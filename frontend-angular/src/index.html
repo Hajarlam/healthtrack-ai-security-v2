@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Sihati AI</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="mat-typography">
+  <app-root></app-root>
+  <!-- Chargement du kit SDK Anam AI -->
+  <script type="module">
+    import { createClient, AnamEvent } from "https://esm.sh/@anam-ai/js-sdk@latest";
+    window.createAnamClient = createClient;
+    window.AnamEvent = AnamEvent;
+  </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+spring:
+  profiles:
+    active: h2
+  application:
+    name: healthtrack-backend
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/healthtrack_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server:
+  port: 8085
+  servlet:
+    context-path: /api
+
+jwt:
+  secret: HealthTrack2025SecretKeyForJWTTokenGenerationVeryLongString
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+# ============================================================
+# AI / ML Configuration
+# ============================================================
+ai:
+  # Ollama local (gratuit, pas de cle API)
+  ollama:
+    url: http://localhost:11434
+    model: mistral
+    enabled: false
+  # OpenAI (optionnel)
+  openai:
+    api-key: ${OPENAI_API_KEY}
+    model: gpt-3.5-turbo
+    enabled: true
+  # Mode demo (reponses simulees)
+  demo-mode: false
+
+# OCR
+ocr:
+  tesseract:
+    data-path: /usr/share/tessdata
+    language: fra+eng
+    enabled: true
+
+# Security
+security:
+  rate-limit:
+    login-attempts: 5
+    window-minutes: 15
+    block-minutes: 30
+  audit:
+    enabled: true
+  password:
+    min-length: 8
+    require-special: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.healthtrack: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+
+---
+spring:
+  config:
+    activate:
+      on-profile: h2
+  datasource:
+    url: jdbc:h2:mem:healthtrackdb;DB_CLOSE_DELAY=-1;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+anam:
+  api-key: ZTdhM2VlMGUtYmJhOS00YTA4LTk3ZGUtZDM4OGYzMmYwYjU5OnF2UmhYL1pxQXhEWkVBb2N6RzlFR0thVU92TzNHVXVqRENDM0tJUC9mWTg9
+  persona-id: dd7594a4-76ef-5e1f-9c9a-7afddd64b438

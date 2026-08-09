@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00B4D8" />
+      <stop offset="100%" stop-color="#0077B6" />
+    </linearGradient>
+    
+    <!-- Screen Shadow -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Blue Rounded Square Container -->
+  <rect x="12" y="12" width="104" height="104" rx="30" fill="url(#bgGrad)" />
+
+  <!-- White Screen -->
+  <rect x="28" y="36" width="72" height="56" rx="12" fill="#FFFFFF" filter="url(#shadow)" />
+
+  <!-- Pulse / Heart Monitor Line -->
+  <path d="M 34 64 L 46 64 L 52 50 L 58 78 L 64 42 L 70 86 L 76 64 L 82 64 M 82 64 L 94 64" 
+        fill="none" stroke="#0077B6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

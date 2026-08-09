@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+node_modules/
+dist/
+build/
+backend/target/
+frontend-angular/dist/
+frontend-angular/.angular/
+mobile-android/build/
+*.env
