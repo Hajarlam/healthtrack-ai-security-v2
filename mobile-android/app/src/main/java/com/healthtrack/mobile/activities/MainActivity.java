@@ -38,11 +38,7 @@ public class MainActivity extends AppCompatActivity {
         loadLatestRecord();
         loadAlertCount();
 
-<<<<<<< HEAD
         CardView cardAi      = findViewById(R.id.card_ai);
-=======
-        // Navigation cards
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
         CardView cardMeasure = findViewById(R.id.card_measure);
         CardView cardHistory = findViewById(R.id.card_history);
         CardView cardAlerts  = findViewById(R.id.card_alerts);
@@ -51,10 +47,7 @@ public class MainActivity extends AppCompatActivity {
         CardView cardProfile = findViewById(R.id.card_profile);
         CardView cardSos     = findViewById(R.id.card_sos);
 
-<<<<<<< HEAD
         cardAi.setOnClickListener(v      -> startActivity(new Intent(this, AiChatbotActivity.class)));
-=======
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
         cardMeasure.setOnClickListener(v -> startActivity(new Intent(this, AddHealthRecordActivity.class)));
         cardHistory.setOnClickListener(v -> startActivity(new Intent(this, HistoryActivity.class)));
         cardAlerts.setOnClickListener(v  -> startActivity(new Intent(this, AlertsActivity.class)));
