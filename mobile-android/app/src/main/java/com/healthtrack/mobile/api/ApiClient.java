@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class ApiClient {
     // Change to your computer IP if testing on physical device
     // Use 10.0.2.2 for Android emulator (= localhost on PC)
-    public static final String BASE_URL = "http://10.0.2.2:8085/api/";
+    public static final String BASE_URL = "http://192.168.0.106:8085/api/";
 
     private static Retrofit retrofit;
 
