@@ -50,10 +50,7 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers("/users/patients").hasAnyRole("DOCTOR","ADMIN")
                 .requestMatchers("/ai/**").hasAnyRole("PATIENT","DOCTOR","ADMIN")
-<<<<<<< HEAD
                 .requestMatchers("/ocr/**").hasAnyRole("PATIENT","DOCTOR","ADMIN")
-=======
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                 .requestMatchers("/audit/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

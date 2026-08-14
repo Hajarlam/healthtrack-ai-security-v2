@@ -1,11 +1,8 @@
 package com.healthtrack.ai;
-<<<<<<< HEAD
+
 import java.util.ArrayList;
 import java.util.List;
 
-=======
-import java.util.List;
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
 public class OcrResult {
     private String rawText;
     private List<String> detectedMedications;
@@ -14,7 +11,6 @@ public class OcrResult {
     private String prescriptionDate;
     private boolean success;
     private String errorMessage;
-<<<<<<< HEAD
     private List<PrescriptionItem> items = new ArrayList<>();
 
     public static class PrescriptionItem {
@@ -89,13 +85,6 @@ public class OcrResult {
         detectedMedications = new ArrayList<>(); 
         detectedDosages = new ArrayList<>();
     }
-=======
-
-    public OcrResult(String t, List<String> m, List<String> d, String doc, String date) {
-        rawText=t; detectedMedications=m; detectedDosages=d; doctorName=doc; prescriptionDate=date; success=true;
-    }
-    public OcrResult(String err) { success=false; errorMessage=err; detectedMedications=new java.util.ArrayList<>(); }
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
 
     public String getRawText()                 { return rawText; }
     public List<String> getDetectedMedications(){ return detectedMedications; }
@@ -104,7 +93,6 @@ public class OcrResult {
     public String getPrescriptionDate()        { return prescriptionDate; }
     public boolean isSuccess()                 { return success; }
     public String getErrorMessage()            { return errorMessage; }
-<<<<<<< HEAD
     public List<PrescriptionItem> getItems()   { return items; }
     
     public void setRawText(String r) { this.rawText = r; }
@@ -113,6 +101,4 @@ public class OcrResult {
     public void setSuccess(boolean s) { this.success = s; }
     public void setErrorMessage(String e) { this.errorMessage = e; }
     public void setItems(List<PrescriptionItem> i) { this.items = i; }
-=======
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
 }
