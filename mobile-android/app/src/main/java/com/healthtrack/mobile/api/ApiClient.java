@@ -12,7 +12,22 @@ import java.util.concurrent.TimeUnit;
 public class ApiClient {
     // Change to your computer IP if testing on physical device
     // Use 10.0.2.2 for Android emulator (= localhost on PC)
-    public static final String BASE_URL = "http://192.168.0.106:8085/api/";
+    public static String getBaseUrl() {
+        if (android.os.Build.FINGERPRINT.startsWith("generic")
+                || android.os.Build.FINGERPRINT.startsWith("unknown")
+                || android.os.Build.MODEL.contains("google_sdk")
+                || android.os.Build.MODEL.contains("Emulator")
+                || android.os.Build.MODEL.contains("Android SDK built for x86")
+                || android.os.Build.MANUFACTURER.contains("Genymotion")
+                || android.os.Build.PRODUCT.contains("sdk_google")
+                || android.os.Build.PRODUCT.contains("google_sdk")
+                || android.os.Build.PRODUCT.contains("sdk")
+                || android.os.Build.PRODUCT.contains("sdk_x86")
+                || android.os.Build.PRODUCT.contains("emulator")) {
+            return "http://10.0.2.2:8085/api/";
+        }
+        return "http://192.168.0.106:8085/api/";
+    }
 
     private static Retrofit retrofit;
 
@@ -38,7 +53,7 @@ public class ApiClient {
                 .build();
 
             retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(getBaseUrl())
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
