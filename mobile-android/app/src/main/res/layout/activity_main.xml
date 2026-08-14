@@ -37,11 +37,7 @@
                     <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:columnCount="2">
                         <LinearLayout android:orientation="vertical" android:padding="8dp"
-<<<<<<< HEAD
                             android:background="#EDF7FA" android:layout_margin="4dp"
-=======
-                            android:background="#FFF0F5" android:layout_margin="4dp"
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_columnWeight="1">
                             <TextView android:text="Tension" android:textSize="11sp" android:textColor="@color/text_secondary"
@@ -51,57 +47,33 @@
                                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                         </LinearLayout>
                         <LinearLayout android:orientation="vertical" android:padding="8dp"
-<<<<<<< HEAD
                             android:background="#E8F5E9" android:layout_margin="4dp"
-=======
-                            android:background="#F0FFF0" android:layout_margin="4dp"
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_columnWeight="1">
                             <TextView android:text="Glycemie" android:textSize="11sp" android:textColor="@color/text_secondary"
                                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                             <TextView android:id="@+id/tv_glucose" android:text="-- mg/dL"
-<<<<<<< HEAD
                                 android:textSize="15sp" android:textStyle="bold" android:textColor="@color/success"
                                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                         </LinearLayout>
                         <LinearLayout android:orientation="vertical" android:padding="8dp"
                             android:background="#E0F7FA" android:layout_margin="4dp"
-=======
-                                android:textSize="15sp" android:textStyle="bold" android:textColor="#2E7D32"
-                                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                        </LinearLayout>
-                        <LinearLayout android:orientation="vertical" android:padding="8dp"
-                            android:background="#F0F8FF" android:layout_margin="4dp"
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_columnWeight="1">
                             <TextView android:text="SpO2" android:textSize="11sp" android:textColor="@color/text_secondary"
                                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                             <TextView android:id="@+id/tv_spo2" android:text="--%"
-<<<<<<< HEAD
                                 android:textSize="15sp" android:textStyle="bold" android:textColor="@color/accent"
                                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                         </LinearLayout>
                         <LinearLayout android:orientation="vertical" android:padding="8dp"
                             android:background="#FFF3E0" android:layout_margin="4dp"
-=======
-                                android:textSize="15sp" android:textStyle="bold" android:textColor="#1565C0"
-                                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                        </LinearLayout>
-                        <LinearLayout android:orientation="vertical" android:padding="8dp"
-                            android:background="#FFF8F0" android:layout_margin="4dp"
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_columnWeight="1">
                             <TextView android:text="Freq. Cardiaque" android:textSize="11sp" android:textColor="@color/text_secondary"
                                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                             <TextView android:id="@+id/tv_hr" android:text="-- bpm"
-<<<<<<< HEAD
                                 android:textSize="15sp" android:textStyle="bold" android:textColor="@color/warning"
-=======
-                                android:textSize="15sp" android:textStyle="bold" android:textColor="#E65100"
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                         </LinearLayout>
                     </GridLayout>
@@ -112,7 +84,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-<<<<<<< HEAD
             <androidx.cardview.widget.CardView android:id="@+id/card_ai"
                 android:layout_width="match_parent" android:layout_height="90dp"
                 android:layout_marginBottom="16dp"
@@ -136,18 +107,12 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-=======
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
             <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:columnCount="2">
                 <androidx.cardview.widget.CardView android:id="@+id/card_measure"
                     android:layout_width="0dp" android:layout_height="80dp"
                     android:layout_columnWeight="1" android:layout_margin="6dp"
-<<<<<<< HEAD
                     app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#EDF7FA">
-=======
-                    app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#FFF0F5">
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                         android:orientation="vertical" android:gravity="center">
                         <TextView android:text="+" android:textSize="24sp" android:textColor="@color/primary"
@@ -160,30 +125,18 @@
                 <androidx.cardview.widget.CardView android:id="@+id/card_history"
                     android:layout_width="0dp" android:layout_height="80dp"
                     android:layout_columnWeight="1" android:layout_margin="6dp"
-<<<<<<< HEAD
                     app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#E8F5E9">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                         android:orientation="vertical" android:gravity="center">
                         <TextView android:text="Historique" android:textSize="11sp"
                             android:textColor="@color/success" android:textStyle="bold"
-=======
-                    app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#F0FFF0">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
-                        android:orientation="vertical" android:gravity="center">
-                        <TextView android:text="Historique" android:textSize="11sp"
-                            android:textColor="#2E7D32" android:textStyle="bold"
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
                 <androidx.cardview.widget.CardView android:id="@+id/card_alerts"
                     android:layout_width="0dp" android:layout_height="80dp"
                     android:layout_columnWeight="1" android:layout_margin="6dp"
-<<<<<<< HEAD
                     app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#FFF3E0">
-=======
-                    app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#FFF8F0">
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                         android:orientation="vertical" android:gravity="center">
                         <TextView android:text="Alertes" android:textSize="11sp"
@@ -194,49 +147,29 @@
                 <androidx.cardview.widget.CardView android:id="@+id/card_appointments"
                     android:layout_width="0dp" android:layout_height="80dp"
                     android:layout_columnWeight="1" android:layout_margin="6dp"
-<<<<<<< HEAD
                     app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#EDE7F6">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                         android:orientation="vertical" android:gravity="center">
                         <TextView android:text="Rendez-vous" android:textSize="11sp"
                             android:textColor="@color/primary_dark" android:textStyle="bold"
-=======
-                    app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#F0F0FF">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
-                        android:orientation="vertical" android:gravity="center">
-                        <TextView android:text="Rendez-vous" android:textSize="11sp"
-                            android:textColor="#5C35CC" android:textStyle="bold"
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
                 <androidx.cardview.widget.CardView android:id="@+id/card_medications"
                     android:layout_width="0dp" android:layout_height="80dp"
                     android:layout_columnWeight="1" android:layout_margin="6dp"
-<<<<<<< HEAD
                     app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#F1F8E9">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                         android:orientation="vertical" android:gravity="center">
                         <TextView android:text="Medicaments" android:textSize="11sp"
                             android:textColor="@color/text_secondary" android:textStyle="bold"
-=======
-                    app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#F5FFF0">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
-                        android:orientation="vertical" android:gravity="center">
-                        <TextView android:text="Medicaments" android:textSize="11sp"
-                            android:textColor="#388E3C" android:textStyle="bold"
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
                 <androidx.cardview.widget.CardView android:id="@+id/card_profile"
                     android:layout_width="0dp" android:layout_height="80dp"
                     android:layout_columnWeight="1" android:layout_margin="6dp"
-<<<<<<< HEAD
                     app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#E0F7FA">
-=======
-                    app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#FFF5F0">
->>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                         android:orientation="vertical" android:gravity="center">
                         <TextView android:text="Mon Profil" android:textSize="11sp"
