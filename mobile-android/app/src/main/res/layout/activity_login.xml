@@ -10,7 +10,11 @@
                 android:textStyle="bold" android:textColor="#FFFFFF"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
             <TextView android:text="Votre sante, intelligemment suivie"
+<<<<<<< HEAD
+                android:textSize="13sp" android:textColor="#CAF0F8"
+=======
                 android:textSize="13sp" android:textColor="#FFD4E8"
+>>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         </LinearLayout>
         <com.google.android.material.textfield.TextInputLayout

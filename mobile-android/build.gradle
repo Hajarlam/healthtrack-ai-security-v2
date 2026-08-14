@@ -1,3 +1,7 @@
 plugins {
+<<<<<<< HEAD
+    id 'com.android.application' version '8.2.2' apply false
+=======
     id 'com.android.application' version '8.2.0' apply false
+>>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
 }

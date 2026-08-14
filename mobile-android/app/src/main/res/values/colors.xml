@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<<<<<<< HEAD
+    <color name="primary">#0077B6</color>
+    <color name="primary_dark">#005F8E</color>
+    <color name="primary_light">#CAF0F8</color>
+    <color name="accent">#00B4D8</color>
+    <color name="bg">#F4FAFD</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="text_primary">#023E58</color>
+    <color name="text_secondary">#4A7C94</color>
+    <color name="success">#0FA958</color>
+    <color name="warning">#F5A623</color>
+    <color name="danger">#E54D4D</color>
+    <color name="white">#FFFFFF</color>
+    <color name="sos_red">#E54D4D</color>
+=======
     <color name="primary">#C2185B</color>
     <color name="primary_dark">#880E4F</color>
     <color name="primary_light">#F8BBD0</color>
@@ -13,4 +28,5 @@
     <color name="danger">#C62828</color>
     <color name="white">#FFFFFF</color>
     <color name="sos_red">#D32F2F</color>
+>>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
 </resources>

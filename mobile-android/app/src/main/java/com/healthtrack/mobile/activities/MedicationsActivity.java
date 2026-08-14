@@ -48,8 +48,12 @@ public class MedicationsActivity extends AppCompatActivity {
                     if (r.isSuccessful() && r.body() != null) {
                         List<String> items = new ArrayList<>();
                         for (Medication m : r.body()) {
+<<<<<<< HEAD
+                            items.add("💊 " + m.getName() + "\n" + m.getDosage() + " - " + m.getFrequency());
+=======
                             items.add("💊 " + m.getName() + "
 " + m.getDosage() + " — " + m.getFrequency());
+>>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                         }
                         listView.setAdapter(new ArrayAdapter<>(MedicationsActivity.this,
                             android.R.layout.simple_list_item_1, items));

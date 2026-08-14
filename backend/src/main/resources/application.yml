@@ -41,6 +41,9 @@ jwt:
 # AI / ML Configuration
 # ============================================================
 ai:
+  # Gemini Vision API Configuration
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
   # Ollama local (gratuit, pas de cle API)
   ollama:
     url: http://localhost:11434
@@ -48,11 +51,11 @@ ai:
     enabled: false
   # OpenAI (optionnel)
   openai:
-    api-key: ${OPENAI_API_KEY}
+    api-key: ${OPENAI_API_KEY:}
     model: gpt-3.5-turbo
-    enabled: true
+    enabled: false
   # Mode demo (reponses simulees)
-  demo-mode: false
+  demo-mode: true
 
 # OCR
 ocr:

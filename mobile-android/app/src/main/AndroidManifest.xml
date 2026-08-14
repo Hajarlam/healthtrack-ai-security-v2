@@ -7,6 +7,10 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.VIBRATE" />
+<<<<<<< HEAD
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+=======
+>>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
 
     <application
         android:allowBackup="true"
@@ -37,5 +41,9 @@
         <activity android:name=".activities.MedicationsActivity" android:exported="false" />
         <activity android:name=".activities.ProfileActivity" android:exported="false" />
         <activity android:name=".activities.SosActivity" android:exported="false" />
+<<<<<<< HEAD
+        <activity android:name=".activities.AiChatbotActivity" android:exported="false" />
+=======
+>>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
     </application>
 </manifest>

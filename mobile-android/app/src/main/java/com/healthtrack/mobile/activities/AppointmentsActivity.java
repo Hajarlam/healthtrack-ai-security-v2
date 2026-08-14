@@ -70,8 +70,12 @@ public class AppointmentsActivity extends AppCompatActivity {
                     if (r.isSuccessful() && r.body() != null) {
                         List<String> items = new ArrayList<>();
                         for (Appointment a : r.body()) {
+<<<<<<< HEAD
+                            items.add("📅 " + a.getAppointmentDate() + "\n" + a.getReason() + " [" + a.getStatus() + "]");
+=======
                             items.add("📅 " + a.getAppointmentDate() + "
 " + a.getReason() + " [" + a.getStatus() + "]");
+>>>>>>> 8b2fa9b134102057c1a9747fdc555122d043afe5
                         }
                         listView.setAdapter(new ArrayAdapter<>(AppointmentsActivity.this,
                             android.R.layout.simple_list_item_1, items));
