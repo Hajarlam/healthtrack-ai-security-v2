@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/bg">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@drawable/bg_gradient_teal" android:orientation="horizontal"
+        android:gravity="center_vertical" android:padding="16dp">
+        <Button android:id="@+id/btn_back" android:text="Retour" android:textColor="#FFFFFF"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="OCR Ordonnance" android:textSize="18sp" android:textStyle="bold"
+            android:textColor="#FFFFFF" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
+
+            <TextView android:text="Photographiez ou importez une ordonnance (manuscrite ou imprimee). L'IA extrait automatiquement les medicaments — verifiez et corrigez si besoin avant import."
+                android:textSize="13sp" android:textColor="@color/text_secondary" android:layout_marginBottom="16dp"
+                android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="180dp"
+                app:cardCornerRadius="12dp" app:cardBackgroundColor="@color/accent_light"
+                app:cardElevation="0dp" android:layout_marginBottom="12dp">
+                <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+                    <ImageView android:id="@+id/iv_preview" android:scaleType="centerCrop"
+                        android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent"/>
+                    <TextView android:id="@+id/tv_placeholder" android:text="Aucune image selectionnee"
+                        android:textColor="@color/text_secondary" android:textSize="13sp" android:gravity="center"
+                        android:layout_width="match_parent" android:layout_height="match_parent"/>
+                </FrameLayout>
+            </androidx.cardview.widget.CardView>
+
+            <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginBottom="16dp">
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_camera"
+                    android:text="Camera" android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="48dp" android:layout_marginEnd="6dp"
+                    android:backgroundTint="@color/primary"/>
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_gallery"
+                    android:text="Galerie" android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="48dp" android:layout_marginStart="6dp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_analyze"
+                android:text="Analyser l'ordonnance" android:layout_width="match_parent" android:layout_height="52dp"
+                android:backgroundTint="@color/accent" android:enabled="false" android:layout_marginBottom="16dp"/>
+
+            <ProgressBar android:id="@+id/progress_bar" android:indeterminateTint="@color/primary"
+                android:visibility="gone" android:layout_gravity="center" android:layout_marginBottom="16dp"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+            <androidx.cardview.widget.CardView android:id="@+id/card_result" android:layout_width="match_parent"
+                android:layout_height="wrap_content" app:cardCornerRadius="12dp" app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/surface" android:visibility="gone">
+                <LinearLayout android:orientation="vertical" android:padding="16dp"
+                    android:layout_width="match_parent" android:layout_height="wrap_content">
+
+                    <TextView android:text="Verifiez et corrigez les champs avant d'importer — l'IA peut se tromper sur une ecriture manuscrite."
+                        android:textSize="12sp" android:textColor="@color/warning" android:layout_marginBottom="12dp"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Medecin"
+                        android:layout_marginBottom="8dp">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_doctor"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Date"
+                        android:layout_marginBottom="12dp">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_date"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView android:text="Medicaments (un par ligne, format: Nom - Posologie) :" android:textSize="13sp"
+                        android:textStyle="bold" android:textColor="@color/text_primary" android:layout_marginBottom="6dp"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_medications"
+                            android:gravity="top" android:minLines="3" android:inputType="textMultiLine"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_toggle_raw"
+                        android:text="Voir le texte brut detecte par l'IA" style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="4dp"/>
+                    <TextView android:id="@+id/tv_raw_text" android:textSize="11sp" android:textColor="@color/text_secondary"
+                        android:background="#F4F9F9" android:padding="10dp" android:visibility="gone"
+                        android:layout_marginBottom="12dp" android:fontFamily="monospace"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_import"
+                        android:text="Importer dans mes medicaments" android:layout_width="match_parent"
+                        android:layout_height="48dp" android:backgroundTint="@color/primary"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView android:id="@+id/tv_error" android:textSize="13sp" android:textColor="@color/danger"
+                android:background="#FCE4EC" android:padding="14dp" android:visibility="gone"
+                android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

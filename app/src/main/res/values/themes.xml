@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.HealthTrack" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorHint">@color/text_secondary</item>
+        <item name="hintTextColor">@color/primary</item>
+        <item name="boxStrokeColor">@color/primary</item>
+        <item name="android:popupBackground">@color/surface</item>
+    </style>
+    <style name="Theme.HealthTrack.Splash" parent="Theme.HealthTrack">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+</resources>
