@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent">#00B4D8</color>
+    <color name="accent_light">#EDF7FA</color>
+    <color name="bg">#F4FAFD</color>
+    <color name="border">#C0DEE9</color>
+    <color name="danger">#E54D4D</color>
+    <color name="primary">#0077B6</color>
+    <color name="primary_dark">#005F8E</color>
+    <color name="primary_light">#CAF0F8</color>
+    <color name="sos_red">#E54D4D</color>
+    <color name="success">#0FA958</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="text_primary">#023E58</color>
+    <color name="text_secondary">#4A7C94</color>
+    <color name="warning">#F5A623</color>
+    <color name="white">#FFFFFF</color>
+    <string name="app_name">HealthTrack AI</string>
+    <style name="Theme.HealthTrack" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorHint">@color/text_secondary</item>
+        <item name="hintTextColor">@color/primary</item>
+        <item name="boxStrokeColor">@color/primary</item>
+        <item name="android:popupBackground">@color/surface</item>
+    </style>
+    <style name="Theme.HealthTrack.Splash" parent="Theme.HealthTrack">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+</resources>

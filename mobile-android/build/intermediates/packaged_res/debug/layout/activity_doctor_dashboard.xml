@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/bg">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@drawable/bg_gradient_teal" android:orientation="vertical" android:padding="20dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView android:id="@+id/tv_welcome" android:text="Dr. Bonjour"
+                    android:textSize="20sp" android:textStyle="bold" android:textColor="#FFFFFF"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tv_specialization" android:text="Specialite"
+                    android:textSize="12sp" android:textColor="#D9F2F0" android:layout_marginTop="2dp"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <Button android:id="@+id/btn_logout" android:text="Deconnexion"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:textColor="#FFFFFF" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
+
+            <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:columnCount="3" android:layout_marginBottom="16dp">
+                <androidx.cardview.widget.CardView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_columnWeight="1" android:layout_margin="4dp"
+                    app:cardCornerRadius="10dp" app:cardElevation="2dp" app:cardBackgroundColor="#F0FFF0">
+                    <LinearLayout android:orientation="vertical" android:padding="10dp" android:gravity="center"
+                        android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:id="@+id/tv_patient_count" android:text="0" android:textSize="20sp"
+                            android:textStyle="bold" android:textColor="#2E7D32"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Patients" android:textSize="10sp" android:textColor="@color/text_secondary"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+                <androidx.cardview.widget.CardView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_columnWeight="1" android:layout_margin="4dp"
+                    app:cardCornerRadius="10dp" app:cardElevation="2dp" app:cardBackgroundColor="#F0F0FF">
+                    <LinearLayout android:orientation="vertical" android:padding="10dp" android:gravity="center"
+                        android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:id="@+id/tv_appt_count" android:text="0" android:textSize="20sp"
+                            android:textStyle="bold" android:textColor="#5C35CC"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="RDV en attente" android:textSize="10sp" android:textColor="@color/text_secondary"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+                <androidx.cardview.widget.CardView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_columnWeight="1" android:layout_margin="4dp"
+                    app:cardCornerRadius="10dp" app:cardElevation="2dp" app:cardBackgroundColor="#FFF0F0">
+                    <LinearLayout android:orientation="vertical" android:padding="10dp" android:gravity="center"
+                        android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:id="@+id/tv_alert_count" android:text="0" android:textSize="20sp"
+                            android:textStyle="bold" android:textColor="@color/danger"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Alertes actives" android:textSize="10sp" android:textColor="@color/text_secondary"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </GridLayout>
+
+            <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:columnCount="3" android:layout_marginBottom="16dp">
+                <androidx.cardview.widget.CardView android:id="@+id/card_appointments"
+                    android:layout_width="0dp" android:layout_height="70dp"
+                    android:layout_columnWeight="1" android:layout_margin="4dp"
+                    app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#F0F0FF">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                        android:orientation="vertical" android:gravity="center">
+                        <TextView android:text="Rendez-vous" android:textSize="11sp"
+                            android:textColor="#5C35CC" android:textStyle="bold"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+                <androidx.cardview.widget.CardView android:id="@+id/card_alerts"
+                    android:layout_width="0dp" android:layout_height="70dp"
+                    android:layout_columnWeight="1" android:layout_margin="4dp"
+                    app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#FFF8F0">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                        android:orientation="vertical" android:gravity="center">
+                        <TextView android:text="Alertes" android:textSize="11sp"
+                            android:textColor="@color/warning" android:textStyle="bold"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+                <androidx.cardview.widget.CardView android:id="@+id/card_profile"
+                    android:layout_width="0dp" android:layout_height="70dp"
+                    android:layout_columnWeight="1" android:layout_margin="4dp"
+                    app:cardCornerRadius="12dp" app:cardElevation="2dp" app:cardBackgroundColor="#FFF5F0">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                        android:orientation="vertical" android:gravity="center">
+                        <TextView android:text="Mon Profil" android:textSize="11sp"
+                            android:textColor="@color/accent" android:textStyle="bold"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </GridLayout>
+
+            <TextView android:text="Mes patients" android:textSize="15sp" android:textStyle="bold"
+                android:textColor="@color/primary_dark" android:layout_marginBottom="10dp"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+            <ProgressBar android:id="@+id/progress_bar" android:indeterminateTint="@color/primary"
+                android:visibility="gone" android:layout_gravity="center"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/tv_empty" android:text="Aucun patient" android:textSize="14sp"
+                android:textColor="@color/text_secondary" android:gravity="center" android:visibility="gone"
+                android:padding="24dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/recycler_patients"
+                android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

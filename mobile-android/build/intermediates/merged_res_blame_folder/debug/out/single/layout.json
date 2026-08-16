@@ -1,0 +1,86 @@
+[
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_appointments.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_appointments.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/item_alert.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/item_alert.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_add_health_record.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_add_health_record.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_alerts.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_alerts.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_main.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/item_health_record.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/item_health_record.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_register.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_register.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_doctor_dashboard.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_doctor_dashboard.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_history.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_history.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_splash.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/item_user_manage.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/item_user_manage.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_ocr.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_ocr.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/item_appointment.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/item_appointment.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_admin_dashboard.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_admin_dashboard.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_avatar.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_avatar.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_medications.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_medications.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_sos.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_sos.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_patient_records.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_patient_records.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/item_patient.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/item_patient.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_login.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-mergeDebugResources-46:/layout/activity_profile.xml",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_profile.xml"
+    }
+]

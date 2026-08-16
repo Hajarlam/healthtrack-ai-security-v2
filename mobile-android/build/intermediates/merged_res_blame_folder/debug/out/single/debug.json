@@ -1,0 +1,174 @@
+[
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_ocr.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_ocr.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_doctor_dashboard.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_doctor_dashboard.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_item_patient.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/item_patient.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_add_health_record.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_add_health_record.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_medications.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_medications.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/xml_file_paths.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/xml/file_paths.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_item_alert.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/item_alert.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_sos.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_sos.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_item_appointment.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/item_appointment.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_profile.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_profile.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/drawable_icon.png.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/drawable/icon.png"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-hdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/drawable_icon2.png.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/drawable/icon2.png"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-mdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_item_health_record.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/item_health_record.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_register.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_register.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_splash.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_login.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_alerts.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_alerts.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_history.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_history.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_admin_dashboard.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_admin_dashboard.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_appointments.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_appointments.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_patient_records.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_patient_records.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-xhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_avatar.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_avatar.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_item_user_manage.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/item_user_manage.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/layout_activity_main.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.healthtrack.mobile.app-merged_res-47:/drawable_bg_gradient_teal.xml.flat",
+        "source": "com.healthtrack.mobile.app-main-49:/drawable/bg_gradient_teal.xml"
+    }
+]

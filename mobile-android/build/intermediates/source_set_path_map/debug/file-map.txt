@@ -1,0 +1,50 @@
+com.healthtrack.mobile.app-jetified-appcompat-resources-1.6.1-0 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\02a9a070bb9ff2a70bf778527fd77ae3\transformed\jetified-appcompat-resources-1.6.1\res
+com.healthtrack.mobile.app-jetified-lifecycle-process-2.6.2-1 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\0a373fc50eb0e6bc8b1e07eb82c35be4\transformed\jetified-lifecycle-process-2.6.2\res
+com.healthtrack.mobile.app-jetified-window-1.0.0-2 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\0d8f6a54f4a11d9c1639b820e5e50181\transformed\jetified-window-1.0.0\res
+com.healthtrack.mobile.app-jetified-annotation-experimental-1.3.0-3 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\0f514703ccdbc21aa0be64711a44a27c\transformed\jetified-annotation-experimental-1.3.0\res
+com.healthtrack.mobile.app-appcompat-1.6.1-4 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\165c06b7adf94a8ac93d9336eeddfb34\transformed\appcompat-1.6.1\res
+com.healthtrack.mobile.app-cardview-1.0.0-5 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\1eb497ce55fca5e318a60fd0ccc6d080\transformed\cardview-1.0.0\res
+com.healthtrack.mobile.app-jetified-customview-poolingcontainer-1.0.0-6 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\2635faee42bc1faf03cff435900cfcf7\transformed\jetified-customview-poolingcontainer-1.0.0\res
+com.healthtrack.mobile.app-navigation-ui-2.7.6-7 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\2cd06cf6eddeb1b6b96ec6adb659f3f1\transformed\navigation-ui-2.7.6\res
+com.healthtrack.mobile.app-jetified-emoji2-views-helper-1.2.0-8 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\337f3208f89a96bf21117ddd74fb8342\transformed\jetified-emoji2-views-helper-1.2.0\res
+com.healthtrack.mobile.app-core-1.9.0-9 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\3641dd028a0d11a7e814ecbdf65d9192\transformed\core-1.9.0\res
+com.healthtrack.mobile.app-fragment-1.6.2-10 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\36c771d6f86ad2e43affa363cfe4e4e1\transformed\fragment-1.6.2\res
+com.healthtrack.mobile.app-lifecycle-runtime-2.6.2-11 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\3cc2fca07f0d9cf1aa3b8f80b29d8db3\transformed\lifecycle-runtime-2.6.2\res
+com.healthtrack.mobile.app-navigation-runtime-2.7.6-12 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\4901b32c82f189d9b21db27756ae935d\transformed\navigation-runtime-2.7.6\res
+com.healthtrack.mobile.app-jetified-lifecycle-livedata-core-ktx-2.6.2-13 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\4df0661edd8b06e7947d67ef740bd05e\transformed\jetified-lifecycle-livedata-core-ktx-2.6.2\res
+com.healthtrack.mobile.app-core-runtime-2.2.0-14 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\5736fbd64ec1c53168e4037f0c37d4f6\transformed\core-runtime-2.2.0\res
+com.healthtrack.mobile.app-jetified-lifecycle-viewmodel-savedstate-2.6.2-15 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\5a82286e6221c2fc8b00b18f74416428\transformed\jetified-lifecycle-viewmodel-savedstate-2.6.2\res
+com.healthtrack.mobile.app-jetified-lifecycle-runtime-ktx-2.6.2-16 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\62b8be9e64d33464cd73d929a4344443\transformed\jetified-lifecycle-runtime-ktx-2.6.2\res
+com.healthtrack.mobile.app-jetified-emoji2-1.2.0-17 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\681d2f14628a979d627fb1ceb5969e6f\transformed\jetified-emoji2-1.2.0\res
+com.healthtrack.mobile.app-jetified-viewpager2-1.1.0-beta02-18 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\706b290a949c26f427e9d0a2bb8d64e4\transformed\jetified-viewpager2-1.1.0-beta02\res
+com.healthtrack.mobile.app-recyclerview-1.3.2-19 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\75a806a0002f2ba38fa85c34219f8279\transformed\recyclerview-1.3.2\res
+com.healthtrack.mobile.app-navigation-common-2.7.6-20 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\7740a9759ef86a95248b27c75faf39a5\transformed\navigation-common-2.7.6\res
+com.healthtrack.mobile.app-coordinatorlayout-1.1.0-21 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\777cd0d818c4bf0f70cf3b1679392ef7\transformed\coordinatorlayout-1.1.0\res
+com.healthtrack.mobile.app-jetified-savedstate-1.2.1-22 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\795ca4a82c575b33f50ddeb4b5147d2e\transformed\jetified-savedstate-1.2.1\res
+com.healthtrack.mobile.app-swiperefreshlayout-1.1.0-23 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\8bb258687d12530c3a14268fa3f2fc23\transformed\swiperefreshlayout-1.1.0\res
+com.healthtrack.mobile.app-material-1.11.0-24 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\8e1a002dc29f7760bfa219833d18de07\transformed\material-1.11.0\res
+com.healthtrack.mobile.app-constraintlayout-2.1.4-25 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\8fe0cf630891c9bd961104b123e9f08a\transformed\constraintlayout-2.1.4\res
+com.healthtrack.mobile.app-jetified-security-crypto-1.1.0-alpha06-26 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\9044e1b2c37af8b96b5580567fc9219c\transformed\jetified-security-crypto-1.1.0-alpha06\res
+com.healthtrack.mobile.app-jetified-profileinstaller-1.3.0-27 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\995dedf815628680643a2fe35df7202a\transformed\jetified-profileinstaller-1.3.0\res
+com.healthtrack.mobile.app-lifecycle-livedata-2.6.2-28 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\99c8f91c143e749b3b7da4fefd27f4f4\transformed\lifecycle-livedata-2.6.2\res
+com.healthtrack.mobile.app-slidingpanelayout-1.2.0-29 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\9a1b26d3198ac6f794da828b150dcba3\transformed\slidingpanelayout-1.2.0\res
+com.healthtrack.mobile.app-jetified-core-ktx-1.9.0-30 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\9bdc364c6528b22fee70a77369ff0e0e\transformed\jetified-core-ktx-1.9.0\res
+com.healthtrack.mobile.app-jetified-savedstate-ktx-1.2.1-31 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\a2b80d7efcdf1566cfb451515ff2bdad\transformed\jetified-savedstate-ktx-1.2.1\res
+com.healthtrack.mobile.app-jetified-activity-1.8.0-32 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\ae540034ab0b85ba53f96ea7be70cee2\transformed\jetified-activity-1.8.0\res
+com.healthtrack.mobile.app-jetified-lifecycle-viewmodel-ktx-2.6.2-33 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\c8426af8cc73482fc2297d4006d8db3f\transformed\jetified-lifecycle-viewmodel-ktx-2.6.2\res
+com.healthtrack.mobile.app-jetified-activity-ktx-1.8.0-34 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\c9dfefed3e409be4dc4464ad5e88ba7a\transformed\jetified-activity-ktx-1.8.0\res
+com.healthtrack.mobile.app-navigation-fragment-2.7.6-35 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\d0ad0393743c1ac9aa1b550717fc9ee0\transformed\navigation-fragment-2.7.6\res
+com.healthtrack.mobile.app-jetified-fragment-ktx-1.6.2-36 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\ddb097dcd98e67f95cf5feb4b8f402ef\transformed\jetified-fragment-ktx-1.6.2\res
+com.healthtrack.mobile.app-transition-1.4.1-37 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\e0823b5f2bba2c92355724f81a7f0bae\transformed\transition-1.4.1\res
+com.healthtrack.mobile.app-lifecycle-viewmodel-2.6.2-38 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\e8fda5e55b8b1f23bb3c4a96ada5b2e9\transformed\lifecycle-viewmodel-2.6.2\res
+com.healthtrack.mobile.app-jetified-glide-4.16.0-39 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\e94eedfbb84696ccaa79c03dc6c0d0df\transformed\jetified-glide-4.16.0\res
+com.healthtrack.mobile.app-drawerlayout-1.1.1-40 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\f77ba832475b17dd322cc19f485df98a\transformed\drawerlayout-1.1.1\res
+com.healthtrack.mobile.app-lifecycle-livedata-core-2.6.2-41 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\f80274b9daaa8a7dd3a8cca2f9c66011\transformed\lifecycle-livedata-core-2.6.2\res
+com.healthtrack.mobile.app-jetified-startup-runtime-1.1.1-42 C:\Users\FaTima Zahra Oukmi\.gradle\caches\9.0-milestone-1\transforms\fa1a27834c8cfd11d8e676091ff3f63d\transformed\jetified-startup-runtime-1.1.1\res
+com.healthtrack.mobile.app-pngs-43 C:\Users\FaTima Zahra Oukmi\Downloads\mobile-android-updated (1)\mobile-android-work\app\build\generated\res\pngs\debug
+com.healthtrack.mobile.app-resValues-44 C:\Users\FaTima Zahra Oukmi\Downloads\mobile-android-updated (1)\mobile-android-work\app\build\generated\res\resValues\debug
+com.healthtrack.mobile.app-packageDebugResources-45 C:\Users\FaTima Zahra Oukmi\Downloads\mobile-android-updated (1)\mobile-android-work\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.healthtrack.mobile.app-packageDebugResources-46 C:\Users\FaTima Zahra Oukmi\Downloads\mobile-android-updated (1)\mobile-android-work\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.healthtrack.mobile.app-merged_res-47 C:\Users\FaTima Zahra Oukmi\Downloads\mobile-android-updated (1)\mobile-android-work\app\build\intermediates\merged_res\debug
+com.healthtrack.mobile.app-debug-48 C:\Users\FaTima Zahra Oukmi\Downloads\mobile-android-updated (1)\mobile-android-work\app\src\debug\res
+com.healthtrack.mobile.app-main-49 C:\Users\FaTima Zahra Oukmi\Downloads\mobile-android-updated (1)\mobile-android-work\app\src\main\res
