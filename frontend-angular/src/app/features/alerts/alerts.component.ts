@@ -87,33 +87,23 @@ export class AlertsComponent implements OnInit {
   constructor(private service: AlertService, private snack: MatSnackBar, public auth: AuthService) {}
 
   ngOnInit() {
-    this.service.getMyAlerts().subscribe({
+    this.loadAlerts();
+  }
+
+  loadAlerts() {
+    const role = this.auth.isDoctor() ? 'DOCTOR' : (this.auth.isPatient() ? 'PATIENT' : 'ADMIN');
+    this.service.getMyAlerts(role).subscribe({
       next: a => {
         if (a && a.length > 0) {
           this.alerts.set(a);
         } else {
-          this.alerts.set(this.getMockAlerts());
+          this.alerts.set(this.service.getLocalAlerts(role));
         }
       },
       error: () => {
-        this.alerts.set(this.getMockAlerts());
+        this.alerts.set(this.service.getLocalAlerts(role));
       }
     });
-  }
-
-  getMockAlerts(): Alert[] {
-    if (this.auth.isDoctor()) {
-      return [
-        { id: 301, message: 'Sara El Amrani : Tension artérielle élevée détectée (145 mmHg)', severity: 'HIGH', type: 'BP', acknowledged: false, createdAt: new Date(Date.now() - 3600000).toISOString() },
-        { id: 304, message: 'Jean Martin : Glycémie critique détectée (240 mg/dL)', severity: 'CRITICAL', type: 'GLUCOSE', acknowledged: false, createdAt: new Date(Date.now() - 7200000).toISOString() }
-      ];
-    } else if (this.auth.isPatient()) {
-      return [
-        { id: 302, message: 'Rappel : Prenez votre médicament (Lisinopril 10mg)', severity: 'LOW', type: 'MED', acknowledged: false, createdAt: new Date(Date.now() - 1800000).toISOString() },
-        { id: 303, message: 'Tension artérielle systolique légèrement élevée (135 mmHg)', severity: 'MEDIUM', type: 'BP', acknowledged: false, createdAt: new Date(Date.now() - 14400000).toISOString() }
-      ];
-    }
-    return [];
   }
 
   criticalCount() { return this.alerts().filter(a => a.severity === 'CRITICAL').length; }

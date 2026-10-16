@@ -117,8 +117,16 @@ export class UsersComponent implements OnInit {
 
   loadUsers() {
     this.userService.getAll().subscribe({
-      next: data => this.users.set(data),
-      error: () => {}
+      next: data => {
+        if (data && data.length > 0) {
+          this.users.set(data);
+        } else {
+          this.users.set(this.userService.getLocalUsers());
+        }
+      },
+      error: () => {
+        this.users.set(this.userService.getLocalUsers());
+      }
     });
   }
 

@@ -204,32 +204,31 @@ export class RegisterComponent {
     this.loading.set(true);
     const formVal = this.form.value;
 
-    const saveDoctorLocally = () => {
-      if (formVal.role === 'DOCTOR') {
-        const prefix = (formVal.firstName.startsWith('Dr.') || formVal.firstName.startsWith('Dr ')) ? '' : 'Dr. ';
-        this.userService.addDoctor({
-          id: Date.now(),
-          firstName: prefix + formVal.firstName,
-          lastName: formVal.lastName,
-          email: formVal.email,
-          role: 'DOCTOR' as any,
-          specialization: formVal.specialization || 'Médecine Générale',
-          hospital: formVal.hospital || 'Cabinet Médical',
-          enabled: true
-        });
-      }
+    const saveLocally = () => {
+      const isDoc = formVal.role === 'DOCTOR';
+      const prefix = isDoc && !(formVal.firstName.startsWith('Dr.') || formVal.firstName.startsWith('Dr ')) ? 'Dr. ' : '';
+      this.userService.addUser({
+        id: Date.now(),
+        firstName: prefix + formVal.firstName,
+        lastName: formVal.lastName,
+        email: formVal.email,
+        role: formVal.role as any,
+        specialization: formVal.specialization,
+        hospital: formVal.hospital,
+        enabled: true
+      });
     };
 
     this.auth.register(formVal).subscribe({
       next: () => {
-        saveDoctorLocally();
+        saveLocally();
         this.snack.open('✅ Inscription réussie ! Connectez-vous.', 'OK',
           {duration:3000, panelClass:'snack-ok'});
         this.router.navigate(['/auth/login']);
       },
       error: () => {
         // Fallback for offline and Vercel environments
-        saveDoctorLocally();
+        saveLocally();
         this.snack.open('✅ Inscription enregistrée avec succès ! Connectez-vous.', 'OK',
           {duration:3500, panelClass:'snack-ok'});
         this.router.navigate(['/auth/login']);
