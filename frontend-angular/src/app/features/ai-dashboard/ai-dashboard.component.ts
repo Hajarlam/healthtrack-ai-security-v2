@@ -208,27 +208,61 @@ interface OcrResult {
               <span class="lang-badge" [class.active]="selectedLang === 'DAR'" (click)="setLang('DAR')">الدارجة</span>
             </div>
 
-            <a href="https://embed.liveavatar.com/v1/a310c6c3-b86d-4531-92a7-94c912c9614c?orientation=horizontal" 
-               target="_blank" class="btn-fullscreen">
-              <span class="material-icons">open_in_new</span> Plein Écran
-            </a>
-            <button (click)="reloadDoctorIframe()" class="btn-reload" title="Recharger la vidéo">
+            <button type="button" (click)="toggleAvatarFullscreen()" class="btn-fullscreen" title="Afficher en plein écran">
+              <span class="material-icons">fullscreen</span> Plein Écran
+            </button>
+            <button type="button" (click)="resetConversation()" class="btn-reload" title="Nouvelle consultation">
               <span class="material-icons">refresh</span>
             </button>
           </div>
         </div>
 
-        <!-- Video Frame Container (LiveAvatar Original) -->
-        <div class="avatar-frame-box">
-          <iframe id="doctorIframe"
-                  src="https://embed.liveavatar.com/v1/a310c6c3-b86d-4531-92a7-94c912c9614c?orientation=horizontal" 
-                  allow="camera; microphone; autoplay; encrypted-media; display-capture; fullscreen; geolocation" 
-                  allowfullscreen="true"
-                  loading="eager"
-                  referrerpolicy="no-referrer-when-downgrade"
-                  title="Dr. Virtuel — Médecin Conseiller Interactif - LiveAvatar"
-                  class="doctor-iframe">
-          </iframe>
+        <!-- Native Virtual Doctor Avatar (100% gratuit — aucun service payant, aucune clé API) -->
+        <div class="avatar-frame-box"
+             [class.is-speaking]="isSpeaking()"
+             [class.is-listening]="isListening()"
+             [class.is-thinking]="loadingChatbot()">
+          <div class="native-avatar-bg"></div>
+
+          <div class="native-avatar-inner">
+            <div class="doctor-avatar-circle">
+              <div class="pulse-ring ring-1"></div>
+              <div class="pulse-ring ring-2"></div>
+              <svg class="doctor-svg" viewBox="0 0 220 220" aria-hidden="true">
+                <defs>
+                  <linearGradient id="coatGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#FFFFFF"/>
+                    <stop offset="1" stop-color="#DCEFFB"/>
+                  </linearGradient>
+                </defs>
+                <path d="M34 214 C34 166 68 146 110 146 C152 146 186 166 186 214 Z" fill="url(#coatGrad)"/>
+                <path d="M96 150 L110 168 L124 150" fill="#E8F4FC"/>
+                <path d="M92 152 C92 178 122 180 122 202" stroke="#023E58" stroke-width="6" fill="none" stroke-linecap="round"/>
+                <circle cx="122" cy="205" r="10" fill="#48CAE4" stroke="#023E58" stroke-width="4"/>
+                <rect x="99" y="116" width="22" height="30" rx="11" fill="#EFC89C"/>
+                <circle cx="110" cy="90" r="43" fill="#F7D4A5"/>
+                <path d="M67 92 C67 56 88 44 110 44 C132 44 153 56 153 92 C153 76 137 68 110 68 C83 68 67 76 67 92 Z" fill="#3A2E2A"/>
+                <circle cx="94" cy="90" r="4.6" fill="#2B2B2B"/>
+                <circle cx="126" cy="90" r="4.6" fill="#2B2B2B"/>
+                <circle cx="95.5" cy="88.4" r="1.5" fill="#FFFFFF"/>
+                <circle cx="127.5" cy="88.4" r="1.5" fill="#FFFFFF"/>
+                <path class="mouth" d="M95 106 Q110 119 125 106" stroke="#9C4A38" stroke-width="5" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+
+            <div class="avatar-name-badge"><span class="avatar-dot"></span> Dr. Virtuel</div>
+
+            <div class="avatar-live-status">
+              @if (loadingChatbot()) { <span>Réflexion clinique en cours…</span> }
+              @else if (isSpeaking()) { <span>Réponse vocale en cours…</span> }
+              @else if (isListening()) { <span>Je vous écoute…</span> }
+              @else { <span>En ligne — prêt à vous conseiller</span> }
+            </div>
+          </div>
+
+          <div class="avatar-eq" [class.active]="isSpeaking()" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
         </div>
 
         <!-- Section Consultation Écrite & Réponse Orale par l'IA -->
@@ -1001,24 +1035,174 @@ interface OcrResult {
 
   .btn-reload .material-icons { font-size: 18px; }
 
-  /* Video Frame Container (LiveAvatar Original) */
+  /* Native Virtual Doctor Avatar Stage (100% gratuit — sans iframe ni service payant) */
   .avatar-frame-box {
     position: relative;
     border-radius: 20px;
     overflow: hidden;
-    background: #0B1120;
+    background: radial-gradient(circle at 50% 32%, #10314F 0%, #0B1120 72%);
     width: 100%;
     aspect-ratio: 16/9;
+    min-height: 300px;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.16);
     border: 1px solid rgba(0, 119, 182, 0.2);
     margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .doctor-iframe {
-    width: 100%;
-    height: 100%;
-    display: block;
-    border: none;
+  .avatar-frame-box:fullscreen,
+  .avatar-frame-box:-webkit-full-screen {
+    aspect-ratio: auto;
+    height: 100vh;
+    min-height: 100vh;
+    border-radius: 0;
+  }
+
+  .native-avatar-bg {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(72, 202, 228, 0.12) 1px, transparent 1px);
+    background-size: 22px 22px;
+    opacity: 0.7;
+  }
+
+  .native-avatar-inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 24px;
+  }
+
+  .doctor-avatar-circle {
+    position: relative;
+    width: clamp(120px, 24vh, 190px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0077B6, #00B4D8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 8px rgba(72, 202, 228, 0.12), 0 18px 42px rgba(0, 180, 216, 0.35);
+    animation: avatarFloat 4.5s ease-in-out infinite;
+  }
+
+  .doctor-svg { width: 84%; height: 84%; display: block; position: relative; z-index: 1; }
+
+  .doctor-svg .mouth { transform-box: fill-box; transform-origin: center; }
+
+  @keyframes avatarFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .pulse-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: clamp(120px, 24vh, 190px);
+    height: clamp(120px, 24vh, 190px);
+    border-radius: 50%;
+    border: 2px solid rgba(72, 202, 228, 0.55);
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .avatar-frame-box.is-speaking .ring-1,
+  .avatar-frame-box.is-speaking .ring-2 { animation: pulseRing 1.8s ease-out infinite; }
+  .avatar-frame-box.is-speaking .ring-2 { animation-delay: 0.6s; }
+  .avatar-frame-box.is-listening .ring-1,
+  .avatar-frame-box.is-listening .ring-2 { border-color: rgba(248, 113, 113, 0.6); animation: pulseRing 1.8s ease-out infinite; }
+  .avatar-frame-box.is-listening .ring-2 { animation-delay: 0.6s; }
+
+  @keyframes pulseRing {
+    0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+  }
+
+  .avatar-frame-box.is-speaking .doctor-svg .mouth { animation: talkMouth 0.3s ease-in-out infinite; }
+
+  @keyframes talkMouth {
+    0%, 100% { transform: scaleY(0.55); }
+    50% { transform: scaleY(1.5); }
+  }
+
+  .avatar-name-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(144, 224, 239, 0.35);
+    color: #E6F7FF;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+  }
+
+  .avatar-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #34D399;
+    animation: liveDot 1.8s ease-in-out infinite;
+  }
+
+  @keyframes liveDot {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+    50% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+  }
+
+  .avatar-live-status {
+    color: #BFE7F5;
+    font-size: 12.5px;
+    letter-spacing: 0.2px;
+    min-height: 18px;
+  }
+
+  .avatar-eq {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 26px;
+    opacity: 0.25;
+    transition: opacity 0.25s ease;
+    z-index: 3;
+  }
+
+  .avatar-eq.active { opacity: 1; }
+
+  .avatar-eq span {
+    width: 4px;
+    height: 8px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #90E0EF, #00B4D8);
+  }
+
+  .avatar-eq.active span { animation: eqBar 0.9s ease-in-out infinite; }
+
+  .avatar-eq span:nth-child(1) { animation-delay: 0.05s; }
+  .avatar-eq span:nth-child(2) { animation-delay: 0.2s; }
+  .avatar-eq span:nth-child(3) { animation-delay: 0.35s; }
+  .avatar-eq span:nth-child(4) { animation-delay: 0.5s; }
+  .avatar-eq span:nth-child(5) { animation-delay: 0.3s; }
+  .avatar-eq span:nth-child(6) { animation-delay: 0.15s; }
+  .avatar-eq span:nth-child(7) { animation-delay: 0.45s; }
+
+  @keyframes eqBar {
+    0%, 100% { height: 8px; }
+    50% { height: 24px; }
   }
 
   /* Consultation Station (Écrit + Réponse Orale) */
@@ -1784,9 +1968,6 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
   anomalyResult = signal<AnomalyResult|null>(null);
   ocrResult     = signal<OcrResult|null>(null);
   selectedFile  = signal<File|null>(null);
-  avatarConnected = signal(false);
-  avatarError     = signal<string|null>(null);
-  private anamClient: any = null;
   loadingAnomaly  = signal(false);
   loadingOcr      = signal(false);
 
@@ -1797,7 +1978,7 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
   ];
 
   selectedLang: 'FR' | 'AR' | 'EN' | 'DAR' = 'FR';
-  doctorMode     = signal<'native' | 'liveavatar'>('liveavatar');
+  doctorMode     = signal<'native' | 'liveavatar'>('native');
   isListening    = signal<boolean>(false);
   isSpeaking     = signal<boolean>(false);
   loadingChatbot = signal<boolean>(false);
@@ -1818,14 +1999,28 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     this.snack.open(`Langue sélectionnée : ${label}`, 'OK', { duration: 2500 });
   }
 
-  reloadDoctorIframe() {
-    const iframe = document.getElementById('doctorIframe') as HTMLIFrameElement;
-    if (iframe) {
-      const src = iframe.src;
-      iframe.src = '';
-      setTimeout(() => { iframe.src = src; }, 150);
-      this.snack.open('Rechargement du Dr. Virtuel en cours...', 'OK', { duration: 2000 });
+  toggleAvatarFullscreen() {
+    const box = document.querySelector('.avatar-frame-box') as HTMLElement | null;
+    if (!box) return;
+    const doc: any = document as any;
+    if (doc.fullscreenElement || doc.webkitFullscreenElement) {
+      (doc.exitFullscreen || doc.webkitExitFullscreen)?.call(doc);
+    } else {
+      (box.requestFullscreen || (box as any).webkitRequestFullscreen)?.call(box);
     }
+  }
+
+  resetConversation() {
+    this.stopSpeaking();
+    this.stopVoiceRecognition();
+    this.loadingChatbot.set(false);
+    this.chatMessages.set([{
+      sender: 'doctor',
+      text: "Bonjour ! Je suis le Dr. Virtuel, votre médecin conseiller interactif sur Sihati.ai. Comment vous sentez-vous aujourd'hui ? Écrivez votre message ou parlez au micro, et je vous répondrai directement à voix haute.",
+      time: 'En ligne'
+    }]);
+    this.scrollToBottom();
+    this.snack.open('Nouvelle consultation démarrée', 'OK', { duration: 2000 });
   }
 
   setDoctorMode(mode: 'native' | 'liveavatar') {
@@ -1871,82 +2066,6 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
   selectTab(tab: 'anomaly'|'chatbot'|'ocr') {
     this.activeTab.set(tab);
   }
-
-
-
-  loadAnamAvatar() {
-    this.avatarConnected.set(false);
-    this.avatarError.set(null);
-    this.disconnectAvatar();
-
-    this.http.get<{ success: boolean; sessionToken: string }>(`${environment.apiUrl}/avatar/token`).subscribe({
-      next: (res) => {
-        if (res.success && res.sessionToken) {
-          this.initializeAnamClient(res.sessionToken);
-        } else {
-          this.avatarError.set("Jeton de session invalide");
-        }
-      },
-      error: () => {
-        this.avatarError.set("Erreur réseau ou clé API Anam AI manquante");
-      }
-    });
-  }
-
-  private initializeAnamClient(token: string) {
-    try {
-      const w = window as any;
-      if (!w.createAnamClient) {
-        this.avatarError.set("SDK Anam AI non chargé");
-        return;
-      }
-
-      this.anamClient = w.createAnamClient(token);
-
-      this.anamClient.addListener(w.AnamEvent.USER_SPEECH_STARTED, () => {
-        console.log('🎙️ Détection de la voix');
-      });
-
-      this.anamClient.addListener(w.AnamEvent.USER_SPEECH_ENDED, () => {
-        console.log('🎙️ Fin de parole');
-      });
-
-      setTimeout(() => {
-        const video = document.getElementById("anamVideo");
-        if (!video) {
-          this.avatarError.set("Élément HTML vidéo introuvable");
-          return;
-        }
-
-        this.anamClient.streamToVideoElement("anamVideo")
-          .then(() => {
-            this.avatarConnected.set(true);
-            const v = document.getElementById("anamVideo");
-            if (v) v.style.display = 'block';
-          })
-          .catch((err: any) => {
-            const detail = err?.message || err || "Vérifiez vos périphériques audio";
-            this.avatarError.set("Accès micro refusé ou erreur WebRTC (" + detail + ")");
-          });
-      }, 100);
-
-    } catch (err: any) {
-      this.avatarError.set("Erreur d'initialisation du client");
-      console.error(err);
-    }
-  }
-
-  private disconnectAvatar() {
-    if (this.anamClient) {
-      try {
-        this.anamClient.disconnect();
-      } catch(e) {}
-      this.anamClient = null;
-    }
-    this.avatarConnected.set(false);
-  }
-
-
 
   toggleVoiceRecognition() {
     if (this.isListening()) {
@@ -2209,7 +2328,6 @@ Question du patient : ${question}`;
   }
 
   ngOnDestroy() {
-    this.disconnectAvatar();
     this.stopSpeaking();
     this.stopVoiceRecognition();
   }
