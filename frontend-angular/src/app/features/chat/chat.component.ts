@@ -6,6 +6,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { HttpClient } from "@angular/common/http";
 import { AuthService } from "../../core/services/auth.service";
 import { ChatService } from "../../core/services/chat.service";
+import { UserService } from "../../core/services/user.service";
 import { environment } from "../../../environments/environment";
 
 interface Contact { id: number; firstName: string; lastName: string; role: string; email: string; }
@@ -143,7 +144,10 @@ interface Msg { id: number; sender: {id:number; firstName:string; lastName:strin
                 <div class="bubble-footer">
                   <span class="bubble-time">{{ formatTime(m.sentAt) }}</span>
                   @if (m.sender.id === myId()) {
-                    <span class="material-icons read-check" [class.read]="m.readByReceiver">done_all</span>
+                    <span class="read-status" [class.is-read]="m.readByReceiver" [title]="m.readByReceiver ? 'Message vu par votre destinataire' : 'Message distribué'">
+                      <span class="material-icons read-icon">{{ m.readByReceiver ? 'done_all' : 'check' }}</span>
+                      <span class="read-label">{{ m.readByReceiver ? 'Vu' : 'Envoyé' }}</span>
+                    </span>
                   }
                 </div>
               </div>
@@ -491,18 +495,24 @@ interface Msg { id: number; sender: {id:number; firstName:string; lastName:strin
   }
 
   .unread-pill {
-    background: linear-gradient(135deg, #F59E0B, #D97706);
+    background: linear-gradient(135deg, #EF4444, #DC2626);
     color: #FFFFFF;
     font-size: 11px;
     font-weight: 800;
     border-radius: 12px;
-    min-width: 20px;
-    height: 20px;
+    min-width: 22px;
+    height: 22px;
     padding: 0 6px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.35);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+    animation: pulseBadge 2s infinite;
+  }
+
+  @keyframes pulseBadge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
   }
 
   .contact-bottom {
@@ -774,13 +784,28 @@ interface Msg { id: number; sender: {id:number; firstName:string; lastName:strin
     opacity: 0.75;
   }
 
-  .read-check {
-    font-size: 14px;
+  .read-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
     color: rgba(255, 255, 255, 0.7);
+    margin-left: 4px;
+    user-select: none;
   }
 
-  .read-check.read {
+  .read-status.is-read {
     color: #90E0EF;
+    font-weight: 700;
+  }
+
+  .read-icon {
+    font-size: 13px;
+  }
+
+  .read-label {
+    font-size: 10px;
+    letter-spacing: 0.2px;
   }
 
   .empty-conversation {
@@ -1226,7 +1251,12 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     );
   });
 
-  constructor(private http: HttpClient, public auth: AuthService, public chatService: ChatService) {}
+  constructor(
+    private http: HttpClient, 
+    public auth: AuthService, 
+    public chatService: ChatService,
+    private userService: UserService
+  ) {}
 
   private unreadInterval: any = null;
   private convoInterval: any = null;
@@ -1236,7 +1266,7 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     this.loadContacts();
     this.chatService.refreshUnreadCount();
     
-    this.unreadInterval = setInterval(() => this.loadUnreadCounts(), 5000);
+    this.unreadInterval = setInterval(() => this.loadUnreadCounts(), 2500);
   }
 
   ngOnDestroy() {
@@ -1291,34 +1321,84 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   loadFallbackContacts() {
     const role = this.auth.getRole();
     let defaultContacts: Contact[] = [];
+    const regDocs = this.userService.getLocalDoctors();
+
     if (role === 'PATIENT') {
-      defaultContacts = [
-        { id: 2, firstName: 'Dr. Ahmed', lastName: 'Bennani', role: 'DOCTOR', email: 'doctor@healthtrack.ai' },
-        { id: 5, firstName: 'Dr. Leila', lastName: 'Alaoui', role: 'DOCTOR', email: 'leila.alaoui@healthtrack.ai' },
-        { id: 4, firstName: 'Service', lastName: 'SAMU / Urgences', role: 'EMERGENCY', email: 'emergency@healthtrack.ai' }
-      ];
+      defaultContacts = regDocs.map(d => ({
+        id: d.id,
+        firstName: d.firstName,
+        lastName: d.lastName,
+        role: 'DOCTOR',
+        email: d.email
+      }));
+      defaultContacts.push(
+        { id: 4, firstName: 'Dr. Secours', lastName: 'Urgentiste SAMU', role: 'EMERGENCY', email: 'emergency@healthtrack.ai' }
+      );
     } else if (role === 'DOCTOR') {
       defaultContacts = [
         { id: 1, firstName: 'Sara', lastName: 'El Amrani', role: 'PATIENT', email: 'patient@healthtrack.ai' },
         { id: 6, firstName: 'Jean', lastName: 'Martin', role: 'PATIENT', email: 'jean.martin@healthtrack.ai' },
-        { id: 4, firstName: 'Dr. Secours', lastName: 'Urgentiste', role: 'EMERGENCY', email: 'emergency@healthtrack.ai' }
+        { id: 4, firstName: 'Dr. Secours', lastName: 'Urgentiste SAMU', role: 'EMERGENCY', email: 'emergency@healthtrack.ai' }
       ];
     } else {
       defaultContacts = [
         { id: 2, firstName: 'Dr. Ahmed', lastName: 'Bennani', role: 'DOCTOR', email: 'doctor@healthtrack.ai' },
         { id: 1, firstName: 'Sara', lastName: 'El Amrani', role: 'PATIENT', email: 'patient@healthtrack.ai' },
-        { id: 4, firstName: 'Dr. Secours', lastName: 'Urgentiste', role: 'EMERGENCY', email: 'emergency@healthtrack.ai' }
+        { id: 4, firstName: 'Dr. Secours', lastName: 'Urgentiste SAMU', role: 'EMERGENCY', email: 'emergency@healthtrack.ai' }
       ];
     }
     this.contacts.set(defaultContacts);
+    this.loadUnreadCounts();
+
     if (!this.selectedContact() && defaultContacts.length > 0) {
       this.selectContact(defaultContacts[0]);
     }
   }
 
   loadUnreadCounts() {
+    const myId = this.myId();
+    const contacts = this.contacts();
+    const counts: {[key: number]: number} = {};
+    let totalUnread = 0;
+
+    for (const c of contacts) {
+      if (this.selectedContact()?.id === c.id) {
+        counts[c.id] = 0;
+        continue;
+      }
+      const min = Math.min(myId, c.id);
+      const max = Math.max(myId, c.id);
+      const key = `sihati_chat_store_${min}_${max}`;
+      let cUnread = 0;
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const msgs: Msg[] = JSON.parse(raw);
+          if (Array.isArray(msgs)) {
+            cUnread = msgs.filter(m => m && m.receiver && m.receiver.id === myId && !m.readByReceiver).length;
+          }
+        }
+      } catch(e) {}
+      counts[c.id] = cUnread;
+      totalUnread += cUnread;
+    }
+
+    this.unreadCounts.set(counts);
+    this.chatService.unreadCount.set(totalUnread);
+
     this.http.get<{[key: number]: number}>(`${environment.apiUrl}/chat/unread-per-contact`).subscribe({
-      next: counts => this.unreadCounts.set(counts),
+      next: serverCounts => {
+        if (serverCounts && Object.keys(serverCounts).length > 0) {
+          const merged = { ...counts };
+          for (const k of Object.keys(serverCounts)) {
+            const id = +k;
+            if (this.selectedContact()?.id !== id) {
+              merged[id] = Math.max(merged[id] || 0, serverCounts[id]);
+            }
+          }
+          this.unreadCounts.set(merged);
+        }
+      },
       error: () => {}
     });
   }
@@ -1385,35 +1465,74 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   selectContact(c: Contact) {
     this.selectedContact.set(c);
 
-    const countForThisContact = this.unreadCounts()[c.id] || 0;
-    if (countForThisContact > 0) {
-      this.chatService.unreadCount.update(total => Math.max(0, total - countForThisContact));
-      this.unreadCounts.update(counts => {
-        const updated = { ...counts };
-        updated[c.id] = 0;
-        return updated;
-      });
-    }
+    const myId = this.myId();
 
+    // 1. Mark all messages from this contact as READ in localStorage
+    const min = Math.min(myId, c.id);
+    const max = Math.max(myId, c.id);
+    const key = `sihati_chat_store_${min}_${max}`;
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const msgs: Msg[] = JSON.parse(raw);
+        if (Array.isArray(msgs)) {
+          let updated = false;
+          for (const m of msgs) {
+            if (m.receiver && m.receiver.id === myId && !m.readByReceiver) {
+              m.readByReceiver = true;
+              updated = true;
+            }
+          }
+          if (updated) {
+            localStorage.setItem(key, JSON.stringify(msgs));
+          }
+        }
+      }
+    } catch(e) {}
+
+    // 2. Clear unread badge for this contact IMMEDIATELY!
+    this.unreadCounts.update(counts => {
+      const updated = { ...counts };
+      updated[c.id] = 0;
+      return updated;
+    });
+
+    // 3. Recalculate total unread count for navbar and sidebar
+    this.chatService.refreshUnreadCount();
+
+    // 4. Load messages into UI
     this.loadMessages(c.id);
 
     if (this.convoInterval) {
       clearInterval(this.convoInterval);
     }
-    // Check for incoming messages in shared store every 2.5s
+    // Poll for new incoming messages from this contact every 2s
     this.convoInterval = setInterval(() => {
       if (this.selectedContact()?.id === c.id) {
         this.syncMessagesFromStorage(c.id);
       }
-    }, 2500);
+    }, 2000);
   }
 
   syncMessagesFromStorage(contactId: number) {
     const myId = this.myId();
     const stored = this.getStoredConvo(myId, contactId);
     if (stored.length !== this.messages().length || (stored.length > 0 && stored[stored.length - 1].id !== this.messages()[this.messages().length - 1]?.id)) {
+      // User is currently viewing this conversation, mark any new incoming message as read ("vu")!
+      let updated = false;
+      for (const m of stored) {
+        if (m.receiver && m.receiver.id === myId && !m.readByReceiver) {
+          m.readByReceiver = true;
+          updated = true;
+        }
+      }
+      if (updated) {
+        this.saveStoredConvo(myId, contactId, stored);
+      }
       this.messages.set(stored);
       this.shouldScroll = true;
+      this.unreadCounts.update(counts => ({ ...counts, [contactId]: 0 }));
+      this.chatService.refreshUnreadCount();
     }
   }
 

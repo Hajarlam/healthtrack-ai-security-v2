@@ -28,7 +28,24 @@ export class AuthService {
           'admin@healthtrack.ai':     { role: 'ADMIN',     firstName: 'Admin',       lastName: 'HealthTrack',id: 3 },
           'emergency@healthtrack.ai': { role: 'EMERGENCY', firstName: 'Dr. Secours', lastName: 'Urgentiste', id: 4 }
         };
-        const demo = mockMap[email];
+        let demo = mockMap[email];
+        if (!demo) {
+          try {
+            const doctorsRaw = localStorage.getItem('sihati_registered_doctors');
+            if (doctorsRaw) {
+              const docList = JSON.parse(doctorsRaw);
+              const foundDoc = docList.find((d: any) => d.email?.toLowerCase().trim() === email);
+              if (foundDoc) {
+                demo = {
+                  role: 'DOCTOR',
+                  firstName: foundDoc.firstName,
+                  lastName: foundDoc.lastName,
+                  id: foundDoc.id || 99
+                };
+              }
+            }
+          } catch(e) {}
+        }
         if (demo) {
           const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
           const payload = btoa(JSON.stringify({
