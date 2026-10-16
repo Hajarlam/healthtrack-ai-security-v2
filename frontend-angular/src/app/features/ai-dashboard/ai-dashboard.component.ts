@@ -1,39 +1,33 @@
-import { Component, OnInit, signal, ViewChild, ElementRef, AfterViewChecked, OnDestroy } from "@angular/core";
+import { Component, OnInit, signal, computed, ViewChild, ElementRef, AfterViewChecked, OnDestroy, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { HttpClient } from "@angular/common/http";
 import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 import { Router } from "@angular/router";
-import { forkJoin, of } from "rxjs";
+import { forkJoin } from "rxjs";
 import { environment } from "../../../environments/environment";
 import { AuthService } from "../../core/services/auth.service";
 import { HealthRecordService } from "../../core/services/health-record.service";
 import { MedicationService } from "../../core/services/medication.service";
+import { SpeechService } from "../../core/services/speech.service";
+import { AiDoctorService } from "../../core/services/ai-doctor.service";
 import { HealthRecord } from "../../core/models/health-record.model";
+import { AnomalyResult, OcrResult } from "../../core/models/ai.model";
+import { VirtualAvatarComponent, AvatarState } from "../../shared/components/virtual-avatar/virtual-avatar.component";
 
-interface AnomalyResult {
-  riskLevel: string;
-  anomalies: string[];
-  trend: string;
-  recommendations: string[];
-  confidenceScore: number;
-}
-
-interface OcrResult {
-  rawText: string;
-  detectedMedications: string[];
-  detectedDosages: string[];
-  doctorName: string;
-  prescriptionDate: string;
-  patientName?: string;
-  success: boolean;
-  errorMessage?: string;
-}
+/**
+ * Avatar image — PRESERVED EXACTLY AS-IS.
+ * This is the original doctor portrait path already used by the app.
+ * Do not regenerate, replace or redesign it; only the surrounding animation
+ * changes. Swap the URL here if the asset ever moves to `assets/`.
+ */
+const DOCTOR_AVATAR_IMAGE =
+  "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80";
 
 @Component({
   selector: "app-ai-dashboard",
   standalone: true,
-  imports: [CommonModule, FormsModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, MatSnackBarModule, VirtualAvatarComponent],
   template: `
   <div class="ai-dashboard-wrap">
 
@@ -56,7 +50,7 @@ interface OcrResult {
         <div class="hero-left">
           <div class="hero-pill-badge">
             <span class="pulse-beacon"></span>
-            MOTEUR PRÉDICTIF SIHATI AI &bull; GEMINI CLINICAL
+            MOTEUR PRÉDICTIF SIHATI AI &bull; IA CLINIQUE SÉCURISÉE
           </div>
           <h1>Analyse Prédictive des Constantes</h1>
           <p>
@@ -208,15 +202,6 @@ interface OcrResult {
               <span class="lang-badge" [class.active]="selectedLang === 'DAR'" (click)="setLang('DAR')">الدارجة</span>
             </div>
 
-            <div class="avatar-mode-pills" title="Choisir le mode du médecin virtuel">
-              <button type="button" class="mode-pill" [class.active]="doctorMode() === 'native'" (click)="setDoctorMode('native')">
-                <span class="material-icons">smart_toy</span> Avatar IA
-              </button>
-              <button type="button" class="mode-pill" [class.active]="doctorMode() === 'liveavatar'" (click)="setDoctorMode('liveavatar')">
-                <span class="material-icons">videocam</span> Vidéo HD
-              </button>
-            </div>
-
             <button type="button" (click)="toggleAvatarFullscreen()" class="btn-fullscreen" title="Afficher en plein écran">
               <span class="material-icons">fullscreen</span> Plein Écran
             </button>
@@ -226,70 +211,17 @@ interface OcrResult {
           </div>
         </div>
 
-        <!-- LiveAvatar HD video mode (default) — switch to « Avatar IA » if LiveAvatar credits run out -->
-        @if (doctorMode() === 'liveavatar') {
-          <div class="avatar-frame-box avatar-video-mode">
-            <iframe id="doctorIframe"
-                    src="https://embed.liveavatar.com/v1/4714424f-aff5-4581-8457-a228a4e6a5ef?orientation=horizontal"
-                    allow="camera; microphone; autoplay; encrypted-media; display-capture; fullscreen"
-                    allowfullscreen="true"
-                    referrerpolicy="no-referrer-when-downgrade"
-                    title="Dr. Virtuel — LiveAvatar (Ann Doctor Standing)"
-                    class="doctor-iframe"></iframe>
-            <div class="avatar-video-note">
-              Vidéo HD LiveAvatar — si des crédits sont requis, cliquez sur « Avatar IA » (gratuit).
-            </div>
-          </div>
-        } @else {
-
-        <!-- Native Virtual Doctor Avatar (100% gratuit — aucun service payant, aucune clé API) -->
-        <div class="avatar-frame-box"
-             [class.is-speaking]="isSpeaking()"
-             [class.is-listening]="isListening()"
-             [class.is-thinking]="loadingChatbot()">
-          <div class="native-avatar-bg"></div>
-
-          <div class="native-avatar-inner">
-            <div class="doctor-avatar-circle">
-              <div class="pulse-ring ring-1"></div>
-              <div class="pulse-ring ring-2"></div>
-              <svg class="doctor-svg" viewBox="0 0 220 220" aria-hidden="true">
-                <defs>
-                  <linearGradient id="coatGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stop-color="#FFFFFF"/>
-                    <stop offset="1" stop-color="#DCEFFB"/>
-                  </linearGradient>
-                </defs>
-                <path d="M34 214 C34 166 68 146 110 146 C152 146 186 166 186 214 Z" fill="url(#coatGrad)"/>
-                <path d="M96 150 L110 168 L124 150" fill="#E8F4FC"/>
-                <path d="M92 152 C92 178 122 180 122 202" stroke="#023E58" stroke-width="6" fill="none" stroke-linecap="round"/>
-                <circle cx="122" cy="205" r="10" fill="#48CAE4" stroke="#023E58" stroke-width="4"/>
-                <rect x="99" y="116" width="22" height="30" rx="11" fill="#EFC89C"/>
-                <circle cx="110" cy="90" r="43" fill="#F7D4A5"/>
-                <path d="M67 92 C67 56 88 44 110 44 C132 44 153 56 153 92 C153 76 137 68 110 68 C83 68 67 76 67 92 Z" fill="#3A2E2A"/>
-                <circle cx="94" cy="90" r="4.6" fill="#2B2B2B"/>
-                <circle cx="126" cy="90" r="4.6" fill="#2B2B2B"/>
-                <circle cx="95.5" cy="88.4" r="1.5" fill="#FFFFFF"/>
-                <circle cx="127.5" cy="88.4" r="1.5" fill="#FFFFFF"/>
-                <path class="mouth" d="M95 106 Q110 119 125 106" stroke="#9C4A38" stroke-width="5" fill="none" stroke-linecap="round"/>
-              </svg>
-            </div>
-
-            <div class="avatar-name-badge"><span class="avatar-dot"></span> Dr. Virtuel</div>
-
-            <div class="avatar-live-status">
-              @if (loadingChatbot()) { <span>Réflexion clinique en cours…</span> }
-              @else if (isSpeaking()) { <span>Réponse vocale en cours…</span> }
-              @else if (isListening()) { <span>Je vous écoute…</span> }
-              @else { <span>En ligne — prêt à vous conseiller</span> }
-            </div>
-          </div>
-
-          <div class="avatar-eq" [class.active]="isSpeaking()" aria-hidden="true">
-            <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-          </div>
-        </div>
-        }
+        <!--
+          Dr. Virtuel — 100% gratuit : aucune iframe, aucun crédit, aucune clé API.
+          L'image de l'avatar est conservée telle quelle ([imageSrc]) et animée
+          pendant la parole. Voir <app-virtual-avatar> et le moteur de lip-sync
+          remplaçable dans core/avatar/.
+        -->
+        <app-virtual-avatar
+          [imageSrc]="doctorImageUrl"
+          [name]="'Dr. Virtuel'"
+          [state]="avatarState()">
+        </app-virtual-avatar>
 
         <!-- Section Consultation Écrite & Réponse Orale par l'IA -->
         <div class="consultation-chat-station">
@@ -1063,214 +995,8 @@ interface OcrResult {
 
   .btn-reload .material-icons { font-size: 18px; }
 
-  .avatar-mode-pills { display: flex; gap: 6px; }
-  .mode-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    border: 1px solid #CBD5E1;
-    background: #FFFFFF;
-    color: #475569;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .mode-pill .material-icons { font-size: 16px; }
-  .mode-pill:hover { border-color: #0077B6; color: #0077B6; }
-  .mode-pill.active { background: #0077B6; border-color: #0077B6; color: #FFFFFF; }
-
-  /* LiveAvatar HD video mode (optional — requires LiveAvatar credits) */
-  .avatar-video-mode { background: #0B1120; }
-  .doctor-iframe { width: 100%; height: 100%; display: block; border: none; }
-  .avatar-video-note {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(2, 62, 88, 0.85);
-    color: #E6F7FF;
-    font-size: 11.5px;
-    line-height: 1.3;
-    padding: 7px 14px;
-    border-radius: 12px;
-    z-index: 5;
-    max-width: 90%;
-    text-align: center;
-    pointer-events: none;
-  }
-
-  /* Native Virtual Doctor Avatar Stage (100% gratuit — sans iframe ni service payant) */
-  .avatar-frame-box {
-    position: relative;
-    border-radius: 20px;
-    overflow: hidden;
-    background: radial-gradient(circle at 50% 32%, #10314F 0%, #0B1120 72%);
-    width: 100%;
-    aspect-ratio: 16/9;
-    min-height: 300px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.16);
-    border: 1px solid rgba(0, 119, 182, 0.2);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .avatar-frame-box:fullscreen,
-  .avatar-frame-box:-webkit-full-screen {
-    aspect-ratio: auto;
-    height: 100vh;
-    min-height: 100vh;
-    border-radius: 0;
-  }
-
-  .native-avatar-bg {
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(rgba(72, 202, 228, 0.12) 1px, transparent 1px);
-    background-size: 22px 22px;
-    opacity: 0.7;
-  }
-
-  .native-avatar-inner {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    padding: 24px;
-  }
-
-  .doctor-avatar-circle {
-    position: relative;
-    width: clamp(120px, 24vh, 190px);
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #0077B6, #00B4D8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 0 8px rgba(72, 202, 228, 0.12), 0 18px 42px rgba(0, 180, 216, 0.35);
-    animation: avatarFloat 4.5s ease-in-out infinite;
-  }
-
-  .doctor-svg { width: 84%; height: 84%; display: block; position: relative; z-index: 1; }
-
-  .doctor-svg .mouth { transform-box: fill-box; transform-origin: center; }
-
-  @keyframes avatarFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-  }
-
-  .pulse-ring {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: clamp(120px, 24vh, 190px);
-    height: clamp(120px, 24vh, 190px);
-    border-radius: 50%;
-    border: 2px solid rgba(72, 202, 228, 0.55);
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .avatar-frame-box.is-speaking .ring-1,
-  .avatar-frame-box.is-speaking .ring-2 { animation: pulseRing 1.8s ease-out infinite; }
-  .avatar-frame-box.is-speaking .ring-2 { animation-delay: 0.6s; }
-  .avatar-frame-box.is-listening .ring-1,
-  .avatar-frame-box.is-listening .ring-2 { border-color: rgba(248, 113, 113, 0.6); animation: pulseRing 1.8s ease-out infinite; }
-  .avatar-frame-box.is-listening .ring-2 { animation-delay: 0.6s; }
-
-  @keyframes pulseRing {
-    0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
-  }
-
-  .avatar-frame-box.is-speaking .doctor-svg .mouth { animation: talkMouth 0.3s ease-in-out infinite; }
-
-  @keyframes talkMouth {
-    0%, 100% { transform: scaleY(0.55); }
-    50% { transform: scaleY(1.5); }
-  }
-
-  .avatar-name-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(144, 224, 239, 0.35);
-    color: #E6F7FF;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 6px 14px;
-    border-radius: 999px;
-    backdrop-filter: blur(6px);
-  }
-
-  .avatar-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: #34D399;
-    animation: liveDot 1.8s ease-in-out infinite;
-  }
-
-  @keyframes liveDot {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
-    50% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
-  }
-
-  .avatar-live-status {
-    color: #BFE7F5;
-    font-size: 12.5px;
-    letter-spacing: 0.2px;
-    min-height: 18px;
-  }
-
-  .avatar-eq {
-    position: absolute;
-    bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: flex-end;
-    gap: 4px;
-    height: 26px;
-    opacity: 0.25;
-    transition: opacity 0.25s ease;
-    z-index: 3;
-  }
-
-  .avatar-eq.active { opacity: 1; }
-
-  .avatar-eq span {
-    width: 4px;
-    height: 8px;
-    border-radius: 3px;
-    background: linear-gradient(180deg, #90E0EF, #00B4D8);
-  }
-
-  .avatar-eq.active span { animation: eqBar 0.9s ease-in-out infinite; }
-
-  .avatar-eq span:nth-child(1) { animation-delay: 0.05s; }
-  .avatar-eq span:nth-child(2) { animation-delay: 0.2s; }
-  .avatar-eq span:nth-child(3) { animation-delay: 0.35s; }
-  .avatar-eq span:nth-child(4) { animation-delay: 0.5s; }
-  .avatar-eq span:nth-child(5) { animation-delay: 0.3s; }
-  .avatar-eq span:nth-child(6) { animation-delay: 0.15s; }
-  .avatar-eq span:nth-child(7) { animation-delay: 0.45s; }
-
-  @keyframes eqBar {
-    0%, 100% { height: 8px; }
-    50% { height: 24px; }
-  }
+  /* L'avatar Dr. Virtuel (image conservée + animation de parole) est rendu par
+     <app-virtual-avatar> : tout son style est encapsulé dans ce composant. */
 
   /* Consultation Station (Écrit + Réponse Orale) */
   .consultation-chat-station {
@@ -2045,22 +1771,38 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
   ];
 
   selectedLang: 'FR' | 'AR' | 'EN' | 'DAR' = 'FR';
-  doctorMode     = signal<'native' | 'liveavatar'>('liveavatar');
-  isListening    = signal<boolean>(false);
-  isSpeaking     = signal<boolean>(false);
+  readonly doctorImageUrl = DOCTOR_AVATAR_IMAGE;
   loadingChatbot = signal<boolean>(false);
   chatInputText  = '';
 
+  /** Free, browser-native speech (STT + TTS). No key, no cost. */
+  private readonly speech   = inject(SpeechService);
+  /** Existing Spring Boot AI backend bridge (keys stay server-side). */
+  private readonly aiDoctor = inject(AiDoctorService);
+
+  readonly isListening = this.speech.isListening;
+  readonly isSpeaking  = this.speech.isSpeaking;
+
+  /** Single source of truth for the avatar animation state. */
+  readonly avatarState = computed<AvatarState>(() => {
+    if (this.loadingChatbot()) return 'thinking';
+    if (this.isSpeaking())    return 'speaking';
+    if (this.isListening())   return 'listening';
+    return 'idle';
+  });
+
+  /** Maps the UI language to a BCP-47 tag for the browser speech engines. */
+  private speechLang(): string {
+    if (this.selectedLang === 'AR' || this.selectedLang === 'DAR') return 'ar-MA';
+    if (this.selectedLang === 'EN') return 'en-US';
+    return 'fr-FR';
+  }
+
   setLang(lang: 'FR' | 'AR' | 'EN' | 'DAR') {
     this.selectedLang = lang;
-    if (this.recognition) {
-      if (lang === 'AR' || lang === 'DAR') {
-        this.recognition.lang = 'ar-MA';
-      } else if (lang === 'EN') {
-        this.recognition.lang = 'en-US';
-      } else {
-        this.recognition.lang = 'fr-FR';
-      }
+    // If a recognition session is running, stop it; the next start uses the new language.
+    if (this.isListening()) {
+      this.speech.stopListening();
     }
     const label = lang === 'FR' ? 'Français' : lang === 'AR' ? 'العربية' : lang === 'DAR' ? 'الدارجة' : 'English';
     this.snack.open(`Langue sélectionnée : ${label}`, 'OK', { duration: 2500 });
@@ -2089,14 +1831,6 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     this.scrollToBottom();
     this.snack.open('Nouvelle consultation démarrée', 'OK', { duration: 2000 });
   }
-
-  setDoctorMode(mode: 'native' | 'liveavatar') {
-    this.stopSpeaking();
-    this.doctorMode.set(mode);
-  }
-
-  private recognition: any = null;
-  private currentUtterance: SpeechSynthesisUtterance | null = null;
 
   chatMessages = signal<Array<{ sender: 'patient' | 'doctor'; text: string; time: string }>>([
     {
@@ -2137,121 +1871,43 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
 
   toggleVoiceRecognition() {
     if (this.isListening()) {
-      this.stopVoiceRecognition();
-    } else {
-      this.startVoiceRecognition();
+      this.speech.stopListening();
+      return;
     }
+    // Stop any ongoing spoken answer so the mic never captures it.
+    this.speech.stopSpeaking();
+
+    void this.speech.startListening({
+      lang: this.speechLang(),
+      onResult: (transcript: string) => {
+        this.chatInputText = transcript;
+        this.askDoctor();
+      },
+      onError: (error) => {
+        // Clear, actionable message (permission, no mic, no speech, network…).
+        this.snack.open(error.message, 'OK', { duration: 5000 });
+      },
+    });
   }
 
   startVoiceRecognition() {
-    try {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        this.snack.open("La reconnaissance vocale n'est pas supportée par votre navigateur (recommandé: Chrome ou Edge).", "OK", { duration: 4000 });
-        return;
-      }
-
-      if (this.recognition) {
-        try { this.recognition.abort(); } catch(e) {}
-      }
-
-      this.recognition = new SpeechRecognition();
-      this.recognition.lang = 'fr-FR';
-      this.recognition.continuous = false;
-      this.recognition.interimResults = false;
-
-      this.recognition.onstart = () => {
-        this.isListening.set(true);
-        this.stopSpeaking();
-      };
-
-      this.recognition.onresult = (event: any) => {
-        const transcript = event?.results?.[0]?.[0]?.transcript;
-        if (transcript && transcript.trim()) {
-          this.chatInputText = transcript.trim();
-          this.askDoctor();
-        }
-      };
-
-      this.recognition.onerror = (err: any) => {
-        console.warn('Erreur micro / reconnaissance:', err);
-        this.isListening.set(false);
-      };
-
-      this.recognition.onend = () => {
-        this.isListening.set(false);
-      };
-
-      this.recognition.start();
-    } catch(e) {
-      console.error(e);
-      this.isListening.set(false);
-    }
+    this.toggleVoiceRecognition();
   }
 
   stopVoiceRecognition() {
-    if (this.recognition) {
-      try {
-        this.recognition.stop();
-      } catch(e) {}
-    }
-    this.isListening.set(false);
+    this.speech.stopListening();
   }
 
+  /** Speak an AI answer aloud using the free, built-in browser voice. */
   speak(text: string) {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    this.stopSpeaking();
-
-    const clean = (text || '').replace(/[*_#`~-]/g, ' ').replace(/\s+/g, ' ').trim();
-    if (!clean) return;
-
-    const utterance = new SpeechSynthesisUtterance(clean);
-    const langCode = (this.selectedLang === 'AR' || this.selectedLang === 'DAR') ? 'ar-SA' : this.selectedLang === 'EN' ? 'en-US' : 'fr-FR';
-    utterance.lang = langCode;
-    utterance.rate = 1.0;
-    utterance.pitch = 1.05;
-
-    const voices = window.speechSynthesis.getVoices();
-    const langPrefix = langCode.substring(0, 2).toLowerCase();
-    const targetVoice = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix) && (
-      v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Amelie') || 
-      v.name.includes('Julie') || v.name.includes('Maged') || v.name.includes('Zayd') || 
-      v.name.includes('Samantha') || v.name.includes('Jenny')
-    ));
-
-    if (targetVoice) {
-      utterance.voice = targetVoice;
-    } else {
-      const anyVoice = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
-      if (anyVoice) utterance.voice = anyVoice;
-    }
-
-    utterance.onstart = () => {
-      this.isSpeaking.set(true);
-    };
-
-    utterance.onend = () => {
-      this.isSpeaking.set(false);
-      this.currentUtterance = null;
-    };
-
-    utterance.onerror = () => {
-      this.isSpeaking.set(false);
-      this.currentUtterance = null;
-    };
-
-    this.currentUtterance = utterance;
-    window.speechSynthesis.speak(utterance);
+    this.speech.speak(text, {
+      lang: this.speechLang(),
+      onError: () => { /* TTS is best-effort; never block the conversation. */ },
+    });
   }
 
   stopSpeaking() {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      try {
-        window.speechSynthesis.cancel();
-      } catch(e) {}
-    }
-    this.isSpeaking.set(false);
-    this.currentUtterance = null;
+    this.speech.stopSpeaking();
   }
 
   askDoctor(promptText?: string) {
@@ -2278,9 +1934,10 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
   }
 
   private handleDoctorReply(question: string) {
-    const geminiApiKey = environment.geminiApiKey || '';
-    const now = new Date();
-    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const timeStr = (() => {
+      const now = new Date();
+      return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    })();
 
     const appendDoctorMsg = (replyText: string) => {
       this.loadingChatbot.set(false);
@@ -2293,60 +1950,19 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
       this.speak(replyText);
     };
 
-    if (!geminiApiKey) {
-      const fallback = this.getFallbackDoctorReply(question);
-      appendDoctorMsg(fallback);
-      return;
-    }
-
-    const langInstructions = this.selectedLang === 'AR'
-      ? 'Réponds impérativement en Arabe littéraire clair, élégant et bienveillant.'
-      : this.selectedLang === 'DAR'
-      ? 'Réponds impérativement en Darija marocaine (arabe dialectal marocain) chaleureuse, naturelle et facile à comprendre.'
-      : this.selectedLang === 'EN'
-      ? 'Respond strictly in English, concise, encouraging and empathetic.'
-      : 'Réponds impérativement en Français clair, empathique, rassurant et médicalement rigoureux.';
-
-    const systemPrompt = `Tu es le Dr. Virtuel, médecin conseiller interactif et cardiologue bienveillant sur la plateforme e-santé Sihati.ai.
-${langInstructions}
-Règles strictes :
-1. Maximum 3 à 4 phrases claires, faciles à comprendre et parfaitement adaptées à la synthèse vocale orale.
-2. Pas de puces, pas de tirets ni de listes numérotées, pas de caractères markdown (*, #, _) car ta réponse sera immédiatement lue à voix haute au patient.
-3. Rassure le patient, donne des explications médicales bienveillantes et rappelle de consulter un médecin traitant si nécessaire.
-Question du patient : ${question}`;
-
-    const body = {
-      contents: [{ parts: [{ text: systemPrompt }] }],
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 350
-      }
-    };
-
-    const tryModels = (idx: number, models: string[]) => {
-      if (idx >= models.length) {
+    // Ask the EXISTING Spring Boot AI backend (POST /ai/chat). The OpenAI/Gemini
+    // key stays server-side and is never exposed to the browser. If the backend
+    // is unreachable (e.g. the static Vercel demo), we fall back to the free,
+    // offline clinical engine so the conversation always works.
+    this.aiDoctor.ask(question, this.selectedLang).subscribe({
+      next: (reply) => {
+        const text = (reply || '').trim();
+        appendDoctorMsg(text || this.getFallbackDoctorReply(question));
+      },
+      error: () => {
         appendDoctorMsg(this.getFallbackDoctorReply(question));
-        return;
       }
-      const model = models[idx];
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
-
-      this.http.post<any>(url, body).subscribe({
-        next: (res) => {
-          const raw = res?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (raw && raw.trim()) {
-            appendDoctorMsg(raw.trim());
-          } else {
-            tryModels(idx + 1, models);
-          }
-        },
-        error: () => {
-          tryModels(idx + 1, models);
-        }
-      });
-    };
-
-    tryModels(0, ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-1.5-flash']);
+    });
   }
 
   private getFallbackDoctorReply(question: string): string {
@@ -2419,111 +2035,45 @@ Question du patient : ${question}`;
   analyzeLatest() {
     this.loadingAnomaly.set(true);
 
+    // 1) Prefer the EXISTING AI backend (GET /ai/analyze-latest). The clinical
+    //    key stays server-side. 2) Fall back to the free offline engine when the
+    //    backend is unavailable (Vercel static demo, no backend running).
+    this.aiDoctor.analyzeLatest().subscribe({
+      next: (result) => {
+        if (result && result.riskLevel) {
+          this.anomalyResult.set(this.normalizeAnomaly(result));
+          this.loadingAnomaly.set(false);
+          this.snack.open("Analyse IA clinique des constantes générée avec succès !", "OK", { duration: 3500 });
+        } else {
+          this.analyzeLatestLocally();
+        }
+      },
+      error: () => this.analyzeLatestLocally()
+    });
+  }
+
+  private analyzeLatestLocally() {
     this.healthService.getMyRecords().subscribe({
       next: (pageRes) => {
         const records = pageRes && pageRes.content && pageRes.content.length > 0
           ? pageRes.content
           : this.healthService.getLocalRecords();
-        this.runAiVitalAnalysis(records);
+        this.computeRealAnalysis(records);
       },
       error: () => {
-        const local = this.healthService.getLocalRecords();
-        this.runAiVitalAnalysis(local);
+        this.computeRealAnalysis(this.healthService.getLocalRecords());
       }
     });
   }
 
-  private runAiVitalAnalysis(records: HealthRecord[]) {
-    const latest = (records && records.length > 0) ? records[0] : {
-      systolicBP: 125, diastolicBP: 82, heartRate: 74, bloodGlucose: 98, oxygenSaturation: 98, temperature: 36.5, weight: 62
-    };
-    const prev = (records && records.length > 1) ? records[1] : null;
-
-    const geminiApiKey = environment.geminiApiKey || '';
-    if (!geminiApiKey) {
-      this.computeRealAnalysis(records);
-      return;
+  /** Guards against malformed/unexpected risk levels coming from the backend. */
+  private normalizeAnomaly(result: AnomalyResult): AnomalyResult {
+    if (result.riskLevel !== 'NORMAL' && result.riskLevel !== 'WARNING' && result.riskLevel !== 'CRITICAL') {
+      result.riskLevel = 'WARNING';
     }
-
-    const prompt = `Tu es un médecin cardiologue et interniste expert en analyse de télésurveillance médicale (plateforme Sihati.ai).
-Voici les constantes vitales réelles mesurées chez le patient :
-- Date de mesure : ${latest.recordedAt ? new Date(latest.recordedAt).toLocaleString('fr-FR') : 'Aujourd\'hui'}
-- Pression artérielle systolique : ${latest.systolicBP || 120} mmHg
-- Pression artérielle diastolique : ${latest.diastolicBP || 80} mmHg
-- Fréquence cardiaque : ${latest.heartRate || 74} bpm
-- Glycémie : ${latest.bloodGlucose || 100} mg/dL
-- Saturation en oxygène (SpO2) : ${latest.oxygenSaturation || 98} %
-- Température corporelle : ${latest.temperature || 36.6} °C
-- Poids : ${latest.weight || 62} kg
-${prev ? `Mesure comparative précédente : PA ${prev.systolicBP}/${prev.diastolicBP} mmHg, FC ${prev.heartRate} bpm, Glycémie ${prev.bloodGlucose} mg/dL` : ''}
-
-Effectue une analyse clinique rigoureuse et retourne obligatoirement un objet JSON STRICT avec cette structure exacte :
-{
-  "riskLevel": "NORMAL" | "WARNING" | "CRITICAL",
-  "confidenceScore": 0.96,
-  "trend": "STABLE" | "IMPROVING" | "DEGRADING",
-  "anomalies": [
-     "Description clinique détaillée pour la tension (${latest.systolicBP || 120}/${latest.diastolicBP || 80} mmHg) avec comparaison aux normes",
-     "Description clinique détaillée pour la fréquence cardiaque (${latest.heartRate || 74} bpm) avec comparaison aux normes",
-     "Description clinique détaillée pour la glycémie (${latest.bloodGlucose || 100} mg/dL) avec comparaison aux normes",
-     "Description clinique détaillée pour la saturation O2 (${latest.oxygenSaturation || 98}%) et la température (${latest.temperature || 36.6}°C)"
-  ],
-  "recommendations": [
-     "Recommandation médicale personnalisée 1...",
-     "Recommandation médicale personnalisée 2...",
-     "Recommandation médicale personnalisée 3...",
-     "Recommandation médicale personnalisée 4..."
-  ]
-}`;
-
-    const body = {
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.2,
-        responseMimeType: 'application/json'
-      }
-    };
-
-    const tryModels = (idx: number, models: string[]) => {
-      if (idx >= models.length) {
-        this.computeRealAnalysis(records);
-        return;
-      }
-      const model = models[idx];
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
-
-      this.http.post<any>(url, body).subscribe({
-        next: (res) => {
-          try {
-            const raw = res?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (raw) {
-              let clean = raw.trim();
-              if (clean.startsWith('```json')) clean = clean.substring(7);
-              if (clean.startsWith('```')) clean = clean.substring(3);
-              if (clean.endsWith('```')) clean = clean.substring(0, clean.length - 3);
-              clean = clean.trim();
-
-              const parsed: AnomalyResult = JSON.parse(clean);
-              if (parsed && parsed.riskLevel && Array.isArray(parsed.anomalies)) {
-                if (parsed.riskLevel !== 'NORMAL' && parsed.riskLevel !== 'WARNING' && parsed.riskLevel !== 'CRITICAL') {
-                  parsed.riskLevel = 'WARNING';
-                }
-                this.anomalyResult.set(parsed);
-                this.loadingAnomaly.set(false);
-                this.snack.open("✅ Analyse IA clinique des constantes générée avec succès !", "OK", { duration: 3500 });
-                return;
-              }
-            }
-          } catch(e) {}
-          tryModels(idx + 1, models);
-        },
-        error: () => {
-          tryModels(idx + 1, models);
-        }
-      });
-    };
-
-    tryModels(0, ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-3-flash-preview']);
+    if (!Array.isArray(result.anomalies)) result.anomalies = [];
+    if (!Array.isArray(result.recommendations)) result.recommendations = [];
+    return result;
   }
 
   computeRealAnalysis(records: HealthRecord[]) {
@@ -2660,145 +2210,20 @@ Effectue une analyse clinique rigoureuse et retourne obligatoirement un objet JS
     if (!file) return;
     this.loadingOcr.set(true);
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const dataUrl = reader.result as string;
-        const base64Data = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
-        const mimeType = file.type || (file.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
-
-        const geminiApiKey = environment.geminiApiKey || '';
-
-        const prompt = `Tu es un médecin spécialiste et expert en OCR et déchiffrage d'ordonnances médicales cliniques, imprimées ou manuscrites (même avec une écriture manuscrite complexe ou difficile).
-Analyse avec la plus grande précision l'ordonnance médicale présente dans le document.
-Déchiffre chaque ligne avec soin et extrais fidèlement :
-1. 'doctor_name': Le nom complet du médecin prescripteur (avec Dr., ex: 'Dr. Julien G.' ou 'Dr. Non Détecté').
-2. 'patient_name': Le nom complet du patient ou de la patiente s'il est mentionné (ex: 'Éric R.' ou 'Mme Zallan N.').
-3. 'prescription_date': La date de prescription ou d'émission si visible (ex: '01/10/2024' ou 'Non précisée').
-4. 'medications': La liste exacte de TOUS les médicaments prescrits. Pour chaque médicament :
-   - 'name': le nom exact du médicament avec son dosage et sa forme galénique (ex: 'Acétylsalicylate de lysine (Kardégic) 75 mg', 'Ramipril (Triatec) 10 mg', 'Amoxicilline 1 g', 'Valium 10mg').
-   - 'dosage': la posologie exacte et les instructions détaillées de prise (ex: '1 sachet à 12 h', '1 comprimé par jour', '1 comprimé 2 fois par jour pendant 10 jours').
-   - 'frequency': le nombre de fois par jour ou moment de prise.
-   - 'quantity': la quantité par prise.`;
-
-        const body = {
-          contents: [{
-            parts: [
-              { text: prompt },
-              {
-                inline_data: {
-                  mime_type: mimeType,
-                  data: base64Data
-                }
-              }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.1,
-            responseMimeType: 'application/json'
-          }
-        };
-
-        const tryModel = (modelIndex: number, models: string[]) => {
-          if (modelIndex >= models.length) {
-            this.fallbackBackendOcr(file);
-            return;
-          }
-
-          const currentModel = models[modelIndex];
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${geminiApiKey}`;
-
-          this.http.post<any>(url, body).subscribe({
-            next: (res) => {
-              try {
-                const text = res?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (text) {
-                  let cleanJson = text.trim();
-                  if (cleanJson.startsWith('```json')) cleanJson = cleanJson.substring(7);
-                  if (cleanJson.startsWith('```')) cleanJson = cleanJson.substring(3);
-                  if (cleanJson.endsWith('```')) cleanJson = cleanJson.substring(0, cleanJson.length - 3);
-                  cleanJson = cleanJson.trim();
-
-                  const parsed = JSON.parse(cleanJson);
-                  let doctor = parsed.doctor_name || parsed.doctorName || 'Dr. Non Détecté';
-                  if (!doctor.toLowerCase().startsWith('dr') && !doctor.toLowerCase().includes('unknown') && !doctor.toLowerCase().includes('non détecté')) {
-                    doctor = 'Dr. ' + doctor;
-                  }
-                  const patient = parsed.patient_name || parsed.patientName || '';
-                  const date = parsed.prescription_date || parsed.prescriptionDate || 'Non précisée';
-
-                  const meds: string[] = [];
-                  const dosages: string[] = [];
-
-                  if (Array.isArray(parsed.medications)) {
-                    for (const m of parsed.medications) {
-                      if (m && m.name) {
-                        meds.push(m.name);
-                        const d = m.dosage || m.posologie || '';
-                        const f = m.frequency || '';
-                        const fullPos = d && f && d !== f ? `${d} - ${f}` : (d || f || 'Selon avis médical');
-                        dosages.push(fullPos);
-                      }
-                    }
-                  }
-
-                  if (meds.length > 0) {
-                    const result: OcrResult = {
-                      rawText: cleanJson,
-                      detectedMedications: meds,
-                      detectedDosages: dosages,
-                      doctorName: doctor,
-                      prescriptionDate: date,
-                      patientName: patient,
-                      success: true
-                    };
-                    this.ocrResult.set(result);
-                    this.loadingOcr.set(false);
-                    try {
-                      localStorage.setItem('lastOcrResult', JSON.stringify(result));
-                    } catch(e) {}
-                    this.snack.open("Ordonnance analysée par l'IA avec succès !", "OK", {duration: 3500});
-                    return;
-                  }
-                }
-              } catch (err) {
-                console.error('Erreur de parsing JSON Gemini :', err);
-              }
-              tryModel(modelIndex + 1, models);
-            },
-            error: (err) => {
-              console.warn(`Modèle ${currentModel} a échoué, essai du modèle suivant...`, err);
-              tryModel(modelIndex + 1, models);
-            }
-          });
-        };
-
-        tryModel(0, ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-3-flash-preview']);
-
-      } catch (e) {
-        this.fallbackBackendOcr(file);
-      }
-    };
-
-    reader.onerror = () => {
-      this.fallbackBackendOcr(file);
-    };
-
-    reader.readAsDataURL(file);
-  }
-
-  private fallbackBackendOcr(file: File) {
+    // Use the EXISTING backend OCR endpoint (POST /ocr/analyze). Any model key
+    // stays server-side. If the backend is unavailable, fall back to the free
+    // in-browser OCR path. No API key is ever embedded in the frontend.
     const fd = new FormData();
     fd.append('file', file);
     this.http.post<OcrResult>(`${environment.apiUrl}/ocr/analyze`, fd).subscribe({
-      next: (r: OcrResult) => { 
+      next: (r: OcrResult) => {
         if (r && r.success && r.detectedMedications && r.detectedMedications.length > 0) {
-          this.ocrResult.set(r); 
-          this.loadingOcr.set(false); 
+          this.ocrResult.set(r);
+          this.loadingOcr.set(false);
           try {
             localStorage.setItem('lastOcrResult', JSON.stringify(r));
           } catch(e) {}
-          this.snack.open("Ordonnance analysée avec succès !", "OK", {duration: 3500});
+          this.snack.open("Ordonnance analysée avec succès !", "OK", { duration: 3500 });
         } else {
           this.performClientSideOcr(file);
         }

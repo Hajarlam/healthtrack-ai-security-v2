@@ -45,8 +45,7 @@ public class SecurityConfig {
                 // Public
                 .requestMatchers(
                     "/auth/**", "/v3/api-docs/**", "/swagger-ui/**",
-                    "/swagger-ui.html", "/h2-console/**", "/actuator/health",
-                    "/avatar/**"
+                    "/swagger-ui.html", "/h2-console/**", "/actuator/health"
                 ).permitAll()
                 .requestMatchers("/users/patients").hasAnyRole("DOCTOR","ADMIN")
                 .requestMatchers("/ai/**").hasAnyRole("PATIENT","DOCTOR","ADMIN")

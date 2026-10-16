@@ -107,7 +107,3 @@ spring:
     console:
       enabled: true
       path: /h2-console
-
-anam:
-  api-key: ZTdhM2VlMGUtYmJhOS00YTA4LTk3ZGUtZDM4OGYzMmYwYjU5OnF2UmhYL1pxQXhEWkVBb2N6RzlFR0thVU92TzNHVXVqRENDM0tJUC9mWTg9
-  persona-id: dd7594a4-76ef-5e1f-9c9a-7afddd64b438

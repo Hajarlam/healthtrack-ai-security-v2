@@ -156,7 +156,9 @@ import { environment } from '../../../../environments/environment';
   `]
 })
 export class LayoutComponent implements OnInit {
-  collapsed = signal(false);
+  // Start collapsed on narrow (mobile) viewports so the content — including the
+  // Dr. Virtuel avatar — gets the full width. Desktop keeps the sidebar open.
+  collapsed = signal(typeof window !== 'undefined' && window.innerWidth <= 768);
   alertCount = signal(0);
 
   get navItemsFiltered() {

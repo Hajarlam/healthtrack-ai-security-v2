@@ -4,7 +4,7 @@
   "outputDirectory": "frontend-angular/dist/healthtrack-frontend/browser",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]
