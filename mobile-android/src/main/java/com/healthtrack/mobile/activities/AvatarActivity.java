@@ -28,7 +28,7 @@ import com.healthtrack.mobile.R;
 public class AvatarActivity extends AppCompatActivity {
 
     private static final String AVATAR_URL =
-        "https://embed.liveavatar.com/v1/66219ded-41c8-47de-a54e-9729508b570e?orientation=horizontal";
+        "https://healthtrack-ai-security-v2.vercel.app/conseiller-virtuel";
 
     private WebView webView;
     private View layoutLoading, layoutError;

@@ -14,19 +14,26 @@ export class MedicationService {
   public getLocalMeds(): Medication[] {
     try {
       const saved = localStorage.getItem(this.STORAGE_KEY);
-      if (saved) {
+      if (saved !== null) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          // Filter out any legacy dummy mock meds
+          const cleaned = parsed.filter(m => 
+            m && m.name &&
+            !m.name.includes('Kardégic 75 mg (Acétylsalicylate de lysine)') &&
+            !m.name.includes('Triatec 10 mg (Ramipril)') &&
+            !m.name.includes('Tahor 10 mg (Atorvastatine)')
+          );
+          if (cleaned.length !== parsed.length) {
+            this.saveLocalMeds(cleaned);
+          }
+          return cleaned;
+        }
       }
     } catch(e) {}
 
-    const initial: Medication[] = [
-      { id: 1, name: 'Kardégic 75 mg (Acétylsalicylate de lysine)', dosage: '75 mg', frequency: '1 sachet par jour au déjeuner', instructions: 'Prescription Dr. Julien Guerrier (Antiagrégant plaquettaire)' },
-      { id: 2, name: 'Triatec 10 mg (Ramipril)', dosage: '10 mg', frequency: '1 comprimé par jour le matin', instructions: 'Prescription Dr. Julien Guerrier (Antihypertenseur)' },
-      { id: 3, name: 'Tahor 10 mg (Atorvastatine)', dosage: '10 mg', frequency: '1 comprimé par jour le soir', instructions: 'Prescription Dr. Julien Guerrier (Statine régulatrice)' }
-    ];
-    this.saveLocalMeds(initial);
-    return initial;
+    // Par défaut : liste complètement vide !
+    return [];
   }
 
   public saveLocalMeds(meds: Medication[]): void {
@@ -38,8 +45,15 @@ export class MedicationService {
   getMedications(): Observable<Medication[]> {
     return this.http.get<Medication[]>(this.API).pipe(
       tap(meds => {
-        if (meds && meds.length > 0) {
-          this.saveLocalMeds(meds);
+        if (Array.isArray(meds)) {
+          // If backend returns a list, sync it to local storage
+          const cleaned = meds.filter(m => 
+            m && m.name &&
+            !m.name.includes('Kardégic 75 mg (Acétylsalicylate de lysine)') &&
+            !m.name.includes('Triatec 10 mg (Ramipril)') &&
+            !m.name.includes('Tahor 10 mg (Atorvastatine)')
+          );
+          this.saveLocalMeds(cleaned);
         }
       }),
       catchError(() => of(this.getLocalMeds()))

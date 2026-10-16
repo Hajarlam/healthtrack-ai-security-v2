@@ -189,189 +189,149 @@ interface OcrResult {
     @if (activeTab() === 'chatbot') {
       <div class="studio-card">
         
-        <!-- Top Mode Selector & Header -->
+        <!-- Top Mode Indicator & Header -->
         <div class="studio-topbar">
           <div class="studio-title-block">
             <span class="material-icons studio-icon">medical_services</span>
             <div>
-              <h2>Dr. Sarah — Médecin Conseiller Vocal & Interactif</h2>
-              <span class="studio-subtitle">Consultation vocale et textuelle en direct &bull; IA médicale multilingue</span>
+              <h2>Dr. Sarah — Médecin Conseiller Vocal &amp; Interactif</h2>
+              <span class="studio-subtitle">Consultation vocale et textuelle en direct &bull; IA médicale multilingue &bull; 100% Illimité &amp; Gratuit</span>
             </div>
           </div>
 
-          <!-- Mode Switcher -->
-          <div class="mode-switch-capsule">
-            <button type="button" class="mode-switch-btn" [class.active]="doctorMode() === 'native'" (click)="setDoctorMode('native')">
-              <span class="material-icons">record_voice_over</span> Mode Vocal Sihati AI (Illimité)
-            </button>
-            <button type="button" class="mode-switch-btn" [class.active]="doctorMode() === 'liveavatar'" (click)="setDoctorMode('liveavatar')">
-              <span class="material-icons">live_tv</span> Mode LiveAvatar (Flux Externe)
-            </button>
+          <div class="unlimited-badge-capsule">
+            <span class="badge-dot-live"></span>
+            <span class="badge-text">IA Clinique Vocale Active</span>
           </div>
         </div>
 
-        @if (doctorMode() === 'native') {
-          <!-- NATIVE AI DOCTOR WITH VOCAL & VISUAL CHAT -->
-          <div class="native-doctor-grid">
-            
-            <!-- Visual Doctor Stage (Left/Top) -->
-            <div class="doctor-visual-stage">
-              <div class="avatar-portrait-wrap">
-                <!-- Glowing beacon ring and pulse wave -->
-                <div class="avatar-glow-ring" [class.pulse-speaking]="isSpeaking()" [class.pulse-listening]="isListening()"></div>
-                
-                <!-- Doctor Avatar Visual -->
-                <div class="doctor-avatar-circle">
-                  <span class="material-icons doctor-big-avatar">support_agent</span>
-                </div>
-
-                <!-- Live Status Beacon -->
-                <div class="doctor-live-tag" [class.tag-speaking]="isSpeaking()" [class.tag-listening]="isListening()">
-                  <span class="live-dot"></span>
-                  @if (isSpeaking()) {
-                    <span>🔊 Dr. Sarah parle en direct...</span>
-                  } @else if (isListening()) {
-                    <span>🎙️ Écoute de votre voix en cours...</span>
-                  } @else {
-                    <span>🟢 Dr. Sarah &bull; Médecin IA En ligne</span>
-                  }
-                </div>
+        <!-- NATIVE AI DOCTOR WITH VOCAL & VISUAL CHAT -->
+        <div class="native-doctor-grid">
+          
+          <!-- Visual Doctor Stage (Left/Top) -->
+          <div class="doctor-visual-stage">
+            <div class="avatar-portrait-wrap">
+              <!-- Glowing beacon ring and pulse wave -->
+              <div class="avatar-glow-ring" [class.pulse-speaking]="isSpeaking()" [class.pulse-listening]="isListening()"></div>
+              
+              <!-- Doctor Avatar Visual -->
+              <div class="doctor-avatar-circle">
+                <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80" 
+                     alt="Dr. Sarah" 
+                     class="doctor-portrait-img"
+                     onerror="this.style.display='none'">
+                <span class="material-icons doctor-big-avatar fallback-avatar">support_agent</span>
               </div>
 
-              <!-- Audio Waveform Visualizer (Active when speaking) -->
+              <!-- Live Status Beacon -->
+              <div class="doctor-live-tag" [class.tag-speaking]="isSpeaking()" [class.tag-listening]="isListening()">
+                <span class="live-dot"></span>
+                @if (isSpeaking()) {
+                  <span>🔊 Dr. Sarah parle en direct...</span>
+                } @else if (isListening()) {
+                  <span>🎙️ Écoute de votre voix en cours...</span>
+                } @else {
+                  <span>🟢 Dr. Sarah &bull; Médecin IA En ligne</span>
+                }
+              </div>
+            </div>
+
+            <!-- Audio Waveform Visualizer (Active when speaking) -->
+            @if (isSpeaking()) {
+              <div class="waveform-box">
+                <span class="wave-bar bar-1"></span>
+                <span class="wave-bar bar-2"></span>
+                <span class="wave-bar bar-3"></span>
+                <span class="wave-bar bar-4"></span>
+                <span class="wave-bar bar-5"></span>
+                <span class="wave-bar bar-6"></span>
+                <span class="wave-bar bar-7"></span>
+                <span class="wave-bar bar-8"></span>
+              </div>
+            }
+
+            <!-- Doctor Voice Controls -->
+            <div class="vocal-controls-row">
+              <button type="button" class="btn-voice-talk" [class.listening]="isListening()" (click)="toggleVoiceRecognition()" title="Parler au micro">
+                <span class="material-icons">{{ isListening() ? 'mic_off' : 'mic' }}</span>
+                <span>{{ isListening() ? 'Arrêter l\'écoute' : 'Parler au micro' }}</span>
+              </button>
+
               @if (isSpeaking()) {
-                <div class="waveform-box">
-                  <span class="wave-bar bar-1"></span>
-                  <span class="wave-bar bar-2"></span>
-                  <span class="wave-bar bar-3"></span>
-                  <span class="wave-bar bar-4"></span>
-                  <span class="wave-bar bar-5"></span>
-                  <span class="wave-bar bar-6"></span>
-                  <span class="wave-bar bar-7"></span>
-                  <span class="wave-bar bar-8"></span>
+                <button type="button" class="btn-stop-audio" (click)="stopSpeaking()" title="Couper le son">
+                  <span class="material-icons">volume_off</span>
+                  <span>Couper la voix</span>
+                </button>
+              }
+            </div>
+
+            <div class="doctor-certif-card">
+              <span class="material-icons cert-icon">verified_user</span>
+              <p>Conseillère médicale conversationnelle multilingue (Français, Arabe, Darija, Anglais). Confidentialité HDS certifiée &bull; Service 100% illimité.</p>
+            </div>
+          </div>
+
+          <!-- Interactive Conversation Panel (Right) -->
+          <div class="doctor-dialog-panel">
+            <div class="dialog-messages-box" #dialogContainer>
+              @for (m of chatMessages(); track $index) {
+                <div class="dialog-msg-row" [class.msg-patient]="m.sender === 'patient'" [class.msg-doctor]="m.sender === 'doctor'">
+                  <div class="dialog-bubble">
+                    <div class="bubble-header-mini">
+                      <span class="sender-name">{{ m.sender === 'doctor' ? 'Dr. Sarah (Conseillère Médicale IA)' : 'Vous' }}</span>
+                      <span class="msg-time-mini">{{ m.time }}</span>
+                    </div>
+                    <p class="dialog-text">{{ m.text }}</p>
+                    @if (m.sender === 'doctor') {
+                      <button type="button" class="btn-replay-voice" (click)="speak(m.text)" title="Réécouter à voix haute">
+                        <span class="material-icons">volume_up</span> Réécouter
+                      </button>
+                    }
+                  </div>
                 </div>
               }
 
-              <!-- Doctor Voice Controls -->
-              <div class="vocal-controls-row">
-                <button type="button" class="btn-voice-talk" [class.listening]="isListening()" (click)="toggleVoiceRecognition()" title="Parler au micro">
-                  <span class="material-icons">{{ isListening() ? 'mic_off' : 'mic' }}</span>
-                  <span>{{ isListening() ? 'Arrêter l\'écoute' : 'Parler au micro' }}</span>
-                </button>
+              @if (loadingChatbot()) {
+                <div class="dialog-msg-row msg-doctor">
+                  <div class="dialog-bubble thinking-bubble">
+                    <div class="typing-indicator">
+                      <span></span><span></span><span></span>
+                    </div>
+                    <span class="thinking-text">Dr. Sarah prépare votre conseil médical personnalisé...</span>
+                  </div>
+                </div>
+              }
+            </div>
 
-                @if (isSpeaking()) {
-                  <button type="button" class="btn-stop-audio" (click)="stopSpeaking()" title="Couper le son">
-                    <span class="material-icons">volume_off</span>
-                    <span>Couper la voix</span>
+            <!-- Quick Prompt Chips -->
+            <div class="quick-prompts-row">
+              <span class="quick-hint">💡 Questions fréquentes :</span>
+              <div class="chips-scroll">
+                @for (q of quickQuestions; track q) {
+                  <button type="button" class="quick-chip-btn" (click)="askDoctor(q)">
+                    <span class="material-icons">chat</span> {{ q }}
                   </button>
                 }
               </div>
-
-              <div class="doctor-certif-card">
-                <span class="material-icons cert-icon">verified_user</span>
-                <p>Conseillère médicale conversationnelle multilingue (Français, Arabe, Darija, Anglais). Confidentialité HDS certifiée &bull; Service 100% illimité.</p>
-              </div>
             </div>
 
-            <!-- Interactive Conversation Panel (Right) -->
-            <div class="doctor-dialog-panel">
-              <div class="dialog-messages-box" #dialogContainer>
-                @for (m of chatMessages(); track $index) {
-                  <div class="dialog-msg-row" [class.msg-patient]="m.sender === 'patient'" [class.msg-doctor]="m.sender === 'doctor'">
-                    <div class="dialog-bubble">
-                      <div class="bubble-header-mini">
-                        <span class="sender-name">{{ m.sender === 'doctor' ? 'Dr. Sarah (Conseillère Médicale IA)' : 'Vous' }}</span>
-                        <span class="msg-time-mini">{{ m.time }}</span>
-                      </div>
-                      <p class="dialog-text">{{ m.text }}</p>
-                      @if (m.sender === 'doctor') {
-                        <button type="button" class="btn-replay-voice" (click)="speak(m.text)" title="Réécouter à voix haute">
-                          <span class="material-icons">volume_up</span> Réécouter
-                        </button>
-                      }
-                    </div>
-                  </div>
-                }
+            <!-- Input Composer -->
+            <div class="dialog-composer-box">
+              <input type="text" [(ngModel)]="chatInputText" (keydown.enter)="askDoctor()"
+                     placeholder="Posez votre question médicale ou utilisez le micro... (Entrée pour envoyer)"
+                     class="dialog-input">
+              
+              <button type="button" class="btn-composer-mic" [class.active-mic]="isListening()" (click)="toggleVoiceRecognition()" title="Parler au micro">
+                <span class="material-icons">{{ isListening() ? 'mic' : 'mic_none' }}</span>
+              </button>
 
-                @if (loadingChatbot()) {
-                  <div class="dialog-msg-row msg-doctor">
-                    <div class="dialog-bubble thinking-bubble">
-                      <div class="typing-indicator">
-                        <span></span><span></span><span></span>
-                      </div>
-                      <span class="thinking-text">Dr. Sarah prépare votre conseil médical personnalisé...</span>
-                    </div>
-                  </div>
-                }
-              </div>
-
-              <!-- Quick Prompt Chips -->
-              <div class="quick-prompts-row">
-                <span class="quick-hint">💡 Questions fréquentes :</span>
-                <div class="chips-scroll">
-                  @for (q of quickQuestions; track q) {
-                    <button type="button" class="quick-chip-btn" (click)="askDoctor(q)">
-                      <span class="material-icons">chat</span> {{ q }}
-                    </button>
-                  }
-                </div>
-              </div>
-
-              <!-- Input Composer -->
-              <div class="dialog-composer-box">
-                <input type="text" [(ngModel)]="chatInputText" (keydown.enter)="askDoctor()"
-                       placeholder="Posez votre question médicale ou utilisez le micro... (Entrée pour envoyer)"
-                       class="dialog-input">
-                
-                <button type="button" class="btn-composer-mic" [class.active-mic]="isListening()" (click)="toggleVoiceRecognition()" title="Parler au micro">
-                  <span class="material-icons">{{ isListening() ? 'mic' : 'mic_none' }}</span>
-                </button>
-
-                <button type="button" class="btn-composer-send" (click)="askDoctor()" [disabled]="!chatInputText.trim() || loadingChatbot()" title="Envoyer">
-                  <span class="material-icons">send</span>
-                </button>
-              </div>
-            </div>
-
-          </div>
-        } @else {
-          <!-- LIVEAVATAR STREAM MODE (WITH HELP BANNER IF CREDITS EXPIRED) -->
-          <div class="liveavatar-container">
-            <div class="credits-notice-banner">
-              <span class="material-icons notice-icon">info</span>
-              <div>
-                <strong>Flux Vidéo LiveAvatar Externe</strong>
-                <p>
-                  Ce flux dépend des crédits de la plateforme externe LiveAvatar. 
-                  Si le message <em>« Insufficient credits. Please ask the developer to check account balance »</em> s'affiche dans le lecteur, basculez simplement sur le 
-                  <a (click)="setDoctorMode('native')" style="color: #0077B6; font-weight: 800; cursor: pointer; text-decoration: underline;">
-                    Mode Vocal Sihati AI
-                  </a> 
-                  qui est 100% illimité et ne dépend d'aucun crédit !
-                </p>
-              </div>
-            </div>
-
-            <div class="avatar-frame-box">
-              <iframe id="doctorIframe"
-                      src="https://embed.liveavatar.com/v1/a310c6c3-b86d-4531-92a7-94c912c9614c?orientation=horizontal" 
-                      allow="camera; microphone; autoplay; encrypted-media; display-capture; fullscreen; geolocation" 
-                      allowfullscreen="true"
-                      loading="eager"
-                      referrerpolicy="no-referrer-when-downgrade"
-                      title="Médecin Virtuel Interactif - LiveAvatar"
-                      class="doctor-iframe">
-              </iframe>
-            </div>
-
-            <div class="interaction-hints-bar">
-              <div class="hint-tip">
-                <span class="material-icons">mic</span>
-                <span>Cliquez sur <strong>"Chat now"</strong> dans la vidéo puis autorisez votre microphone. Vous pouvez dialoguer en Français, en Arabe ou en Darija.</span>
-              </div>
+              <button type="button" class="btn-composer-send" (click)="askDoctor()" [disabled]="!chatInputText.trim() || loadingChatbot()" title="Envoyer">
+                <span class="material-icons">send</span>
+              </button>
             </div>
           </div>
-        }
+
+        </div>
 
       </div>
     }
@@ -968,36 +928,27 @@ interface OcrResult {
     color: #64748B;
   }
 
-  .mode-switch-capsule {
-    display: flex;
-    background: #F1F5F9;
-    padding: 4px;
-    border-radius: 12px;
-    gap: 4px;
-  }
-
-  .mode-switch-btn {
+  .unlimited-badge-capsule {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: transparent;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 10px;
+    gap: 8px;
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+    color: #065F46;
+    padding: 8px 16px;
+    border-radius: 20px;
     font-size: 12px;
     font-weight: 700;
-    color: #64748B;
-    cursor: pointer;
-    transition: all 0.2s ease;
   }
 
-  .mode-switch-btn.active {
-    background: linear-gradient(135deg, #0077B6, #0096C7);
-    color: #FFFFFF;
-    box-shadow: 0 2px 8px rgba(0, 119, 182, 0.25);
+  .badge-dot-live {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10B981;
+    box-shadow: 0 0 8px #10B981;
+    animation: beacon 1.5s infinite;
   }
-
-  .mode-switch-btn .material-icons { font-size: 16px; }
 
   /* Native Doctor Grid */
   .native-doctor-grid {
@@ -1069,11 +1020,26 @@ interface OcrResult {
     color: #FFFFFF;
     box-shadow: 0 8px 24px rgba(0, 119, 182, 0.3);
     z-index: 2;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .doctor-portrait-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    z-index: 2;
   }
 
   .doctor-big-avatar {
     font-size: 64px;
     color: #FFFFFF;
+  }
+
+  .fallback-avatar {
+    position: absolute;
+    z-index: 1;
   }
 
   .doctor-live-tag {
@@ -1437,80 +1403,7 @@ interface OcrResult {
     cursor: not-allowed;
   }
 
-  /* LiveAvatar Stream Container & Notice */
-  .liveavatar-container {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
 
-  .credits-notice-banner {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    background: #EFF6FF;
-    border: 1px solid #BFDBFE;
-    border-radius: 14px;
-    padding: 14px 18px;
-  }
-
-  .credits-notice-banner .notice-icon {
-    font-size: 24px;
-    color: #2563EB;
-    margin-top: 1px;
-    flex-shrink: 0;
-  }
-
-  .credits-notice-banner strong {
-    font-size: 13px;
-    color: #1E3A8A;
-    display: block;
-    margin-bottom: 2px;
-  }
-
-  .credits-notice-banner p {
-    font-size: 12.5px;
-    color: #1E40AF;
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  .avatar-frame-box {
-    position: relative;
-    border-radius: 20px;
-    overflow: hidden;
-    background: #0B1120;
-    width: 100%;
-    aspect-ratio: 16/9;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.16);
-    border: 1px solid rgba(0, 119, 182, 0.2);
-    margin-bottom: 14px;
-  }
-
-  .doctor-iframe {
-    width: 100%;
-    height: 100%;
-    display: block;
-    border: none;
-  }
-
-  .interaction-hints-bar {
-    background: #F0FDF4;
-    border: 1px solid #BBF7D0;
-    border-radius: 12px;
-    padding: 12px 18px;
-    margin-bottom: 20px;
-  }
-
-  .hint-tip {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #166534;
-    font-size: 13px;
-  }
-
-  .hint-tip .material-icons { font-size: 20px; }
 
   .quick-prompts-block {
     background: #F8FAFD;
@@ -1940,7 +1833,6 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     "Quels sont les signaux d'alerte cardiovasculaires majeurs ?"
   ];
 
-  doctorMode     = signal<'native' | 'liveavatar'>('native');
   isListening    = signal<boolean>(false);
   isSpeaking     = signal<boolean>(false);
   loadingChatbot = signal<boolean>(false);
@@ -1986,12 +1878,7 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     this.activeTab.set(tab);
   }
 
-  reloadDoctorIframe() {
-    const iframe = document.getElementById('doctorIframe') as HTMLIFrameElement;
-    if (iframe) {
-      iframe.src = 'https://embed.liveavatar.com/v1/a310c6c3-b86d-4531-92a7-94c912c9614c?orientation=horizontal&t=' + Date.now();
-    }
-  }
+
 
   loadAnamAvatar() {
     this.avatarConnected.set(false);
@@ -2065,13 +1952,7 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     this.avatarConnected.set(false);
   }
 
-  setDoctorMode(mode: 'native' | 'liveavatar') {
-    this.doctorMode.set(mode);
-    if (mode === 'liveavatar') {
-      this.stopSpeaking();
-      this.stopVoiceRecognition();
-    }
-  }
+
 
   toggleVoiceRecognition() {
     if (this.isListening()) {

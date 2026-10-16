@@ -86,9 +86,12 @@ import { Medication } from '../../core/models/medication.model';
             }
           </div>
         } @else {
-          <div class="empty-state" style="padding: 40px 0;">
-            <span class="material-icons" style="font-size:48px;">medication</span>
-            <p>Aucun médicament enregistré pour le moment.</p>
+          <div class="empty-state" style="padding: 48px 20px; text-align: center; background: #F8FAFC; border: 2px dashed #E2E8F0; border-radius: 12px;">
+            <span class="material-icons" style="font-size: 56px; color: #94A3B8; margin-bottom: 8px;">medication</span>
+            <p style="font-size: 16px; font-weight: 700; color: #334155; margin: 4px 0;">Aucun médicament enregistré pour le moment</p>
+            <p style="font-size: 13px; color: #64748B; max-width: 380px; margin: 0 auto;">
+              Votre carnet de traitement est vide. Remplissez le formulaire ci-contre pour ajouter un médicament ou numérisez votre ordonnance dans l'onglet <strong>Analyse IA &amp; OCR</strong>.
+            </p>
           </div>
         }
       </div>
@@ -120,8 +123,8 @@ export class MedicationsComponent implements OnInit {
 
   loadMedications() {
     this.medService.getMedications().subscribe({
-      next: data => this.medications.set(data),
-      error: () => {}
+      next: data => this.medications.set(data || []),
+      error: () => this.medications.set(this.medService.getLocalMeds())
     });
   }
 
