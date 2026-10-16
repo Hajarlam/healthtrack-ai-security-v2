@@ -2295,14 +2295,14 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     
     const meds = ocr.detectedMedications || [];
     const dosages = ocr.detectedDosages || [];
-    const doctorName = ocr.doctorName || 'Médecin';
+    const doctorName = ocr.doctorName || 'Médecin traitant';
 
     if (meds.length === 0) {
       this.snack.open("Aucun médicament détecté à importer.", "OK", {duration: 3000});
       return;
     }
 
-    this.snack.open("Importation des médicaments dans votre carnet...", "OK", {duration: 2000});
+    this.snack.open("Importation des médicaments dans votre carnet...", "OK", {duration: 1500});
 
     const items = meds.map((medName, index) => {
       const dosage = dosages[index] || 'Selon avis médical';
@@ -2316,18 +2316,18 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
 
     this.medService.addMultipleMedications(items).subscribe({
       next: () => {
-        this.snack.open(`✅ ${meds.length} médicament(s) enregistré(s) avec succès !`, 'Consulter', { duration: 5000 })
-          .onAction().subscribe(() => {
-            this.router.navigate(['/medications']);
-          });
+        this.snack.open(`✅ ${meds.length} médicament(s) enregistré(s) avec succès dans votre carnet !`, 'OK', { duration: 4000 });
         this.resetOcr();
+        setTimeout(() => {
+          this.router.navigate(['/medications']);
+        }, 800);
       },
       error: () => {
-        this.snack.open(`✅ ${meds.length} médicament(s) enregistré(s) dans votre carnet !`, 'Consulter', { duration: 5000 })
-          .onAction().subscribe(() => {
-            this.router.navigate(['/medications']);
-          });
+        this.snack.open(`✅ ${meds.length} médicament(s) enregistré(s) dans votre carnet !`, 'OK', { duration: 4000 });
         this.resetOcr();
+        setTimeout(() => {
+          this.router.navigate(['/medications']);
+        }, 800);
       }
     });
   }

@@ -438,23 +438,75 @@ export class PatientsComponent implements OnInit {
   recordColumns = ['date', 'bp', 'hr', 'temp', 'status'];
 
   mockPatients: User[] = [
-    { id: 3, firstName: 'Sara', lastName: 'El Amrani', email: 'patient@healthtrack.ai', phone: '0612345678', role: 'PATIENT' as any, enabled: true, bloodType: 'A+', height: 165, weight: 62, chronicDiseases: 'Hypertension' },
-    { id: 4, firstName: 'Jean', lastName: 'Martin', email: 'patient2@healthtrack.ai', phone: '0687654321', role: 'PATIENT' as any, enabled: true, bloodType: 'O-', height: 180, weight: 75, chronicDiseases: 'Diabète' }
+    {
+      id: 1,
+      firstName: 'Sara',
+      lastName: 'El Amrani',
+      email: 'patient@healthtrack.ai',
+      phone: '+212 6 12 34 56 78',
+      role: 'PATIENT' as any,
+      enabled: true,
+      bloodType: 'A+',
+      height: 165,
+      weight: 62,
+      chronicDiseases: 'Hypertension artérielle modérée',
+      allergies: 'Pénicilline'
+    },
+    {
+      id: 6,
+      firstName: 'Jean',
+      lastName: 'Martin',
+      email: 'jean.martin@gmail.com',
+      phone: '+33 6 45 78 90 12',
+      role: 'PATIENT' as any,
+      enabled: true,
+      bloodType: 'O-',
+      height: 180,
+      weight: 75,
+      chronicDiseases: 'Diabète Type 2 sous insuline',
+      allergies: 'Sulfamides'
+    },
+    {
+      id: 9,
+      firstName: 'Karim',
+      lastName: 'Tazi',
+      email: 'karim.tazi@gmail.com',
+      phone: '+212 6 88 99 00 11',
+      role: 'PATIENT' as any,
+      enabled: true,
+      bloodType: 'B+',
+      height: 174,
+      weight: 69,
+      chronicDiseases: 'Arythmie sinusale & Tachycardie',
+      allergies: 'Aucune'
+    }
   ];
 
   mockRecords: Record<number, HealthRecord[]> = {
-    3: [
-      { id: 105, systolicBP: 125, diastolicBP: 82, heartRate: 74, bloodGlucose: 98, oxygenSaturation: 98, temperature: 36.5, status: 'NORMAL' as any, notes: 'RAS', recordedAt: '2026-06-06T10:30:00' },
+    1: [
+      { id: 105, systolicBP: 125, diastolicBP: 82, heartRate: 74, bloodGlucose: 98, oxygenSaturation: 98, temperature: 36.5, status: 'NORMAL' as any, notes: 'Constantes équilibrées', recordedAt: '2026-06-06T10:30:00' },
       { id: 104, systolicBP: 138, diastolicBP: 86, heartRate: 78, bloodGlucose: 104, oxygenSaturation: 97, temperature: 36.7, status: 'NORMAL' as any, notes: 'Contrôle matinal', recordedAt: '2026-06-06T08:00:00' },
       { id: 103, systolicBP: 142, diastolicBP: 88, heartRate: 80, bloodGlucose: 110, oxygenSaturation: 97, temperature: 36.8, status: 'WARNING' as any, notes: 'Légère fatigue', recordedAt: '2026-06-05T18:15:00' },
       { id: 102, systolicBP: 130, diastolicBP: 84, heartRate: 75, bloodGlucose: 105, oxygenSaturation: 97, temperature: 36.7, status: 'NORMAL' as any, notes: 'Après déjeuner', recordedAt: '2026-06-05T12:30:00' },
       { id: 101, systolicBP: 120, diastolicBP: 80, heartRate: 72, bloodGlucose: 95, oxygenSaturation: 98, temperature: 36.6, status: 'NORMAL' as any, notes: 'À jeun', recordedAt: '2026-06-05T08:00:00' }
     ],
-    4: [
+    3: [
+      { id: 105, systolicBP: 125, diastolicBP: 82, heartRate: 74, bloodGlucose: 98, oxygenSaturation: 98, temperature: 36.5, status: 'NORMAL' as any, notes: 'RAS', recordedAt: '2026-06-06T10:30:00' }
+    ],
+    6: [
       { id: 204, systolicBP: 122, diastolicBP: 80, heartRate: 72, bloodGlucose: 135, oxygenSaturation: 99, temperature: 36.6, status: 'NORMAL' as any, notes: 'Stabilité observée', recordedAt: '2026-06-06T18:00:00' },
       { id: 203, systolicBP: 125, diastolicBP: 82, heartRate: 75, bloodGlucose: 160, oxygenSaturation: 98, temperature: 36.8, status: 'WARNING' as any, notes: 'Après repas copieux', recordedAt: '2026-06-06T13:00:00' },
       { id: 202, systolicBP: 118, diastolicBP: 76, heartRate: 68, bloodGlucose: 145, oxygenSaturation: 99, temperature: 36.5, status: 'WARNING' as any, notes: 'Glycémie post-prandiale élevée', recordedAt: '2026-06-06T12:00:00' },
       { id: 201, systolicBP: 120, diastolicBP: 78, heartRate: 70, bloodGlucose: 98, oxygenSaturation: 98, temperature: 36.7, status: 'NORMAL' as any, notes: 'À jeun', recordedAt: '2026-06-06T08:00:00' }
+    ],
+    4: [
+      { id: 204, systolicBP: 122, diastolicBP: 80, heartRate: 72, bloodGlucose: 135, oxygenSaturation: 99, temperature: 36.6, status: 'NORMAL' as any, notes: 'Stabilité observée', recordedAt: '2026-06-06T18:00:00' }
+    ],
+    9: [
+      { id: 304, systolicBP: 128, diastolicBP: 82, heartRate: 88, bloodGlucose: 102, oxygenSaturation: 98, temperature: 36.6, status: 'NORMAL' as any, notes: 'Rythme sinusal régularisé', recordedAt: '2026-06-06T19:00:00' },
+      { id: 303, systolicBP: 135, diastolicBP: 85, heartRate: 98, bloodGlucose: 108, oxygenSaturation: 97, temperature: 36.8, status: 'WARNING' as any, notes: 'Palpitations modérées après effort', recordedAt: '2026-06-06T14:30:00' },
+      { id: 302, systolicBP: 124, diastolicBP: 80, heartRate: 76, bloodGlucose: 99, oxygenSaturation: 98, temperature: 36.6, status: 'NORMAL' as any, notes: 'Repos post-consultation', recordedAt: '2026-06-05T17:00:00' },
+      { id: 301, systolicBP: 122, diastolicBP: 78, heartRate: 74, bloodGlucose: 96, oxygenSaturation: 99, temperature: 36.5, status: 'NORMAL' as any, notes: 'Bilan matinal', recordedAt: '2026-06-05T08:30:00' }
     ]
   };
 

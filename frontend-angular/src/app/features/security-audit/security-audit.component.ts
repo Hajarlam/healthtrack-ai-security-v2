@@ -28,12 +28,15 @@ interface AuditLog {
           <h1 class="page-title" style="margin: 0 0 6px; font-weight: 800; color: #023E58;">🛡️ Audit de Sécurité & Traçabilité HDS</h1>
           <p style="margin: 0; color: #64748B; font-size: 13.5px;">Journal d'audit cryptographique et détection d'intrusions (Conforme CNDP &amp; HDS)</p>
         </div>
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
           <button mat-stroked-button (click)="loadLogs()" style="border-radius: 10px; color: #0077B6;">
             <mat-icon>refresh</mat-icon> Actualiser
           </button>
+          <button mat-raised-button (click)="exportAuditPdf()" style="border-radius: 10px; background: #0284C7; color: white;">
+            <mat-icon>picture_as_pdf</mat-icon> Exporter en PDF
+          </button>
           <button mat-raised-button color="primary" (click)="exportAuditReport()" style="border-radius: 10px; background: #0077B6;">
-            <mat-icon>file_download</mat-icon> Exporter le Journal
+            <mat-icon>file_download</mat-icon> Exporter JSON
           </button>
         </div>
       </div>
@@ -230,6 +233,98 @@ export class SecurityAuditComponent implements OnInit {
     return this.logs().filter(l => l.status === 'FAILED').length;
   }
 
+  exportAuditPdf() {
+    const list = this.logs();
+    const now = new Date().toLocaleString('fr-FR');
+    const rows = list.map(l => `
+      <tr>
+        <td style="white-space:nowrap;">${new Date(l.timestamp).toLocaleString('fr-FR')}</td>
+        <td><strong>${l.userEmail}</strong></td>
+        <td>${l.action}</td>
+        <td><code>${l.ipAddress}</code></td>
+        <td><span style="color:${l.status === 'SUCCESS' ? '#166534' : '#DC2626'}; font-weight:700;">${l.status === 'SUCCESS' ? '✓ SUCCÈS' : '✕ BLOQUÉ'}</span></td>
+      </tr>
+    `).join('');
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Journal d'Audit de Sécurité - Sihati.ai</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0F172A; padding: 32px; margin: 0; }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0077B6; padding-bottom: 16px; margin-bottom: 24px; }
+          .title { font-size: 22px; font-weight: 800; color: #023E58; margin: 0; }
+          .sub { font-size: 13px; color: #64748B; margin-top: 4px; }
+          .badge { background: #E0F2FE; color: #0077B6; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; border: 1px solid #BAE6FD; }
+          table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px; }
+          th { background: #F1F5F9; text-align: left; padding: 10px 12px; border: 1px solid #CBD5E1; color: #1E293B; font-weight: 700; }
+          td { padding: 8px 12px; border: 1px solid #E2E8F0; }
+          tr:nth-child(even) { background: #F8FAFC; }
+          code { background: #F1F5F9; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+          .legal-footer { margin-top: 36px; padding: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 11px; color: #64748B; line-height: 1.6; }
+          @media print {
+            body { padding: 16px; }
+            @page { margin: 1cm; size: landscape; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1 class="title">JOURNAL D'AUDIT DE SÉCURITÉ &amp; TRAÇABILITÉ HDS</h1>
+            <p class="sub">Plateforme Sihati.ai / HealthTrack AI Security V2 &bull; Horodatage UTC &bull; Généré le ${now}</p>
+          </div>
+          <span class="badge">TRAÇABILITÉ IMMUABLE</span>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Horodatage</th>
+              <th>Utilisateur / Source</th>
+              <th>Action Réalisée</th>
+              <th>Adresse IP</th>
+              <th>Résultat</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+
+        <div class="legal-footer">
+          <strong>Certification de non-répudiation et intégrité :</strong> Les entrées d'audit ci-dessus sont scellées cryptographiquement. Tout accès aux dossiers médicaux partagés est consigné conformément aux exigences HDS (Hébergement de Données de Santé) et au guide de sécurité de l'ANSSI / CNDP.
+        </div>
+
+        <script>
+          window.onload = function() {
+            setTimeout(function() { window.print(); }, 400);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    const printWin = window.open('', '_blank');
+    if (printWin) {
+      printWin.document.open();
+      printWin.document.write(html);
+      printWin.document.close();
+      this.snack.open("📄 Journal d'audit généré en PDF !", "OK", { duration: 4000 });
+    } else {
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `rapport_securite_audit_${Date.now()}.html`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      this.snack.open("📄 Journal d'audit téléchargé !", "OK", { duration: 4000 });
+    }
+  }
+
   exportAuditReport() {
     const dataStr = JSON.stringify(this.logs(), null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
@@ -239,7 +334,7 @@ export class SecurityAuditComponent implements OnInit {
     a.download = `sihati_security_audit_trail_${Date.now()}.json`;
     a.click();
     window.URL.revokeObjectURL(url);
-    this.snack.open("✅ Journal d'audit téléchargé avec succès !", "OK", { duration: 3000 });
+    this.snack.open("✅ Journal d'audit (JSON) téléchargé avec succès !", "OK", { duration: 3000 });
   }
 
   public getLocalLogs(): AuditLog[] {

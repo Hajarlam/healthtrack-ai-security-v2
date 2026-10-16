@@ -113,6 +113,33 @@ export class UserService {
   }
 
   public getLocalUsers(): User[] {
+    const defaultPatientDetails: Record<string, Partial<User>> = {
+      'patient@healthtrack.ai': {
+        phone: '+212 6 12 34 56 78',
+        chronicDiseases: 'Hypertension artérielle modérée',
+        bloodType: 'A+',
+        height: 165,
+        weight: 62,
+        allergies: 'Pénicilline'
+      },
+      'jean.martin@gmail.com': {
+        phone: '+33 6 45 78 90 12',
+        chronicDiseases: 'Diabète Type 2 sous insuline',
+        bloodType: 'O-',
+        height: 180,
+        weight: 75,
+        allergies: 'Sulfamides'
+      },
+      'karim.tazi@gmail.com': {
+        phone: '+212 6 88 99 00 11',
+        chronicDiseases: 'Arythmie sinusale & Tachycardie',
+        bloodType: 'B+',
+        height: 174,
+        weight: 69,
+        allergies: 'Aucune'
+      }
+    };
+
     try {
       const data = localStorage.getItem(this.USERS_STORAGE_KEY);
       if (data) {
@@ -126,6 +153,25 @@ export class UserService {
               merged.push(d);
             }
           }
+
+          // Backfill missing phone and chronicDiseases for known patients
+          let modified = false;
+          for (const u of merged) {
+            const key = u.email?.toLowerCase();
+            if (key && defaultPatientDetails[key]) {
+              const def = defaultPatientDetails[key];
+              if (!u.phone) { u.phone = def.phone; modified = true; }
+              if (!u.chronicDiseases) { u.chronicDiseases = def.chronicDiseases; modified = true; }
+              if (!u.bloodType) { u.bloodType = def.bloodType; modified = true; }
+              if (!u.height) { u.height = def.height; modified = true; }
+              if (!u.weight) { u.weight = def.weight; modified = true; }
+              if (!u.allergies) { u.allergies = def.allergies; modified = true; }
+            }
+          }
+          if (modified) {
+            this.saveLocalUsers(merged);
+          }
+
           return merged;
         }
       }
@@ -138,6 +184,12 @@ export class UserService {
         lastName: 'El Amrani',
         email: 'patient@healthtrack.ai',
         role: 'PATIENT' as any,
+        phone: '+212 6 12 34 56 78',
+        chronicDiseases: 'Hypertension artérielle modérée',
+        bloodType: 'A+',
+        height: 165,
+        weight: 62,
+        allergies: 'Pénicilline',
         enabled: true
       },
       {
@@ -146,6 +198,7 @@ export class UserService {
         lastName: 'Bennani',
         email: 'doctor@healthtrack.ai',
         role: 'DOCTOR' as any,
+        phone: '+212 5 37 77 00 11',
         specialization: 'Cardiologie & Hypertension Artérielle',
         hospital: 'CHU Ibn Sina - Rabat',
         enabled: true
@@ -156,6 +209,7 @@ export class UserService {
         lastName: 'HealthTrack',
         email: 'admin@healthtrack.ai',
         role: 'ADMIN' as any,
+        phone: '+212 5 37 60 00 00',
         enabled: true
       },
       {
@@ -164,6 +218,7 @@ export class UserService {
         lastName: 'Urgentiste',
         email: 'emergency@healthtrack.ai',
         role: 'EMERGENCY' as any,
+        phone: '+212 5 37 15 15 15',
         hospital: 'SAMU Urgences Métropolitain',
         enabled: true
       },
@@ -173,6 +228,7 @@ export class UserService {
         lastName: 'Alaoui',
         email: 'leila.alaoui@healthtrack.ai',
         role: 'DOCTOR' as any,
+        phone: '+212 5 22 45 67 89',
         specialization: 'Médecine Générale & Suivi Chronique',
         hospital: 'Clinique Internationale - Casablanca',
         enabled: true
@@ -183,6 +239,12 @@ export class UserService {
         lastName: 'Martin',
         email: 'jean.martin@gmail.com',
         role: 'PATIENT' as any,
+        phone: '+33 6 45 78 90 12',
+        chronicDiseases: 'Diabète Type 2 sous insuline',
+        bloodType: 'O-',
+        height: 180,
+        weight: 75,
+        allergies: 'Sulfamides',
         enabled: true
       },
       {
@@ -191,6 +253,7 @@ export class UserService {
         lastName: 'Amrani',
         email: 'youssef.amrani@healthtrack.ai',
         role: 'DOCTOR' as any,
+        phone: '+212 5 37 71 22 33',
         specialization: 'Endocrinologie & Diabétologie',
         hospital: 'Hôpital Militaire - Rabat',
         enabled: true
@@ -201,6 +264,7 @@ export class UserService {
         lastName: 'El Idrissi',
         email: 'fz.idrissi@healthtrack.ai',
         role: 'DOCTOR' as any,
+        phone: '+212 5 35 61 88 99',
         specialization: 'Pneumologie & Allergologie',
         hospital: 'CHU Hassan II - Fès',
         enabled: true
@@ -211,6 +275,12 @@ export class UserService {
         lastName: 'Tazi',
         email: 'karim.tazi@gmail.com',
         role: 'PATIENT' as any,
+        phone: '+212 6 88 99 00 11',
+        chronicDiseases: 'Arythmie sinusale & Tachycardie',
+        bloodType: 'B+',
+        height: 174,
+        weight: 69,
+        allergies: 'Aucune',
         enabled: true
       }
     ];
@@ -234,9 +304,17 @@ export class UserService {
       firstName: user.firstName || 'Nouvel',
       lastName: user.lastName || 'Utilisateur',
       email: user.email || '',
+      phone: user.phone || '',
       role: (user.role || 'PATIENT') as any,
+      bloodType: user.bloodType,
+      height: user.height,
+      weight: user.weight,
+      allergies: user.allergies,
+      chronicDiseases: user.chronicDiseases,
       specialization: user.specialization,
       hospital: user.hospital,
+      emergencyContact: user.emergencyContact,
+      emergencyPhone: user.emergencyPhone,
       enabled: user.enabled !== undefined ? user.enabled : true
     };
 
