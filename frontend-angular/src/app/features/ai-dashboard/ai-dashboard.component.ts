@@ -185,7 +185,7 @@ interface OcrResult {
       }
     }
 
-    <!-- ==================== 7.2 CONSEILLER VIRTUEL AI (NATIVE DOCTOR + LIVEAVATAR) ==================== -->
+    <!-- ==================== 7.2 DR. VIRTUEL — MÉDECIN CONSEILLER INTERACTIF ==================== -->
     @if (activeTab() === 'chatbot') {
       <div class="studio-card">
         
@@ -194,141 +194,139 @@ interface OcrResult {
           <div class="studio-title-block">
             <span class="material-icons studio-icon">medical_services</span>
             <div>
-              <h2>Dr. Sarah — Médecin Conseiller Vocal &amp; Interactif</h2>
-              <span class="studio-subtitle">Consultation vocale et textuelle en direct &bull; IA médicale multilingue &bull; 100% Illimité &amp; Gratuit</span>
+              <h2>Dr. Virtuel — Médecin Conseiller Interactif</h2>
+              <span class="studio-subtitle">Consultation vocale &amp; visuelle en temps réel avec IA médicale multilingue</span>
             </div>
           </div>
 
-          <div class="unlimited-badge-capsule">
-            <span class="badge-dot-live"></span>
-            <span class="badge-text">IA Clinique Vocale Active</span>
+          <div class="studio-actions">
+            <!-- Language Badges -->
+            <div class="lang-pills">
+              <span class="lang-badge" [class.active]="selectedLang === 'FR'" (click)="setLang('FR')">FR</span>
+              <span class="lang-badge" [class.active]="selectedLang === 'AR'" (click)="setLang('AR')">العربية</span>
+              <span class="lang-badge" [class.active]="selectedLang === 'EN'" (click)="setLang('EN')">EN</span>
+              <span class="lang-badge" [class.active]="selectedLang === 'DAR'" (click)="setLang('DAR')">الدارجة</span>
+            </div>
+
+            <a href="https://embed.liveavatar.com/v1/a310c6c3-b86d-4531-92a7-94c912c9614c?orientation=horizontal" 
+               target="_blank" class="btn-fullscreen">
+              <span class="material-icons">open_in_new</span> Plein Écran
+            </a>
+            <button (click)="reloadDoctorIframe()" class="btn-reload" title="Recharger la vidéo">
+              <span class="material-icons">refresh</span>
+            </button>
           </div>
         </div>
 
-        <!-- NATIVE AI DOCTOR WITH VOCAL & VISUAL CHAT -->
-        <div class="native-doctor-grid">
-          
-          <!-- Visual Doctor Stage (Left/Top) -->
-          <div class="doctor-visual-stage">
-            <div class="avatar-portrait-wrap">
-              <!-- Glowing beacon ring and pulse wave -->
-              <div class="avatar-glow-ring" [class.pulse-speaking]="isSpeaking()" [class.pulse-listening]="isListening()"></div>
-              
-              <!-- Doctor Avatar Visual -->
-              <div class="doctor-avatar-circle">
-                <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80" 
-                     alt="Dr. Sarah" 
-                     class="doctor-portrait-img"
-                     onerror="this.style.display='none'">
-                <span class="material-icons doctor-big-avatar fallback-avatar">support_agent</span>
-              </div>
+        <!-- Video Frame Container (LiveAvatar Original) -->
+        <div class="avatar-frame-box">
+          <iframe id="doctorIframe"
+                  src="https://embed.liveavatar.com/v1/a310c6c3-b86d-4531-92a7-94c912c9614c?orientation=horizontal" 
+                  allow="camera; microphone; autoplay; encrypted-media; display-capture; fullscreen; geolocation" 
+                  allowfullscreen="true"
+                  loading="eager"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  title="Dr. Virtuel — Médecin Conseiller Interactif - LiveAvatar"
+                  class="doctor-iframe">
+          </iframe>
+        </div>
 
-              <!-- Live Status Beacon -->
-              <div class="doctor-live-tag" [class.tag-speaking]="isSpeaking()" [class.tag-listening]="isListening()">
-                <span class="live-dot"></span>
+        <!-- Section Consultation Écrite & Réponse Orale par l'IA -->
+        <div class="consultation-chat-station">
+          
+          <!-- Live Audio / Speech Status Banner -->
+          <div class="consult-status-banner" [class.speaking]="isSpeaking()" [class.listening]="isListening()">
+            <div class="status-left">
+              <span class="material-icons status-icon">
+                {{ isSpeaking() ? 'record_voice_over' : isListening() ? 'mic' : 'support_agent' }}
+              </span>
+              <div class="status-text">
                 @if (isSpeaking()) {
-                  <span>🔊 Dr. Sarah parle en direct...</span>
+                  <span class="status-title">🔊 Dr. Virtuel vous répond à voix haute...</span>
+                  <span class="status-sub">Écoutez les conseils médicaux oraux en direct</span>
                 } @else if (isListening()) {
-                  <span>🎙️ Écoute de votre voix en cours...</span>
+                  <span class="status-title">🎙️ Écoute de votre voix en cours...</span>
+                  <span class="status-sub">Parlez dans votre microphone, le texte s'écrira automatiquement</span>
                 } @else {
-                  <span>🟢 Dr. Sarah &bull; Médecin IA En ligne</span>
+                  <span class="status-title">💬 Consultation Interactive &amp; Réponse Orale par l'IA</span>
+                  <span class="status-sub">Écrivez un message ou parlez au micro — le médecin virtuel vous répond par écrit et à voix haute</span>
                 }
               </div>
             </div>
 
-            <!-- Audio Waveform Visualizer (Active when speaking) -->
             @if (isSpeaking()) {
-              <div class="waveform-box">
-                <span class="wave-bar bar-1"></span>
-                <span class="wave-bar bar-2"></span>
-                <span class="wave-bar bar-3"></span>
-                <span class="wave-bar bar-4"></span>
-                <span class="wave-bar bar-5"></span>
-                <span class="wave-bar bar-6"></span>
-                <span class="wave-bar bar-7"></span>
-                <span class="wave-bar bar-8"></span>
+              <div class="waveform-wrap">
+                <div class="mini-waveform">
+                  <span class="wave-bar bar-1"></span>
+                  <span class="wave-bar bar-2"></span>
+                  <span class="wave-bar bar-3"></span>
+                  <span class="wave-bar bar-4"></span>
+                  <span class="wave-bar bar-5"></span>
+                  <span class="wave-bar bar-6"></span>
+                </div>
+                <button type="button" class="btn-stop-audio-mini" (click)="stopSpeaking()" title="Couper le son">
+                  <span class="material-icons">volume_off</span> Arrêter la voix
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- Dialogue Messages Area -->
+          <div class="dialog-messages-box" #dialogContainer>
+            @for (m of chatMessages(); track $index) {
+              <div class="dialog-msg-row" [class.msg-patient]="m.sender === 'patient'" [class.msg-doctor]="m.sender === 'doctor'">
+                <div class="dialog-bubble">
+                  <div class="bubble-header-mini">
+                    <span class="sender-name">{{ m.sender === 'doctor' ? 'Dr. Virtuel (Médecin IA)' : 'Vous' }}</span>
+                    <span class="msg-time-mini">{{ m.time }}</span>
+                  </div>
+                  <p class="dialog-text">{{ m.text }}</p>
+                  @if (m.sender === 'doctor') {
+                    <button type="button" class="btn-replay-voice" (click)="speak(m.text)" title="Réécouter à voix haute">
+                      <span class="material-icons">volume_up</span> Réécouter à voix haute
+                    </button>
+                  }
+                </div>
               </div>
             }
 
-            <!-- Doctor Voice Controls -->
-            <div class="vocal-controls-row">
-              <button type="button" class="btn-voice-talk" [class.listening]="isListening()" (click)="toggleVoiceRecognition()" title="Parler au micro">
-                <span class="material-icons">{{ isListening() ? 'mic_off' : 'mic' }}</span>
-                <span>{{ isListening() ? 'Arrêter l\'écoute' : 'Parler au micro' }}</span>
-              </button>
+            @if (loadingChatbot()) {
+              <div class="dialog-msg-row msg-doctor">
+                <div class="dialog-bubble thinking-bubble">
+                  <div class="typing-indicator">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <span class="thinking-text">Dr. Virtuel prépare votre conseil médical oral...</span>
+                </div>
+              </div>
+            }
+          </div>
 
-              @if (isSpeaking()) {
-                <button type="button" class="btn-stop-audio" (click)="stopSpeaking()" title="Couper le son">
-                  <span class="material-icons">volume_off</span>
-                  <span>Couper la voix</span>
+          <!-- Quick Suggestion Prompts -->
+          <div class="quick-prompts-row">
+            <span class="quick-hint">💡 Questions fréquentes rapides :</span>
+            <div class="chips-scroll">
+              @for (q of quickQuestions; track q) {
+                <button type="button" class="quick-chip-btn" (click)="askDoctor(q)">
+                  <span class="material-icons">chat</span> {{ q }}
                 </button>
               }
             </div>
-
-            <div class="doctor-certif-card">
-              <span class="material-icons cert-icon">verified_user</span>
-              <p>Conseillère médicale conversationnelle multilingue (Français, Arabe, Darija, Anglais). Confidentialité HDS certifiée &bull; Service 100% illimité.</p>
-            </div>
           </div>
 
-          <!-- Interactive Conversation Panel (Right) -->
-          <div class="doctor-dialog-panel">
-            <div class="dialog-messages-box" #dialogContainer>
-              @for (m of chatMessages(); track $index) {
-                <div class="dialog-msg-row" [class.msg-patient]="m.sender === 'patient'" [class.msg-doctor]="m.sender === 'doctor'">
-                  <div class="dialog-bubble">
-                    <div class="bubble-header-mini">
-                      <span class="sender-name">{{ m.sender === 'doctor' ? 'Dr. Sarah (Conseillère Médicale IA)' : 'Vous' }}</span>
-                      <span class="msg-time-mini">{{ m.time }}</span>
-                    </div>
-                    <p class="dialog-text">{{ m.text }}</p>
-                    @if (m.sender === 'doctor') {
-                      <button type="button" class="btn-replay-voice" (click)="speak(m.text)" title="Réécouter à voix haute">
-                        <span class="material-icons">volume_up</span> Réécouter
-                      </button>
-                    }
-                  </div>
-                </div>
-              }
+          <!-- Message Composer Bar -->
+          <div class="dialog-composer-box">
+            <input type="text" [(ngModel)]="chatInputText" (keydown.enter)="askDoctor()"
+                   placeholder="Écrivez votre message pour le Dr. Virtuel... (Entrée pour envoyer)"
+                   class="dialog-input">
+            
+            <button type="button" class="btn-composer-mic" [class.active-mic]="isListening()" (click)="toggleVoiceRecognition()" title="Parler au micro">
+              <span class="material-icons">{{ isListening() ? 'mic' : 'mic_none' }}</span>
+            </button>
 
-              @if (loadingChatbot()) {
-                <div class="dialog-msg-row msg-doctor">
-                  <div class="dialog-bubble thinking-bubble">
-                    <div class="typing-indicator">
-                      <span></span><span></span><span></span>
-                    </div>
-                    <span class="thinking-text">Dr. Sarah prépare votre conseil médical personnalisé...</span>
-                  </div>
-                </div>
-              }
-            </div>
-
-            <!-- Quick Prompt Chips -->
-            <div class="quick-prompts-row">
-              <span class="quick-hint">💡 Questions fréquentes :</span>
-              <div class="chips-scroll">
-                @for (q of quickQuestions; track q) {
-                  <button type="button" class="quick-chip-btn" (click)="askDoctor(q)">
-                    <span class="material-icons">chat</span> {{ q }}
-                  </button>
-                }
-              </div>
-            </div>
-
-            <!-- Input Composer -->
-            <div class="dialog-composer-box">
-              <input type="text" [(ngModel)]="chatInputText" (keydown.enter)="askDoctor()"
-                     placeholder="Posez votre question médicale ou utilisez le micro... (Entrée pour envoyer)"
-                     class="dialog-input">
-              
-              <button type="button" class="btn-composer-mic" [class.active-mic]="isListening()" (click)="toggleVoiceRecognition()" title="Parler au micro">
-                <span class="material-icons">{{ isListening() ? 'mic' : 'mic_none' }}</span>
-              </button>
-
-              <button type="button" class="btn-composer-send" (click)="askDoctor()" [disabled]="!chatInputText.trim() || loadingChatbot()" title="Envoyer">
-                <span class="material-icons">send</span>
-              </button>
-            </div>
+            <button type="button" class="btn-composer-send" (click)="askDoctor()" [disabled]="!chatInputText.trim() || loadingChatbot()" title="Envoyer le message">
+              <span class="material-icons">send</span>
+            </button>
           </div>
 
         </div>
@@ -927,264 +925,229 @@ interface OcrResult {
     font-size: 12px;
     color: #64748B;
   }
-
-  .unlimited-badge-capsule {
-    display: inline-flex;
+  .studio-actions {
+    display: flex;
     align-items: center;
-    gap: 8px;
-    background: #ECFDF5;
-    border: 1px solid #A7F3D0;
-    color: #065F46;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 12px;
+    gap: 10px;
+  }
+
+  .lang-pills {
+    display: flex;
+    gap: 4px;
+    background: #F1F5F9;
+    padding: 4px;
+    border-radius: 10px;
+  }
+
+  .lang-badge {
+    font-size: 11px;
     font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    color: #64748B;
+    cursor: pointer;
+    transition: all 0.15s ease;
   }
 
-  .badge-dot-live {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #10B981;
-    box-shadow: 0 0 8px #10B981;
-    animation: beacon 1.5s infinite;
+  .lang-badge:hover {
+    background: #E2E8F0;
+    color: #023E58;
   }
 
-  /* Native Doctor Grid */
-  .native-doctor-grid {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 24px;
-    margin-top: 8px;
-  }
-
-  @media(max-width: 900px) {
-    .native-doctor-grid { grid-template-columns: 1fr; }
-  }
-
-  .doctor-visual-stage {
-    background: linear-gradient(180deg, #F8FAFD 0%, #EFF6FF 100%);
-    border: 1px solid #BAE6FD;
-    border-radius: 20px;
-    padding: 24px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .avatar-portrait-wrap {
-    position: relative;
-    width: 140px;
-    height: 140px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .avatar-glow-ring {
-    position: absolute;
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    border: 3px solid #00B4D8;
-    opacity: 0.3;
-    pointer-events: none;
-  }
-
-  .avatar-glow-ring.pulse-speaking {
-    border-color: #10B981;
-    animation: ringPulse 1.2s infinite;
-  }
-
-  .avatar-glow-ring.pulse-listening {
-    border-color: #EF4444;
-    animation: ringPulse 0.9s infinite;
-  }
-
-  @keyframes ringPulse {
-    0% { transform: scale(0.95); opacity: 0.6; }
-    50% { transform: scale(1.15); opacity: 0.1; }
-    100% { transform: scale(0.95); opacity: 0.6; }
-  }
-
-  .doctor-avatar-circle {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #023E58 0%, #0077B6 60%, #00B4D8 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .lang-badge.active {
+    background: #0077B6;
     color: #FFFFFF;
-    box-shadow: 0 8px 24px rgba(0, 119, 182, 0.3);
-    z-index: 2;
-    overflow: hidden;
-    position: relative;
+    box-shadow: 0 2px 6px rgba(0, 119, 182, 0.25);
   }
 
-  .doctor-portrait-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-    z-index: 2;
-  }
-
-  .doctor-big-avatar {
-    font-size: 64px;
-    color: #FFFFFF;
-  }
-
-  .fallback-avatar {
-    position: absolute;
-    z-index: 1;
-  }
-
-  .doctor-live-tag {
-    position: absolute;
-    bottom: -10px;
+  .btn-fullscreen {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: #023E58;
+    background: #0077B6;
     color: #FFFFFF;
-    font-size: 11px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 12px;
     font-weight: 700;
-    padding: 4px 12px;
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    white-space: nowrap;
-    z-index: 3;
+    text-decoration: none;
+    box-shadow: 0 3px 8px rgba(0, 119, 182, 0.25);
+    transition: all 0.15s ease;
   }
 
-  .doctor-live-tag.tag-speaking { background: #059669; }
-  .doctor-live-tag.tag-listening { background: #DC2626; }
-
-  .live-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #10B981;
+  .btn-fullscreen:hover {
+    background: #0096C7;
+    transform: translateY(-1px);
   }
 
-  /* Audio Waveform */
-  .waveform-box {
+  .btn-fullscreen .material-icons { font-size: 16px; }
+
+  .btn-reload {
+    background: #F1F5F9;
+    border: none;
+    padding: 8px;
+    border-radius: 10px;
+    color: #475569;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 4px;
-    height: 32px;
-    margin-bottom: 14px;
+    transition: all 0.15s ease;
   }
 
-  .wave-bar {
-    width: 4px;
-    background: #0077B6;
-    border-radius: 4px;
+  .btn-reload:hover {
+    background: #E2E8F0;
+    color: #023E58;
+  }
+
+  .btn-reload .material-icons { font-size: 18px; }
+
+  /* Video Frame Container (LiveAvatar Original) */
+  .avatar-frame-box {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #0B1120;
+    width: 100%;
+    aspect-ratio: 16/9;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(0, 119, 182, 0.2);
+    margin-bottom: 20px;
+  }
+
+  .doctor-iframe {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: none;
+  }
+
+  /* Consultation Station (Écrit + Réponse Orale) */
+  .consultation-chat-station {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(0, 119, 182, 0.04);
+  }
+
+  .consult-status-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #F8FAFD;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    transition: all 0.2s ease;
+  }
+
+  .consult-status-banner.speaking {
+    background: #ECFDF5;
+    border-color: #A7F3D0;
+  }
+
+  .consult-status-banner.listening {
+    background: #FEF2F2;
+    border-color: #FECACA;
+  }
+
+  .status-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .status-icon {
+    font-size: 26px;
+    color: #0077B6;
+    background: #E0F2FE;
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  .speaking .status-icon {
+    color: #059669;
+    background: #D1FAE5;
+  }
+
+  .listening .status-icon {
+    color: #DC2626;
+    background: #FEE2E2;
+  }
+
+  .status-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .status-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #023E58;
+  }
+
+  .speaking .status-title { color: #065F46; }
+  .listening .status-title { color: #991B1B; }
+
+  .status-sub {
+    font-size: 12px;
+    color: #64748B;
+  }
+
+  .waveform-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mini-waveform {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 24px;
+  }
+
+  .mini-waveform .wave-bar {
+    width: 3.5px;
+    background: #10B981;
+    border-radius: 3px;
     animation: waveJump 1s ease-in-out infinite;
   }
 
-  .bar-1 { height: 12px; animation-delay: 0.1s; }
-  .bar-2 { height: 22px; animation-delay: 0.25s; }
-  .bar-3 { height: 28px; animation-delay: 0.4s; }
-  .bar-4 { height: 18px; animation-delay: 0.15s; }
-  .bar-5 { height: 26px; animation-delay: 0.35s; }
-  .bar-6 { height: 14px; animation-delay: 0.2s; }
-  .bar-7 { height: 24px; animation-delay: 0.3s; }
-  .bar-8 { height: 16px; animation-delay: 0.05s; }
+  .wave-bar.bar-1 { height: 10px; animation-delay: 0.1s; }
+  .wave-bar.bar-2 { height: 18px; animation-delay: 0.25s; }
+  .wave-bar.bar-3 { height: 24px; animation-delay: 0.4s; }
+  .wave-bar.bar-4 { height: 15px; animation-delay: 0.15s; }
+  .wave-bar.bar-5 { height: 22px; animation-delay: 0.35s; }
+  .wave-bar.bar-6 { height: 12px; animation-delay: 0.2s; }
 
   @keyframes waveJump {
     0%, 100% { transform: scaleY(0.4); }
     50% { transform: scaleY(1.3); }
   }
 
-  .vocal-controls-row {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-    margin-top: 14px;
-  }
-
-  .btn-voice-talk {
-    display: flex;
+  .btn-stop-audio-mini {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: linear-gradient(135deg, #0077B6, #0096C7);
-    color: white;
-    border: none;
-    padding: 12px 18px;
-    border-radius: 14px;
-    font-size: 13px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 119, 182, 0.25);
-    transition: all 0.2s ease;
-  }
-
-  .btn-voice-talk:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 119, 182, 0.35);
-  }
-
-  .btn-voice-talk.listening {
-    background: linear-gradient(135deg, #DC2626, #EF4444);
-    animation: pulseListen 1.5s infinite;
-  }
-
-  @keyframes pulseListen {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
-    50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
-  }
-
-  .btn-stop-audio {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+    gap: 4px;
     background: #FFFFFF;
     color: #DC2626;
     border: 1px solid #FECACA;
-    padding: 8px 14px;
-    border-radius: 12px;
-    font-size: 12px;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 11.5px;
     font-weight: 700;
     cursor: pointer;
+    transition: all 0.15s ease;
   }
 
-  .doctor-certif-card {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-radius: 12px;
-    padding: 10px 12px;
-    text-align: left;
+  .btn-stop-audio-mini:hover {
+    background: #FEE2E2;
   }
 
-  .doctor-certif-card p {
-    margin: 0;
-    font-size: 11px;
-    color: #64748B;
-    line-height: 1.4;
-  }
-
-  .cert-icon { font-size: 20px; color: #059669; flex-shrink: 0; }
-
-  /* Dialog Panel */
-  .doctor-dialog-panel {
-    display: flex;
-    flex-direction: column;
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-radius: 20px;
-    padding: 18px 20px;
-  }
+  .btn-stop-audio-mini .material-icons { font-size: 15px; }
 
   .dialog-messages-box {
     flex: 1;
@@ -1833,18 +1796,40 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     "Quels sont les signaux d'alerte cardiovasculaires majeurs ?"
   ];
 
-  doctorMode     = signal<'native' | 'liveavatar'>('native');
+  selectedLang: 'FR' | 'AR' | 'EN' | 'DAR' = 'FR';
+  doctorMode     = signal<'native' | 'liveavatar'>('liveavatar');
   isListening    = signal<boolean>(false);
   isSpeaking     = signal<boolean>(false);
   loadingChatbot = signal<boolean>(false);
   chatInputText  = '';
 
+  setLang(lang: 'FR' | 'AR' | 'EN' | 'DAR') {
+    this.selectedLang = lang;
+    if (this.recognition) {
+      if (lang === 'AR' || lang === 'DAR') {
+        this.recognition.lang = 'ar-MA';
+      } else if (lang === 'EN') {
+        this.recognition.lang = 'en-US';
+      } else {
+        this.recognition.lang = 'fr-FR';
+      }
+    }
+    const label = lang === 'FR' ? 'Français' : lang === 'AR' ? 'العربية' : lang === 'DAR' ? 'الدارجة' : 'English';
+    this.snack.open(`Langue sélectionnée : ${label}`, 'OK', { duration: 2500 });
+  }
+
+  reloadDoctorIframe() {
+    const iframe = document.getElementById('doctorIframe') as HTMLIFrameElement;
+    if (iframe) {
+      const src = iframe.src;
+      iframe.src = '';
+      setTimeout(() => { iframe.src = src; }, 150);
+      this.snack.open('Rechargement du Dr. Virtuel en cours...', 'OK', { duration: 2000 });
+    }
+  }
+
   setDoctorMode(mode: 'native' | 'liveavatar') {
     this.doctorMode.set(mode);
-    if (mode === 'liveavatar') {
-      this.stopSpeaking();
-      this.stopVoiceRecognition();
-    }
   }
 
   private recognition: any = null;
@@ -1853,7 +1838,7 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
   chatMessages = signal<Array<{ sender: 'patient' | 'doctor'; text: string; time: string }>>([
     {
       sender: 'doctor',
-      text: "Bonjour ! Je suis le Dr. Sarah, votre conseillère médicale IA sur Sihati.ai. Comment vous sentez-vous aujourd'hui ? Vous pouvez me poser vos questions à l'écrit ou directement par la voix en cliquant sur le micro.",
+      text: "Bonjour ! Je suis le Dr. Virtuel, votre médecin conseiller interactif sur Sihati.ai. Comment vous sentez-vous aujourd'hui ? Écrivez votre message ou parlez au micro, et je vous répondrai directement à voix haute.",
       time: 'En ligne'
     }
   ]);
@@ -2030,21 +2015,28 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     this.stopSpeaking();
 
-    const clean = (text || '').replace(/[*_#`~]/g, '').trim();
+    const clean = (text || '').replace(/[*_#`~-]/g, ' ').replace(/\s+/g, ' ').trim();
     if (!clean) return;
 
     const utterance = new SpeechSynthesisUtterance(clean);
-    utterance.lang = 'fr-FR';
+    const langCode = (this.selectedLang === 'AR' || this.selectedLang === 'DAR') ? 'ar-SA' : this.selectedLang === 'EN' ? 'en-US' : 'fr-FR';
+    utterance.lang = langCode;
     utterance.rate = 1.0;
     utterance.pitch = 1.05;
 
     const voices = window.speechSynthesis.getVoices();
-    const frVoice = voices.find(v => v.lang.startsWith('fr') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Amelie') || v.name.includes('Julie') || v.name.includes('Thomas')));
-    if (frVoice) {
-      utterance.voice = frVoice;
+    const langPrefix = langCode.substring(0, 2).toLowerCase();
+    const targetVoice = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix) && (
+      v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Amelie') || 
+      v.name.includes('Julie') || v.name.includes('Maged') || v.name.includes('Zayd') || 
+      v.name.includes('Samantha') || v.name.includes('Jenny')
+    ));
+
+    if (targetVoice) {
+      utterance.voice = targetVoice;
     } else {
-      const anyFr = voices.find(v => v.lang.startsWith('fr'));
-      if (anyFr) utterance.voice = anyFr;
+      const anyVoice = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
+      if (anyVoice) utterance.voice = anyVoice;
     }
 
     utterance.onstart = () => {
@@ -2120,13 +2112,20 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
       return;
     }
 
-    const systemPrompt = `Tu es le Dr. Sarah, conseillère médicale et cardiologue virtuelle bienveillante et hautement qualifiée sur la plateforme e-santé Sihati.ai.
-Réponds de manière concise, chaleureuse, empathique et médicalement rigoureuse à la question du patient.
+    const langInstructions = this.selectedLang === 'AR'
+      ? 'Réponds impérativement en Arabe littéraire clair, élégant et bienveillant.'
+      : this.selectedLang === 'DAR'
+      ? 'Réponds impérativement en Darija marocaine (arabe dialectal marocain) chaleureuse, naturelle et facile à comprendre.'
+      : this.selectedLang === 'EN'
+      ? 'Respond strictly in English, concise, encouraging and empathetic.'
+      : 'Réponds impérativement en Français clair, empathique, rassurant et médicalement rigoureux.';
+
+    const systemPrompt = `Tu es le Dr. Virtuel, médecin conseiller interactif et cardiologue bienveillant sur la plateforme e-santé Sihati.ai.
+${langInstructions}
 Règles strictes :
-1. Maximum 3 à 4 phrases claires, faciles à comprendre et adaptées à la synthèse vocale.
-2. Pas de listes à puces complexes ni d'astérisques ou de mise en forme markdown lourde.
-3. Si la question est en français, réponds en français. Si elle est en arabe ou darija, réponds dans la même langue.
-4. Rassure le patient tout en rappelant les bonnes pratiques cliniques.
+1. Maximum 3 à 4 phrases claires, faciles à comprendre et parfaitement adaptées à la synthèse vocale orale.
+2. Pas de puces, pas de tirets ni de listes numérotées, pas de caractères markdown (*, #, _) car ta réponse sera immédiatement lue à voix haute au patient.
+3. Rassure le patient, donne des explications médicales bienveillantes et rappelle de consulter un médecin traitant si nécessaire.
 Question du patient : ${question}`;
 
     const body = {
@@ -2165,6 +2164,25 @@ Question du patient : ${question}`;
 
   private getFallbackDoctorReply(question: string): string {
     const q = question.toLowerCase();
+
+    if (this.selectedLang === 'AR') {
+      if (q.includes('ضغط') || q.includes('tension')) {
+        return "ارتفاع ضغط الدم يتطلب أخذ قسط من الراحة في مكان هادئ لمدة عشر دقائق قبل إعادة القياس. احرص على تقليل استهلاك الملح وشرب كمية كافية من الماء، وإذا استمر الارتفاع استشر طبيبك مباشرة.";
+      }
+      return "أهلاً بك! أنا الدكتور الافتراضي لمتابعتك الصحية على منصة صحتي. أنصحك بمراقبة علاماتك الحيوية بانتظام، والحفاظ على نمط حياة صحي، واستشارة الطبيب المعالج عند الشعور بأي تعب.";
+    }
+
+    if (this.selectedLang === 'DAR') {
+      return "مرحبا بيك! أنا الطبيب الافتراضي ديالك في صحتي.اي. ارتاح شوية وتبع القياسات ديالك مزيان، ونقص من الملحة والستريس. و ديما استشر الطبيب ديالك إذا حسيتي بأي عياء.";
+    }
+
+    if (this.selectedLang === 'EN') {
+      if (q.includes('pressure') || q.includes('tension')) {
+        return "An elevated blood pressure requires resting calmly for 10 minutes before taking another reading. Please limit sodium intake, stay hydrated, and contact your doctor if numbers remain high.";
+      }
+      return "Hello! I am Dr. Virtual, your interactive health advisor on Sihati.ai. Keep tracking your vitals consistently, maintain a balanced lifestyle, and consult your primary physician if symptoms persist.";
+    }
+
     if (q.includes('tension') || q.includes('pression') || q.includes('hyper')) {
       return "Une tension artérielle élevée nécessite du repos au calme pendant 10 minutes avant une nouvelle prise. Pensez à limiter votre consommation de sel, hydratez-vous convenablement et surveillez l'apparition de maux de tête ou de vertiges. Si la tension dépasse 160/100 mmHg, contactez rapidement votre médecin traitant.";
     }
