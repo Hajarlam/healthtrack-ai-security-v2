@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "cd frontend-angular && npm install && npm run build",
+  "outputDirectory": "frontend-angular/dist/healthtrack-frontend/browser",
+  "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

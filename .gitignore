@@ -15,3 +15,5 @@ mobile-android/.gradle/
 scratch/
 *.env
 *.lock
+*.pdf
+*.log

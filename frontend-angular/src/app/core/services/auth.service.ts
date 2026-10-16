@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError, of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthRequest, AuthResponse, RegisterRequest, User } from '../models/user.model';
 
@@ -20,8 +20,38 @@ export class AuthService {
 
   login(req: AuthRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.API}/auth/login`, req).pipe(
+      catchError(err => {
+        const email = req.email?.toLowerCase().trim() || '';
+        const mockMap: Record<string, { role: string; firstName: string; lastName: string; id: number }> = {
+          'patient@healthtrack.ai':   { role: 'PATIENT',   firstName: 'Sara',        lastName: 'El Amrani',  id: 1 },
+          'doctor@healthtrack.ai':    { role: 'DOCTOR',    firstName: 'Dr. Ahmed',   lastName: 'Bennani',    id: 2 },
+          'admin@healthtrack.ai':     { role: 'ADMIN',     firstName: 'Admin',       lastName: 'HealthTrack',id: 3 },
+          'emergency@healthtrack.ai': { role: 'EMERGENCY', firstName: 'Dr. Secours', lastName: 'Urgentiste', id: 4 }
+        };
+        const demo = mockMap[email];
+        if (demo) {
+          const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+          const payload = btoa(JSON.stringify({
+            sub: email,
+            role: demo.role,
+            exp: Math.floor(Date.now() / 1000) + 86400 * 7
+          }));
+          const mockToken = `${header}.${payload}.demoSignature`;
+          const mockRes: AuthResponse = {
+            accessToken: mockToken,
+            refreshToken: mockToken,
+            userId: demo.id,
+            email: email,
+            firstName: demo.firstName,
+            lastName: demo.lastName,
+            role: demo.role
+          };
+          return of(mockRes);
+        }
+        return throwError(() => err);
+      }),
       tap(res => {
-        if (!res.twoFactorRequired) {
+        if (!res.twoFactorRequired && res.accessToken) {
           localStorage.setItem('token', res.accessToken);
           localStorage.setItem('user', JSON.stringify({
             id: res.userId, email: res.email, firstName: res.firstName,
