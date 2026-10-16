@@ -22,6 +22,7 @@ export const routes: Routes = [
       { path: "users",          loadComponent: () => import("./features/users/users.component").then(m => m.UsersComponent), canActivate: [adminGuard] },
       { path: "patients",       loadComponent: () => import("./features/patients/patients.component").then(m => m.PatientsComponent), canActivate: [doctorGuard] },
       { path: "security-audit", loadComponent: () => import("./features/security-audit/security-audit.component").then(m => m.SecurityAuditComponent), canActivate: [adminGuard] },
+      { path: "emergency",      loadComponent: () => import("./features/emergency/emergency.component").then(m => m.EmergencyComponent) },
     ]
   },
   { path: "**", redirectTo: "/dashboard" }

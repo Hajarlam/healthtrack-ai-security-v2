@@ -64,4 +64,11 @@ public interface ApiService {
 
     @DELETE("medications/{id}")
     Call<Void> deleteMedication(@Path("id") int id);
+
+    // ── AI Services (OpenAI & Avatar) ──
+    @POST("ai/chat")
+    Call<Map<String, Object>> chatWithAi(@Body Map<String, Object> body);
+
+    @GET("avatar/token")
+    Call<Map<String, Object>> getAvatarToken();
 }

@@ -11,8 +11,8 @@ import { AuthService } from '../../core/services/auth.service';
     <div class="landing-wrap">
       <!-- Navigation Header -->
       <header class="landing-header">
-        <div class="logo" style="display: flex; align-items: center; gap: 8px;">
-          <span class="material-icons logo-icon" style="background: linear-gradient(135deg, #0077B6, #00B4D8); color: white; border-radius: 12px; padding: 6px; font-size: 22px; box-shadow: 0 4px 12px rgba(0, 119, 182, 0.25);">monitor_heart</span>
+        <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+          <img src="assets/logo.svg" alt="Sihati AI Logo" style="width: 38px; height: 38px; object-fit: contain;">
           <div style="display: flex; align-items: center; gap: 6px;">
             <span style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.8px; background: linear-gradient(135deg, #023E58 30%, #0077B6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Sihati</span>
             <span style="background: linear-gradient(135deg, #00B4D8, #0077B6); color: white; border-radius: 6px; font-size: 9px; font-weight: 900; padding: 2px 6px; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(0, 180, 216, 0.3);">Ai</span>
@@ -26,6 +26,7 @@ import { AuthService } from '../../core/services/auth.service';
         <div class="nav-actions">
           @if (auth.isLoggedIn()) {
             <a routerLink="/dashboard" class="btn-primary">Tableau de bord</a>
+            <button (click)="auth.logout()" class="btn-outline" style="cursor: pointer; background: transparent;">Déconnexion</button>
           } @else {
             <a routerLink="/auth/login" class="btn-outline">Se connecter</a>
             <a routerLink="/auth/register" class="btn-primary">S'inscrire</a>
@@ -44,10 +45,11 @@ import { AuthService } from '../../core/services/auth.service';
           </p>
           <div class="hero-actions">
             @if (auth.isLoggedIn()) {
-              <a routerLink="/dashboard" class="btn-primary lg">Accéder à mon espace</a>
+              <a routerLink="/dashboard" class="btn-primary lg">Accéder au Tableau de bord</a>
+              <button (click)="auth.logout()" class="btn-outline lg" style="cursor: pointer; background: transparent;">Changer de compte</button>
             } @else {
-              <a routerLink="/auth/register" class="btn-primary lg">Démarrer gratuitement</a>
-              <a routerLink="/auth/login" class="btn-outline lg">Découvrir la démo</a>
+              <a routerLink="/auth/login" class="btn-primary lg">Se connecter</a>
+              <a routerLink="/auth/register" class="btn-outline lg">Créer un compte</a>
             }
           </div>
         </div>

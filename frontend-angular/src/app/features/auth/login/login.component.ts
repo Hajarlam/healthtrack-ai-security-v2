@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -21,8 +21,8 @@ import { AuthService } from '../../../core/services/auth.service';
   <div class="auth-wrap">
     <div class="auth-left">
       <div class="brand">
-        <div class="brand-icon" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 8px 32px rgba(0,0,0,0.1); backdrop-filter: blur(4px);">
-          <span class="material-icons" style="text-shadow: 0 0 10px rgba(255,255,255,0.5);">monitor_heart</span>
+        <div class="brand-icon" style="background: transparent; border: none; display: flex; align-items: center; justify-content: flex-start; width: 64px; height: 64px;">
+          <img src="assets/logo.svg" alt="Sihati AI" style="width: 60px; height: 60px; object-fit: contain;">
         </div>
         <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
           <h1 style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 38px; font-weight: 800; letter-spacing: -1px; background: linear-gradient(135deg, #FFFFFF 40%, #90E0EF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">Sihati</h1>
@@ -68,9 +68,10 @@ import { AuthService } from '../../../core/services/auth.service';
         <div class="demo-box">
           <p>▸ Comptes de démo</p>
           <div class="demo-row">
-            <button class="demo-btn" (click)="fill('patient')">🏥 Patient</button>
-            <button class="demo-btn" (click)="fill('doctor')">👨‍⚕️ Médecin</button>
-            <button class="demo-btn" (click)="fill('admin')">⚙️ Admin</button>
+            <button type="button" class="demo-btn" (click)="fill('patient')">🏥 Patient</button>
+            <button type="button" class="demo-btn" (click)="fill('doctor')">👨‍⚕️ Médecin</button>
+            <button type="button" class="demo-btn" (click)="fill('admin')">⚙️ Admin</button>
+            <button type="button" class="demo-btn" (click)="fill('emergency')">🚨 Urgentiste</button>
           </div>
         </div>
         <p class="link-row">Pas encore inscrit ? <a routerLink="/auth/register">Créer un compte</a></p>
@@ -100,8 +101,8 @@ import { AuthService } from '../../../core/services/auth.service';
   .btn-login:hover:not(:disabled){opacity:.9;} .btn-login:disabled{opacity:.6;cursor:not-allowed;}
   .demo-box{margin-top:24px;background:#CAF0F8;border-radius:12px;padding:14px;}
   .demo-box p{font-size:12px;color:#023E58;font-weight:700;margin-bottom:8px;}
-  .demo-row{display:flex;gap:8px;}
-  .demo-btn{flex:1;padding:8px 0;border-radius:8px;border:2px solid #0077B6;background:white;color:#023E58;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .demo-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+  .demo-btn{padding:8px 2px;border-radius:8px;border:2px solid #0077B6;background:white;color:#023E58;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .demo-btn:hover{background:#0077B6;color:white;}
   .link-row{text-align:center;margin-top:16px;font-size:14px;color:#4A7C94;}
   .link-row a{color:#0077B6;font-weight:600;text-decoration:none;}
@@ -115,19 +116,32 @@ export class LoginComponent {
   showPwd = signal(false);
 
   constructor(private fb: FormBuilder, private auth: AuthService,
-              private router: Router) {
+              private router: Router, private route: ActivatedRoute) {
     this.form = this.fb.group({
       email:    ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
-    if (this.auth.isLoggedIn()) this.router.navigate(['/dashboard']);
+
+    const autoRole = this.route.snapshot.queryParams['auto'];
+    const redirectUrl = this.route.snapshot.queryParams['redirect'] || '/dashboard';
+
+    if (autoRole) {
+      this.fill(autoRole);
+      this.auth.login(this.form.value).subscribe({
+        next: () => this.router.navigateByUrl(redirectUrl),
+        error: () => {}
+      });
+    } else if (this.auth.isLoggedIn()) {
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   fill(role: string) {
     const acc: Record<string,{email:string;password:string}> = {
       patient: {email:'patient@healthtrack.ai', password:'Patient@123'},
       doctor:  {email:'doctor@healthtrack.ai',  password:'Doctor@123'},
-      admin:   {email:'admin@healthtrack.ai',   password:'Admin@123'}
+      admin:   {email:'admin@healthtrack.ai',   password:'Admin@123'},
+      emergency:{email:'emergency@healthtrack.ai',password:'Emergency@123'}
     };
     this.form.patchValue(acc[role]);
   }

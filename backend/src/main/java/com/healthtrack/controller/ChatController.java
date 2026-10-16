@@ -39,13 +39,32 @@ public class ChatController {
     }
 
     @GetMapping("/conversation/{otherId}")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<List<ChatMessage>> getConversation(@PathVariable Long otherId) {
         User me = userService.getCurrentUser();
         List<ChatMessage> msgs = chatRepo.findConversation(me.getId(), otherId);
-        // Mark as read
-        msgs.stream().filter(m -> m.getReceiver().getId().equals(me.getId()) && !m.isReadByReceiver())
-            .forEach(m -> { m.setReadByReceiver(true); chatRepo.save(m); });
+        // Mark as read immediately and flush
+        for (ChatMessage m : msgs) {
+            if (m.getReceiver().getId().equals(me.getId()) && !m.isReadByReceiver()) {
+                m.setReadByReceiver(true);
+                chatRepo.saveAndFlush(m);
+            }
+        }
         return ResponseEntity.ok(msgs);
+    }
+
+    @PostMapping("/read/{otherId}")
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<Void> markAsRead(@PathVariable Long otherId) {
+        User me = userService.getCurrentUser();
+        List<ChatMessage> msgs = chatRepo.findConversation(me.getId(), otherId);
+        for (ChatMessage m : msgs) {
+            if (m.getReceiver().getId().equals(me.getId()) && !m.isReadByReceiver()) {
+                m.setReadByReceiver(true);
+                chatRepo.saveAndFlush(m);
+            }
+        }
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/send/{receiverId}")

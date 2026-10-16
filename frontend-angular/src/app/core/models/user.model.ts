@@ -13,6 +13,8 @@ export interface User {
   chronicDiseases?: string;
   specialization?: string;
   hospital?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
   createdAt?: string;
 }
 

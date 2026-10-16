@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Auth Helper</title>
+</head>
+<body style="background:#F0F4F8; font-family:sans-serif; display:flex; align-items:center; justify-content:center; height:100vh;">
+<div style="text-align:center;">
+  <h2>Authentification en cours...</h2>
+</div>
+<script>
+const params = new URLSearchParams(window.location.search);
+const role = params.get('role') || 'PATIENT';
+const redirect = params.get('redirect') || '/dashboard';
+
+let email = 'patient@healthtrack.ai';
+let password = 'Patient@123';
+
+if (role === 'DOCTOR') {
+  email = 'doctor@healthtrack.ai';
+  password = 'Doctor@123';
+} else if (role === 'ADMIN') {
+  email = 'admin@healthtrack.ai';
+  password = 'Admin@123';
+} else if (role === 'EMERGENCY') {
+  email = 'emergency@healthtrack.ai';
+  password = 'Emergency@123';
+}
+
+fetch('http://localhost:8085/api/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: email, password: password })
+})
+.then(r => r.json())
+.then(res => {
+  if (res && res.accessToken) {
+    localStorage.setItem('token', res.accessToken);
+    localStorage.setItem('user', JSON.stringify({
+      id: res.userId,
+      email: res.email,
+      firstName: res.firstName,
+      lastName: res.lastName,
+      role: res.role
+    }));
+    setTimeout(() => {
+      window.location.href = redirect;
+    }, 100);
+  } else {
+    document.body.innerHTML = 'Erreur auth: ' + JSON.stringify(res);
+  }
+})
+.catch(err => {
+  document.body.innerHTML = 'Erreur reseau: ' + err;
+});
+</script>
+</body>
+</html>

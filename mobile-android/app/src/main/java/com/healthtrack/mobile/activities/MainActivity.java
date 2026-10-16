@@ -46,6 +46,15 @@ public class MainActivity extends AppCompatActivity {
         CardView cardMeds    = findViewById(R.id.card_medications);
         CardView cardProfile = findViewById(R.id.card_profile);
         CardView cardSos     = findViewById(R.id.card_sos);
+        CardView cardAvatar  = findViewById(R.id.card_avatar);
+        CardView cardAiChat  = findViewById(R.id.card_ai_consultation);
+
+        if (cardAvatar != null) {
+            cardAvatar.setOnClickListener(v -> startActivity(new Intent(this, AvatarActivity.class)));
+        }
+        if (cardAiChat != null) {
+            cardAiChat.setOnClickListener(v -> startActivity(new Intent(this, AiConsultationActivity.class)));
+        }
 
         cardAi.setOnClickListener(v      -> startActivity(new Intent(this, AiChatbotActivity.class)));
         cardMeasure.setOnClickListener(v -> startActivity(new Intent(this, AddHealthRecordActivity.class)));

@@ -48,6 +48,15 @@ public class MedicalChatbotService {
     @Value("${ai.openai.enabled:false}")
     private boolean openAiEnabled;
 
+    @Value("${ai.gemini.api-key:}")
+    private String geminiApiKey;
+
+    @Value("${ai.gemini.model:gemini-2.5-flash}")
+    private String geminiModel;
+
+    @Value("${ai.gemini.enabled:true}")
+    private boolean geminiEnabled;
+
     // Base de connaissances medicales (RAG simplifie)
     private static final Map<String, String> MEDICAL_KB = new LinkedHashMap<>();
     static {
@@ -180,11 +189,11 @@ public class MedicalChatbotService {
 
     private String callOllama(String question, String patCtx, String kbCtx) {
         try {
-            String prompt = "Tu es un assistant medical intelligent. " + patCtx +
-                " Connaissances medicales pertinentes: " + kbCtx +
+            String prompt = "Tu es un assistant médical intelligent et polyglotte pour la plateforme Sihati AI. " + patCtx +
+                " Connaissances médicales pertinentes: " + kbCtx +
                 " Question du patient: " + question +
-                " Reponds en francais de maniere claire et precise. " +
-                " Recommande toujours de consulter un medecin pour un diagnostic definitif.";
+                " RÈGLE : Réponds toujours dans la même langue que le patient (Arabe classique العربية, Darija marocaine الدارجة, Français, ou Anglais) de manière claire, concise et bienveillante. " +
+                " Recommande toujours de consulter un médecin pour un diagnostic définitif.";
 
             Map<String,Object> body = new HashMap<>();
             body.put("model", ollamaModel);
@@ -207,10 +216,14 @@ public class MedicalChatbotService {
 
     private String callOpenAi(String question, String patCtx, String kbCtx) {
         try {
-            String systemPrompt = "Tu es un assistant medical intelligent. " + patCtx +
-                " Connaissances medicales pertinentes: " + kbCtx +
-                " Reponds en francais de maniere claire, precise et professionnelle. " +
-                " Recommande toujours de consulter un medecin pour un diagnostic definitif.";
+            String systemPrompt = "Tu es un médecin et assistant médical virtuel polyglotte et bienveillant pour la plateforme Sihati AI. " + patCtx +
+                " Connaissances médicales pertinentes : " + kbCtx +
+                " RÈGLE LINGUISTIQUE PRIMORDIALE : Détecte la langue de la question du patient et réponds impérativement dans cette MÊME langue : " +
+                "- Si le patient écrit en Darija marocaine (الدارجة المغربية) : réponds en Darija marocaine chaleureuse, naturelle et claire. " +
+                "- Si le patient écrit en Arabe (العربية) : réponds en Arabe standard clair et professionnel. " +
+                "- Si le patient écrit en Français : réponds en Français professionnel et rassurant. " +
+                "- Si le patient écrit en Anglais : réponds en Anglais médical clair et bienveillant. " +
+                "Fournis des explications médicales adaptées, préventives et rappelle toujours l'importance d'une consultation médicale directe.";
 
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("model", openAiModel);
@@ -246,8 +259,55 @@ public class MedicalChatbotService {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            // Fallback to demo mode
+            System.err.println("OpenAI failed (" + e.getMessage() + "), falling back to Gemini...");
+            if (geminiEnabled && geminiApiKey != null && !geminiApiKey.isBlank()) {
+                return callGemini(question, patCtx, kbCtx);
+            }
+        }
+        return generateDemoAnswer(question, patCtx, kbCtx);
+    }
+
+    private String callGemini(String question, String patCtx, String kbCtx) {
+        try {
+            String prompt = "Tu es un médecin et assistant médical virtuel polyglotte et bienveillant pour la plateforme Sihati AI. " + patCtx +
+                " Connaissances médicales pertinentes : " + kbCtx +
+                " RÈGLE LINGUISTIQUE PRIMORDIALE : Détecte la langue de la question du patient et réponds impérativement dans cette MÊME langue : " +
+                "- Si le patient écrit en Darija marocaine (الدارجة المغربية) : réponds en Darija marocaine chaleureuse, naturelle et claire. " +
+                "- Si le patient écrit en Arabe (العربية) : réponds en Arabe standard clair et professionnel. " +
+                "- Si le patient écrit en Français : réponds en Français professionnel et rassurant. " +
+                "- Si le patient écrit en Anglais : réponds en Anglais médical clair et bienveillant. " +
+                "Fournis des explications médicales adaptées, préventives et rappelle toujours l'importance d'une consultation médicale directe. " +
+                "Question du patient : " + question;
+
+            Map<String, Object> textPart = new HashMap<>();
+            textPart.put("text", prompt);
+
+            Map<String, Object> content = new HashMap<>();
+            content.put("parts", List.of(textPart));
+
+            Map<String, Object> config = new HashMap<>();
+            config.put("temperature", 0.3);
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("contents", List.of(content));
+            requestBody.put("generationConfig", config);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel + ":generateContent?key=" + geminiApiKey;
+
+            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(response.getBody());
+                com.fasterxml.jackson.databind.JsonNode candidates = root.path("candidates");
+                if (candidates.isArray() && !candidates.isEmpty()) {
+                    return candidates.get(0).path("content").path("parts").get(0).path("text").asText();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Gemini Chatbot error: " + e.getMessage());
         }
         return generateDemoAnswer(question, patCtx, kbCtx);
     }

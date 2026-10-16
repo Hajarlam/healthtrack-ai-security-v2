@@ -19,7 +19,9 @@ import { AuthService } from '../../../core/services/auth.service';
   <div class="reg-wrap">
     <div class="reg-box">
       <div class="reg-header" style="text-align: center; margin-bottom: 24px;">
-        <span class="material-icons hicon" style="background: linear-gradient(135deg, #0077B6, #00B4D8); color: white; border-radius: 12px; padding: 10px; font-size: 28px; box-shadow: 0 4px 12px rgba(0, 119, 182, 0.2); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">monitor_heart</span>
+        <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+          <img src="assets/logo.svg" alt="Sihati AI" style="width: 48px; height: 48px; object-fit: contain;">
+        </div>
         <h2 style="font-size: 24px; font-weight: 800; color: #023E58; margin: 0 0 4px;">Créer un compte</h2>
         <div style="display: inline-flex; align-items: center; gap: 6px; justify-content: center;">
           <span style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, #023E58 30%, #0077B6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Sihati</span>
@@ -83,13 +85,23 @@ import { AuthService } from '../../../core/services/auth.service';
         </button>
       </form>
 
+      <div class="demo-box">
+        <p>▸ Comptes de démo</p>
+        <div class="demo-row">
+          <button type="button" class="demo-btn" (click)="fill('patient')">🏥 Patient</button>
+          <button type="button" class="demo-btn" (click)="fill('doctor')">👨‍⚕️ Médecin</button>
+          <button type="button" class="demo-btn" (click)="fill('admin')">⚙️ Admin</button>
+          <button type="button" class="demo-btn" (click)="fill('emergency')">🚨 Urgentiste</button>
+        </div>
+      </div>
+
       <p class="link-row">Déjà inscrit ? <a routerLink="/auth/login">Se connecter</a></p>
     </div>
   </div>
   `,
   styles: [`
   .reg-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#005F8E,#0077B6,#0096C7);padding:24px;}
-  .reg-box{background:white;border-radius:20px;padding:32px;width:100%;max-width:540px;box-shadow:0 20px 60px rgba(0,95,142,.3);}
+  .reg-box{background:white;border-radius:20px;padding:32px;width:100%;max-width:580px;box-shadow:0 20px 60px rgba(0,95,142,.3);}
   .reg-header{text-align:center;margin-bottom:24px;}
   .hicon{font-size:44px;color:#0077B6;display:block;margin-bottom:8px;}
   .reg-header h2{font-size:24px;font-weight:800;color:#023E58;margin:0;}
@@ -97,15 +109,20 @@ import { AuthService } from '../../../core/services/auth.service';
   mat-form-field{width:100%;margin-bottom:4px;}
   .role-section{margin:12px 0 16px;}
   .role-label{font-size:13px;font-weight:600;color:#023E58;display:block;margin-bottom:10px;}
-  .role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-  .role-card{border:2px solid #C0DEE9;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;}
+  .role-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .role-card{border:2px solid #C0DEE9;border-radius:12px;padding:12px 6px;text-align:center;cursor:pointer;transition:all .2s;}
   .role-card:hover{border-color:#0077B6;background:#CAF0F8;}
   .role-card.selected{border-color:#0077B6;background:#CAF0F8;}
-  .role-card .material-icons{font-size:28px;color:#0077B6;display:block;margin-bottom:4px;}
+  .role-card .material-icons{font-size:26px;color:#0077B6;display:block;margin-bottom:4px;}
   .role-card strong{font-size:12px;color:#023E58;display:block;}
   .role-card small{font-size:10px;color:#4A7C94;display:block;margin-top:2px;}
   .btn-register{width:100%;height:50px;border-radius:12px;background:linear-gradient(135deg,#0077B6,#005F8E);color:white;border:none;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity .2s;text-shadow:0 1px 2px rgba(0,0,0,.1);}
   .btn-register:hover:not(:disabled){opacity:.9;} .btn-register:disabled{opacity:.6;cursor:not-allowed;}
+  .demo-box{margin-top:20px;background:#CAF0F8;border-radius:12px;padding:14px;}
+  .demo-box p{font-size:12px;color:#023E58;font-weight:700;margin-bottom:8px;}
+  .demo-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+  .demo-btn{padding:8px 2px;border-radius:8px;border:2px solid #0077B6;background:white;color:#023E58;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .demo-btn:hover{background:#0077B6;color:white;}
   .link-row{text-align:center;margin-top:16px;font-size:14px;color:#4A7C94;}
   .link-row a{color:#0077B6;font-weight:600;text-decoration:none;}
   `]
@@ -115,9 +132,10 @@ export class RegisterComponent {
   loading = signal(false);
 
   roles = [
-    {value:'PATIENT',  icon:'person',          label:'Patient',   desc:'Suivi santé'},
-    {value:'DOCTOR',   icon:'local_hospital',  label:'Médecin',   desc:'Gestion patients'},
-    {value:'EMERGENCY',icon:'emergency',        label:'Urgentiste',desc:'Accès urgences'},
+    {value:'PATIENT',  icon:'person',                label:'Patient',   desc:'Suivi santé'},
+    {value:'DOCTOR',   icon:'local_hospital',        label:'Médecin',   desc:'Gestion patients'},
+    {value:'ADMIN',    icon:'admin_panel_settings',  label:'Admin',     desc:'Administration'},
+    {value:'EMERGENCY',icon:'emergency',             label:'Urgentiste',desc:'Secours (RBAC)'},
   ];
 
   constructor(private fb: FormBuilder, private auth: AuthService,
@@ -131,6 +149,50 @@ export class RegisterComponent {
       specialization: [''],
       hospital:       ['']
     });
+  }
+
+  fill(role: string) {
+    const acc: Record<string, any> = {
+      patient: {
+        firstName: 'Sara',
+        lastName: 'El Amrani',
+        email: 'patient@healthtrack.ai',
+        password: 'Patient@123',
+        role: 'PATIENT',
+        specialization: '',
+        hospital: ''
+      },
+      doctor: {
+        firstName: 'Dr. Ahmed',
+        lastName: 'Bennani',
+        email: 'doctor@healthtrack.ai',
+        password: 'Doctor@123',
+        role: 'DOCTOR',
+        specialization: 'Cardiologie',
+        hospital: 'CHU Rabat'
+      },
+      admin: {
+        firstName: 'Admin',
+        lastName: 'HealthTrack',
+        email: 'admin@healthtrack.ai',
+        password: 'Admin@123',
+        role: 'ADMIN',
+        specialization: '',
+        hospital: ''
+      },
+      emergency: {
+        firstName: 'Dr. Secours',
+        lastName: 'Urgentiste',
+        email: 'urgentiste@healthtrack.ai',
+        password: 'Emergency@123',
+        role: 'EMERGENCY',
+        specialization: '',
+        hospital: 'Service SAMU / Urgences'
+      }
+    };
+    if (acc[role]) {
+      this.form.patchValue(acc[role]);
+    }
   }
 
   onSubmit() {

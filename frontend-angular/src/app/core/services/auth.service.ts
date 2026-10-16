@@ -11,7 +11,7 @@ export class AuthService {
   currentUser = signal<User | null>(null);
 
   constructor(private http: HttpClient, private router: Router) {
-    const token = localStorage.getItem('token');
+    const token = this.getToken();
     if (token) {
       const user = localStorage.getItem('user');
       if (user) this.currentUser.set(JSON.parse(user));
@@ -40,14 +40,39 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.API}/auth/register`, req);
   }
 
-  logout() {
+  clearStorage() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.currentUser.set(null);
+  }
+
+  logout() {
+    this.clearStorage();
     this.router.navigate(['/auth/login']);
   }
 
-  getToken(): string | null { return localStorage.getItem('token'); }
+  isTokenExpired(token: string): boolean {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return true;
+      const payload = JSON.parse(atob(parts[1]));
+      if (!payload.exp) return false;
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      return true;
+    }
+  }
+
+  getToken(): string | null { 
+    const token = localStorage.getItem('token'); 
+    if (!token) return null;
+    if (this.isTokenExpired(token)) {
+      this.clearStorage();
+      return null;
+    }
+    return token;
+  }
+
   isLoggedIn(): boolean { return !!this.getToken(); }
   getRole(): string { return this.currentUser()?.role || ''; }
   isDoctor(): boolean { return this.getRole() === 'DOCTOR'; }

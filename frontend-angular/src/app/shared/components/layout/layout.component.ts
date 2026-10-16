@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { ChatService } from '../../../core/services/chat.service';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -20,11 +21,13 @@ import { environment } from '../../../../environments/environment';
     <!-- Sidebar -->
     <aside class="sidebar" [class.collapsed]="collapsed()">
       <div class="sb-brand">
-        <div class="sb-logo"><span class="material-icons">monitor_heart</span></div>
+        <div class="sb-logo">
+          <img src="assets/logo.svg" alt="Sihati AI" style="width: 34px; height: 34px; object-fit: contain;">
+        </div>
         @if (!collapsed()) {
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span class="sb-name" style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, #FFFFFF 40%, #90E0EF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Sihati</span>
-            <span class="sb-ai" style="background: linear-gradient(135deg, #00B4D8, #0077B6); color: white; border-radius: 6px; font-size: 9px; font-weight: 900; padding: 2px 6px; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(0, 180, 216, 0.4); border: 1px solid rgba(255,255,255,0.2); margin-left: 0;">Ai</span>
+          <div style="display: flex; align-items: center; gap: 7px;">
+            <span class="sb-name" style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: #FFFFFF;">Sihati</span>
+            <span class="sb-ai" style="background: #00B4D8; color: #003049; border-radius: 6px; font-size: 10px; font-weight: 900; padding: 2px 7px; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(0, 180, 216, 0.4); margin-left: 0;">AI</span>
           </div>
         }
       </div>
@@ -34,7 +37,7 @@ import { environment } from '../../../../environments/environment';
           <div class="sb-avatar">{{initials()}}</div>
           <div class="sb-user-info">
             <span class="sb-uname">{{auth.currentUser()?.firstName}} {{auth.currentUser()?.lastName}}</span>
-            <span class="sb-urole">{{auth.getRole()}}</span>
+            <span class="sb-urole">{{auth.getRole() === 'EMERGENCY' ? 'URGENTISTE (SECOURS)' : auth.getRole()}}</span>
           </div>
         </div>
       }
@@ -47,8 +50,8 @@ import { environment } from '../../../../environments/environment';
             @if (item.route === '/alerts' && alertCount() > 0) {
               <span class="sb-badge">{{alertCount()}}</span>
             }
-            @if (item.route === '/chat' && msgCount() > 0) {
-              <span class="sb-badge">{{msgCount()}}</span>
+            @if (item.route === '/chat' && chatService.unreadCount() > 0) {
+              <span class="sb-badge" style="background: #F59E0B; color: #FFFFFF;">{{chatService.unreadCount()}}</span>
             }
           </a>
         }
@@ -69,16 +72,34 @@ import { environment } from '../../../../environments/environment';
     <!-- Main -->
     <div class="main-area">
       <header class="topbar">
-        <button class="toggle-btn" (click)="collapsed.set(!collapsed())">
+        <button class="toggle-btn" (click)="collapsed.set(!collapsed())" title="Basculer le menu">
           <span class="material-icons">{{collapsed() ? 'menu_open' : 'menu'}}</span>
         </button>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span class="topbar-title" style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, #023E58 30%, #0077B6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Sihati</span>
-          <span style="background: linear-gradient(135deg, #0077B6, #0096C7); color: white; border-radius: 6px; font-size: 9px; font-weight: 900; padding: 2px 6px; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0, 119, 182, 0.2);">Ai</span>
-        </div>
+
+        @if (collapsed()) {
+          <div style="display: flex; align-items: center; gap: 8px; margin-left: 4px;">
+            <img src="assets/logo.svg" alt="Sihati AI" style="width: 28px; height: 28px; object-fit: contain;">
+            <span class="topbar-title" style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, #023E58 30%, #0077B6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Sihati</span>
+            <span style="background: linear-gradient(135deg, #0077B6, #0096C7); color: white; border-radius: 6px; font-size: 9px; font-weight: 900; padding: 2px 6px; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0, 119, 182, 0.2);">AI</span>
+          </div>
+        } @else {
+          <div style="display: flex; align-items: center; gap: 8px; margin-left: 8px;">
+            <span class="topbar-title" style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: #023E58; letter-spacing: -0.3px;">Plateforme Médicale Intelligente</span>
+            <span style="background: #E0F2FE; color: #0284C7; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px; border: 1px solid #BAE6FD;">IA V2.0</span>
+          </div>
+        }
         <span style="flex:1"></span>
-        <button class="icon-btn" routerLink="/alerts">
-          <span class="material-icons" [attr.data-badge]="alertCount() > 0 ? alertCount() : null">notifications</span>
+        <button class="icon-btn" routerLink="/chat" title="Messagerie">
+          <span class="material-icons">chat</span>
+          @if (chatService.unreadCount() > 0) {
+            <span class="topbar-badge msg">{{chatService.unreadCount()}}</span>
+          }
+        </button>
+        <button class="icon-btn" routerLink="/alerts" title="Alertes">
+          <span class="material-icons">notifications</span>
+          @if (alertCount() > 0) {
+            <span class="topbar-badge">{{alertCount()}}</span>
+          }
         </button>
         <div class="topbar-avatar" routerLink="/profile">{{initials()}}</div>
       </header>
@@ -100,7 +121,7 @@ import { environment } from '../../../../environments/environment';
   }
   .sidebar.collapsed{width:64px;min-width:64px;}
   .sb-brand{display:flex;align-items:center;gap:10px;padding:20px 14px 14px;border-bottom:1px solid rgba(255,255,255,.15);}
-  .sb-logo{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,.3);}
+  .sb-logo{width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:transparent;border:none;}
   .sb-logo .material-icons{font-size:22px;color:#FFF;}
   .sb-name{font-size:16px;font-weight:800;color:white;white-space:nowrap;}
   .sb-ai{background:#00B4D8;color:#003049;border-radius:4px;font-size:10px;font-weight:800;padding:1px 5px;margin-left:4px;}
@@ -127,6 +148,8 @@ import { environment } from '../../../../environments/environment';
   .icon-btn{background:none;border:none;cursor:pointer;border-radius:8px;padding:6px;display:flex;align-items:center;color:#023E58;position:relative;}
   .icon-btn:hover{background:#CAF0F8;}
   .icon-btn .material-icons{font-size:22px;}
+  .topbar-badge{position:absolute;top:2px;right:2px;background:#EF4444;color:white;border-radius:10px;font-size:10px;font-weight:800;padding:1px 5px;line-height:1.2;box-shadow:0 2px 6px rgba(239,68,68,.4);border:1.5px solid #FFFFFF;}
+  .topbar-badge.msg{background:#F59E0B;box-shadow:0 2px 6px rgba(245,158,11,.4);}
   .topbar-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#0077B6,#00B4D8);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;cursor:pointer;margin-left:4px;}
   .content{flex:1;overflow-y:auto;background:#F4FAFD;padding:24px;}
   @media(max-width:768px){.content{padding:14px;}}
@@ -135,7 +158,6 @@ import { environment } from '../../../../environments/environment';
 export class LayoutComponent implements OnInit {
   collapsed = signal(false);
   alertCount = signal(0);
-  msgCount = signal(0);
 
   get navItemsFiltered() {
     if (this.auth.isAdmin()) {
@@ -153,6 +175,12 @@ export class LayoutComponent implements OnInit {
         {label:'Rendez-vous',     icon:'calendar_today',  route:'/appointments'},
         {label:'Prescriptions',   icon:'medication',      route:'/medications'},
       ];
+    } else if (this.auth.isEmergency()) {
+      return [
+        {label:'Tableau de bord',  icon:'dashboard',     route:'/dashboard'},
+        {label:'Portail Urgences', icon:'crisis_alert',  route:'/emergency'},
+        {label:'Alertes Actives',  icon:'notifications', route:'/alerts'},
+      ];
     } else {
       return [
         {label:'Tableau de bord', icon:'dashboard',       route:'/dashboard'},
@@ -168,7 +196,7 @@ export class LayoutComponent implements OnInit {
     }
   }
 
-  constructor(public auth: AuthService, private http: HttpClient) {}
+  constructor(public auth: AuthService, private http: HttpClient, public chatService: ChatService) {}
 
   ngOnInit() {
     setInterval(() => this.loadCounts(), 30000);
@@ -177,7 +205,7 @@ export class LayoutComponent implements OnInit {
 
   loadCounts() {
     this.http.get<number>(`${environment.apiUrl}/alerts/count`).subscribe({next: n => this.alertCount.set(n), error:()=>{}});
-    this.http.get<number>(`${environment.apiUrl}/chat/unread-count`).subscribe({next: n => this.msgCount.set(n), error:()=>{}});
+    this.chatService.refreshUnreadCount();
   }
 
   initials(): string {

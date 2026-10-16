@@ -1,0 +1,204 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="100%" height="100%" fill="none">
+  <defs>
+    <!-- Dark Medical Navy for Heart Contours (exact match to user image) -->
+    <linearGradient id="heartDarkBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1B3B6F" />
+      <stop offset="50%" stop-color="#16325B" />
+      <stop offset="100%" stop-color="#0F2547" />
+    </linearGradient>
+
+    <!-- Inner Cyan Ribbon -->
+    <linearGradient id="innerCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#48CAE4" />
+      <stop offset="60%" stop-color="#0096C7" />
+      <stop offset="100%" stop-color="#0077B6" />
+    </linearGradient>
+
+    <!-- AI Circuit Traces Gradient -->
+    <linearGradient id="circuitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#56CFE1" />
+      <stop offset="45%" stop-color="#00B4D8" />
+      <stop offset="85%" stop-color="#1B3B6F" />
+      <stop offset="100%" stop-color="#22223B" />
+    </linearGradient>
+
+    <!-- Internal Brain Aura / Glow (Cyan to Violet) -->
+    <radialGradient id="brainAura" cx="62%" cy="52%" r="48%">
+      <stop offset="0%" stop-color="#48CAE4" stop-opacity="0.45" />
+      <stop offset="45%" stop-color="#5390D9" stop-opacity="0.30" />
+      <stop offset="75%" stop-color="#7209B7" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#0077B6" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Subtle Node Glow -->
+    <filter id="glowFilter" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <g transform="translate(10, 8)">
+    <!-- Right side Aurora Glow (matches purple/cyan cloud in original image) -->
+    <ellipse cx="128" cy="106" rx="52" ry="58" fill="url(#brainAura)" transform="rotate(18, 128, 106)" />
+
+    <!-- ==================== LEFT HEART HALF ==================== -->
+    <!-- 1. Outer Heart Curve (Dark Blue) -->
+    <path d="M 88 56
+             C 74 38, 52 30, 32 40
+             C 12 50, 4 76, 12 102
+             C 16 116, 26 128, 38 138"
+          stroke="url(#heartDarkBlue)"
+          stroke-width="7.5"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <!-- 2. Inner Heart Parallel Contour (Cyan) -->
+    <path d="M 86 73
+             C 74 58, 58 52, 43 59
+             C 28 66, 23 84, 28 102
+             C 31 112, 38 122, 48 130"
+          stroke="url(#innerCyanGrad)"
+          stroke-width="5"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <!-- 3. Bottom V-Tip and Lower Heart Chevron -->
+    <!-- Outer bottom V -->
+    <path d="M 38 138
+             L 76 176
+             L 106 206
+             L 118 194"
+          stroke="url(#heartDarkBlue)"
+          stroke-width="7.5"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <!-- Inner parallel chevron at base -->
+    <path d="M 58 144
+             L 86 172
+             L 106 192"
+          stroke="url(#innerCyanGrad)"
+          stroke-width="5"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <!-- ==================== ECG / PULSE SPIKE WAVE ==================== -->
+    <!-- Horizontal pulse entrance to Node 1 -->
+    <path d="M 38 138 L 64 138"
+          stroke="url(#heartDarkBlue)"
+          stroke-width="7.5"
+          stroke-linecap="round" />
+
+    <!-- Valley after Node 1 down to V and then up to main diagonal -->
+    <path d="M 72 138
+             L 86 156
+             L 100 138"
+          stroke="url(#heartDarkBlue)"
+          stroke-width="6.5"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <!-- ==================== MAIN DIAGONAL AI HIGHWAY ==================== -->
+    <line x1="100" y1="138" x2="152" y2="76"
+          stroke="url(#circuitGrad)"
+          stroke-width="6.5"
+          stroke-linecap="round" />
+
+    <!-- ==================== TOP RIGHT BRANCHES ==================== -->
+    <!-- Vertical connector to top synapse -->
+    <line x1="136" y1="95" x2="136" y2="58"
+          stroke="url(#circuitGrad)"
+          stroke-width="5.5"
+          stroke-linecap="round" />
+
+    <!-- Diagonal connector to outer top-right synapse -->
+    <line x1="152" y1="76" x2="178" y2="84"
+          stroke="url(#circuitGrad)"
+          stroke-width="5.5"
+          stroke-linecap="round" />
+
+    <!-- ==================== PCB CIRCUIT TRACES (MIDDLE & LOWER) ==================== -->
+    <!-- PCB Trace 1: Horizontal bend to Node -->
+    <path d="M 120 120
+             L 142 120
+             L 158 136
+             L 174 136"
+          stroke="url(#circuitGrad)"
+          stroke-width="5"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <!-- PCB Trace 2: Secondary horizontal trace -->
+    <path d="M 132 142
+             L 152 142
+             L 164 154"
+          stroke="url(#circuitGrad)"
+          stroke-width="4.5"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <!-- PCB Trace 3: Lower vertical drop to bottom synapse -->
+    <path d="M 124 156
+             L 124 180
+             L 142 196"
+          stroke="url(#heartDarkBlue)"
+          stroke-width="5.5"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <!-- Right Brain Lobe Curved Outer Boundary -->
+    <path d="M 178 84
+             C 192 102, 192 124, 186 142
+             C 180 156, 168 172, 150 182
+             L 142 196"
+          stroke="url(#circuitGrad)"
+          stroke-width="6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-dasharray="24 12 36 10" />
+
+    <!-- ==================== SYNAPSE NODES (ILLUMINATED GLOWING DOTS) ==================== -->
+    <!-- Node 1: ECG Baseline Node -->
+    <circle cx="68" cy="138" r="8" fill="#56CFE1" stroke="#16325B" stroke-width="3" filter="url(#glowFilter)" />
+    <circle cx="68" cy="138" r="3.2" fill="#FFFFFF" />
+
+    <!-- Node 2: Center Diagonal Node (Large) -->
+    <circle cx="108" cy="128" r="9.5" fill="#48CAE4" stroke="#16325B" stroke-width="3.5" filter="url(#glowFilter)" />
+    <circle cx="108" cy="128" r="4" fill="#FFFFFF" />
+
+    <!-- Node 3: Upper-Mid Diagonal Node -->
+    <circle cx="136" cy="95" r="9" fill="#00B4D8" stroke="#16325B" stroke-width="3.2" filter="url(#glowFilter)" />
+    <circle cx="136" cy="95" r="3.8" fill="#FFFFFF" />
+
+    <!-- Node 4: Top Synapse Node (Vertically connected) -->
+    <circle cx="136" cy="56" r="8.5" fill="#56CFE1" stroke="#1B3B6F" stroke-width="3" filter="url(#glowFilter)" />
+    <circle cx="136" cy="56" r="3.5" fill="#FFFFFF" />
+
+    <!-- Node 5: Upper Right Diagonal Synapse -->
+    <circle cx="152" cy="76" r="8.5" fill="#48CAE4" stroke="#16325B" stroke-width="3" filter="url(#glowFilter)" />
+    <circle cx="152" cy="76" r="3.5" fill="#FFFFFF" />
+
+    <!-- Node 6: Far Top-Right Outer Synapse -->
+    <circle cx="178" cy="84" r="8" fill="#56CFE1" stroke="#16325B" stroke-width="2.8" />
+    <circle cx="178" cy="84" r="3" fill="#FFFFFF" />
+
+    <!-- Node 7: Middle-Right Synapse (Trace 1 end) -->
+    <circle cx="174" cy="136" r="7.5" fill="#0096C7" stroke="#16325B" stroke-width="2.8" />
+    <circle cx="174" cy="136" r="3" fill="#FFFFFF" />
+
+    <!-- Node 8: Lower-Right Synapse (Trace 2 end) -->
+    <circle cx="164" cy="154" r="7" fill="#48CAE4" stroke="#16325B" stroke-width="2.5" />
+    <circle cx="164" cy="154" r="2.8" fill="#FFFFFF" />
+
+    <!-- Node 9: Bottom Right Terminal Synapse -->
+    <circle cx="142" cy="196" r="8" fill="#0077B6" stroke="#16325B" stroke-width="3" filter="url(#glowFilter)" />
+    <circle cx="142" cy="196" r="3.2" fill="#FFFFFF" />
+
+    <!-- Node 10: Center Cavity Synapse -->
+    <circle cx="122" cy="162" r="7.5" fill="#56CFE1" stroke="#16325B" stroke-width="2.5" />
+    <circle cx="122" cy="162" r="2.8" fill="#FFFFFF" />
+  </g>
+</svg>

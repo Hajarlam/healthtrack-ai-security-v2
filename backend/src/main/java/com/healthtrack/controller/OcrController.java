@@ -50,8 +50,8 @@ public class OcrController {
                     m.setName(medName);
                     String dosage = (dosages != null && i < dosages.size()) ? dosages.get(i) : "Voir ordonnance";
                     m.setDosage(dosage);
-                    m.setFrequency("Voir ordonnance");
-                    m.setInstructions("Importe automatiquement depuis ordonnance OCR - " + result.getDoctorName());
+                    m.setFrequency(dosage);
+                    m.setInstructions("Prescrit par " + result.getDoctorName() + " - " + dosage);
                     m.setStartDate(LocalDate.now());
                     m.setActive(true);
                     saved.add(medRepo.save(m));
