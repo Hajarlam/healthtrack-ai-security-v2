@@ -21,8 +21,7 @@ import { VirtualAvatarComponent, AvatarState } from "../../shared/components/vir
  * Do not regenerate, replace or redesign it; only the surrounding animation
  * changes. Swap the URL here if the asset ever moves to `assets/`.
  */
-const DOCTOR_AVATAR_IMAGE =
-  "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80";
+const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
 
 @Component({
   selector: "app-ai-dashboard",
@@ -2276,17 +2275,17 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
 
     this.snack.open("Importation des médicaments dans votre carnet...", "OK", {duration: 2000});
 
-    const requests = meds.map((medName, index) => {
+    const items = meds.map((medName, index) => {
       const dosage = dosages[index] || 'Selon avis médical';
-      return this.medService.addMedication({
+      return {
         name: medName,
         dosage: dosage,
         frequency: dosage,
         instructions: `Prescrit par ${doctorName} - ${dosage}`
-      });
+      };
     });
 
-    forkJoin(requests).subscribe({
+    this.medService.addMultipleMedications(items).subscribe({
       next: () => {
         this.snack.open(`✅ ${meds.length} médicament(s) enregistré(s) avec succès !`, 'Consulter', { duration: 5000 })
           .onAction().subscribe(() => {

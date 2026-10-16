@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, tap, catchError } from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Medication } from '../models/medication.model';
 
@@ -17,22 +18,12 @@ export class MedicationService {
       if (saved !== null) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          // Filter out any legacy dummy mock meds
-          const cleaned = parsed.filter(m => 
-            m && m.name &&
-            !m.name.includes('Kardégic 75 mg (Acétylsalicylate de lysine)') &&
-            !m.name.includes('Triatec 10 mg (Ramipril)') &&
-            !m.name.includes('Tahor 10 mg (Atorvastatine)')
-          );
-          if (cleaned.length !== parsed.length) {
-            this.saveLocalMeds(cleaned);
-          }
-          return cleaned;
+          return parsed;
         }
       }
     } catch(e) {}
 
-    // Par défaut : liste complètement vide !
+    // Par défaut si la liste n'a jamais été initialisée : liste vide
     return [];
   }
 
@@ -44,17 +35,20 @@ export class MedicationService {
 
   getMedications(): Observable<Medication[]> {
     return this.http.get<Medication[]>(this.API).pipe(
-      tap(meds => {
-        if (Array.isArray(meds)) {
-          // If backend returns a list, sync it to local storage
-          const cleaned = meds.filter(m => 
-            m && m.name &&
-            !m.name.includes('Kardégic 75 mg (Acétylsalicylate de lysine)') &&
-            !m.name.includes('Triatec 10 mg (Ramipril)') &&
-            !m.name.includes('Tahor 10 mg (Atorvastatine)')
-          );
-          this.saveLocalMeds(cleaned);
+      map(remoteMeds => {
+        const local = this.getLocalMeds();
+        if (Array.isArray(remoteMeds) && remoteMeds.length > 0) {
+          // Fusionner les données distantes avec la liste locale pour ne rien perdre
+          const merged = [...local];
+          for (const rm of remoteMeds) {
+            if (rm && rm.name && !merged.some(m => m.id === rm.id || m.name.toLowerCase() === rm.name.toLowerCase())) {
+              merged.push(rm);
+            }
+          }
+          this.saveLocalMeds(merged);
+          return merged;
         }
+        return local;
       }),
       catchError(() => of(this.getLocalMeds()))
     );
@@ -69,12 +63,53 @@ export class MedicationService {
       frequency: medication.frequency || '',
       instructions: medication.instructions || ''
     };
-    localList.unshift(newMed);
+    
+    // Éviter les doublons exacts par nom
+    const idx = localList.findIndex(m => m.name.trim().toLowerCase() === newMed.name.trim().toLowerCase());
+    if (idx >= 0) {
+      localList[idx] = { ...localList[idx], ...newMed };
+    } else {
+      localList.unshift(newMed);
+    }
     this.saveLocalMeds(localList);
 
-    return this.http.post<Medication>(this.API, medication).pipe(
+    return this.http.post<Medication>(this.API, newMed).pipe(
       catchError(() => of(newMed))
     );
+  }
+
+  addMultipleMedications(medications: Partial<Medication>[]): Observable<Medication[]> {
+    const localList = this.getLocalMeds();
+    const addedList: Medication[] = [];
+    let baseId = Date.now();
+
+    for (let i = 0; i < medications.length; i++) {
+      const m = medications[i];
+      baseId++;
+      const newMed: Medication = {
+        id: m.id || baseId,
+        name: (m.name || '').trim(),
+        dosage: m.dosage || 'Selon avis médical',
+        frequency: m.frequency || '1 fois par jour',
+        instructions: m.instructions || ''
+      };
+
+      if (newMed.name) {
+        const existingIdx = localList.findIndex(x => x.name.trim().toLowerCase() === newMed.name.toLowerCase());
+        if (existingIdx >= 0) {
+          localList[existingIdx] = { ...localList[existingIdx], ...newMed };
+        } else {
+          localList.unshift(newMed);
+        }
+        addedList.push(newMed);
+      }
+    }
+
+    this.saveLocalMeds(localList);
+
+    const requests = addedList.map(item => this.http.post<Medication>(this.API, item).pipe(catchError(() => of(item))));
+    if (requests.length === 0) return of(addedList);
+    return forkJoin(requests).pipe(catchError(() => of(addedList)));
   }
 
   deleteMedication(id: number): Observable<void> {

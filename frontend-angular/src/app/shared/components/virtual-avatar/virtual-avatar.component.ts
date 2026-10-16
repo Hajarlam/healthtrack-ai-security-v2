@@ -18,16 +18,9 @@ export type AvatarState = 'idle' | 'listening' | 'thinking' | 'speaking';
 /**
  * Dr. Virtuel avatar stage.
  *
- * Renders the **existing avatar image unchanged** (the caller passes its URL) and
- * animates it while the AI is speaking. The animation strategy is delegated to a
- * pluggable {@link LipSyncEngine}:
- *
- *  - default (`BasicMotionLipSyncEngine`): a purely cosmetic bob / glow / equaliser
- *    driven by a simulated amplitude — **not** a phoneme-accurate lip-sync.
- *  - a future open-source model: provide `LIP_SYNC_ENGINE` once in `app.config.ts`
- *    and, if it is `phonemeSynced`, this component exposes a viseme canvas hook.
- *
- * No paid service, iframe, API key or GPU is required for the default stage.
+ * Renders the clinical office avatar image in full 16:9 view and animates it
+ * naturally while the AI speaks out loud.
+ * 100% free, no external iframe or credits required.
  */
 @Component({
   selector: 'app-virtual-avatar',
@@ -42,53 +35,42 @@ export type AvatarState = 'idle' | 'listening' | 'thinking' | 'speaking';
          [class.is-thinking]="state === 'thinking'"
          [class.lipsync-accurate]="engine.phonemeSynced">
 
-      <div class="native-avatar-bg"></div>
-
-      <div class="native-avatar-inner">
-        <div class="doctor-avatar-circle">
-          <div class="pulse-ring ring-1"></div>
-          <div class="pulse-ring ring-2"></div>
-          <div class="voice-halo" aria-hidden="true"></div>
-
-          <!--
-            PRESERVED AVATAR IMAGE — do not regenerate/replace/redesign.
-            Its source is supplied verbatim by the caller.
-          -->
-          @if (!imgFailed) {
-            <img class="doctor-portrait-img"
-                 [src]="imageSrc"
-                 [alt]="name"
-                 loading="eager"
-                 decoding="async"
-                 (error)="imgFailed = true" />
-          } @else {
-            <span class="material-icons doctor-big-avatar fallback-avatar">support_agent</span>
-          }
-
-          <!--
-            Viseme canvas hook: only meaningful when a real phoneme engine is
-            plugged in. It stays empty for the default basic engine.
-          -->
-          @if (engine.phonemeSynced) {
-            <canvas class="viseme-canvas" width="256" height="256" aria-hidden="true"></canvas>
-          }
-        </div>
-
-        <div class="avatar-name-badge"><span class="avatar-dot"></span> {{ name }}</div>
-        <div class="avatar-live-status">{{ statusText }}</div>
-
-        <!-- Honest indicator: basic animation vs real phoneme lip-sync -->
-        <div class="lip-badge" [class.synced]="engine.phonemeSynced"
-             [title]="engine.phonemeSynced
-               ? 'Lip-sync phonétique (synchronisation réelle des lèvres)'
-               : 'Animation de parole basique : mouvement et halo, sans synchronisation phonème des lèvres'">
-          <span class="material-icons">{{ engine.phonemeSynced ? 'graphic_eq' : 'auto_awesome_motion' }}</span>
-          <span>{{ engine.label }}</span>
-        </div>
+      <!-- Full Clinic Doctor Photo -->
+      <div class="clinic-stage-bg">
+        @if (!imgFailed) {
+          <img class="clinic-doctor-photo"
+               [src]="imageSrc"
+               [alt]="name"
+               loading="eager"
+               decoding="async"
+               (error)="imgFailed = true" />
+        } @else {
+          <div class="fallback-stage">
+            <span class="material-icons fallback-icon">support_agent</span>
+            <p>{{ name }} &bull; Conseillère Médicale IA</p>
+          </div>
+        }
       </div>
 
-      <div class="avatar-eq" [class.active]="state === 'speaking'" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <!-- Speaking Waves & Halo Overlay on Doctor -->
+      @if (state === 'speaking') {
+        <div class="sound-halo-container" aria-hidden="true">
+          <span class="sound-ring ring-1"></span>
+          <span class="sound-ring ring-2"></span>
+          <span class="sound-ring ring-3"></span>
+        </div>
+      }
+
+      <!-- Overlay Badges at the bottom of the stage -->
+      <div class="stage-overlay-bottom">
+        <div class="avatar-status-pill" [class.speaking]="state === 'speaking'" [class.listening]="state === 'listening'">
+          <span class="status-dot"></span>
+          <span class="status-txt">{{ statusText }}</span>
+        </div>
+
+        <div class="avatar-eq" [class.active]="state === 'speaking'" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
       </div>
     </div>
   `,
@@ -99,16 +81,14 @@ export type AvatarState = 'idle' | 'listening' | 'thinking' | 'speaking';
       position: relative;
       border-radius: 20px;
       overflow: hidden;
-      background: radial-gradient(circle at 50% 32%, #10314F 0%, #0B1120 72%);
+      background: #0B1120;
       width: 100%;
       aspect-ratio: 16/9;
-      min-height: 300px;
+      min-height: 280px;
       box-shadow: 0 12px 36px rgba(0, 0, 0, 0.16);
-      border: 1px solid rgba(0, 119, 182, 0.2);
+      border: 2px solid rgba(0, 119, 182, 0.2);
       margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
       --talk-amp: 0;
     }
 
@@ -118,231 +98,177 @@ export type AvatarState = 'idle' | 'listening' | 'thinking' | 'speaking';
       height: 100vh;
       min-height: 100vh;
       border-radius: 0;
+      border: none;
     }
 
-    .native-avatar-bg {
+    .avatar-frame-box.is-speaking {
+      border-color: #10B981;
+      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.25);
+    }
+
+    .avatar-frame-box.is-listening {
+      border-color: #EF4444;
+      box-shadow: 0 12px 40px rgba(239, 68, 68, 0.25);
+    }
+
+    .clinic-stage-bg {
       position: absolute;
       inset: 0;
-      background-image: radial-gradient(rgba(72, 202, 228, 0.12) 1px, transparent 1px);
-      background-size: 22px 22px;
-      opacity: 0.7;
-    }
-
-    .native-avatar-inner {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      padding: 24px;
-    }
-
-    .doctor-avatar-circle {
-      position: relative;
-      width: clamp(120px, 24vh, 190px);
-      aspect-ratio: 1;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #0077B6, #00B4D8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
-      box-shadow: 0 0 0 8px rgba(72, 202, 228, 0.12), 0 18px 42px rgba(0, 180, 216, 0.35);
-      animation: avatarFloat 4.5s ease-in-out infinite;
     }
 
-    /* The preserved portrait image fills the circle without altering the face. */
-    .doctor-portrait-img {
+    .clinic-doctor-photo {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center 22%;
+      object-position: center center;
       display: block;
-      border-radius: 50%;
-      position: relative;
-      z-index: 1;
       user-select: none;
       -webkit-user-drag: none;
+      transition: transform 0.25s ease, filter 0.25s ease;
     }
 
-    .fallback-avatar {
-      font-size: clamp(56px, 12vh, 90px);
-      color: #FFFFFF;
-      position: relative;
-      z-index: 1;
+    .avatar-frame-box.is-speaking .clinic-doctor-photo {
+      transform: scale(calc(1 + var(--talk-amp, 0) * 0.02));
+      filter: brightness(1.04);
     }
 
-    .viseme-canvas {
-      position: absolute;
-      inset: 0;
+    .fallback-stage {
       width: 100%;
       height: 100%;
-      z-index: 3;
-      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 32%, #10314F 0%, #0B1120 72%);
+      color: #FFFFFF;
+      gap: 12px;
     }
 
-    @keyframes avatarFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+    .fallback-icon {
+      font-size: 72px;
+      color: #38BDF8;
     }
 
-    /* Speaking → amplitude-driven motion (cosmetic; not lip-sync) */
-    .avatar-frame-box.is-speaking .doctor-avatar-circle {
-      animation: avatarSpeak 1.05s ease-in-out infinite;
-    }
-
-    @keyframes avatarSpeak {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-4px) scale(calc(1 + var(--talk-amp, 0) * 0.025)); }
-    }
-
-    .voice-halo {
+    .sound-halo-container {
       position: absolute;
-      inset: -6%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(144, 224, 239, 0.55) 0%, rgba(144, 224, 239, 0) 62%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .avatar-frame-box.is-speaking .voice-halo {
-      opacity: calc(0.25 + var(--talk-amp, 0) * 0.65);
-    }
-
-    .pulse-ring {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: clamp(120px, 24vh, 190px);
-      height: clamp(120px, 24vh, 190px);
-      border-radius: 50%;
-      border: 2px solid rgba(72, 202, 228, 0.55);
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 0;
+      top: 40%;
+      left: 47%;
+      transform: translate(-50%, -50%);
+      width: 140px;
+      height: 140px;
       pointer-events: none;
       z-index: 2;
     }
 
-    .avatar-frame-box.is-speaking .ring-1,
-    .avatar-frame-box.is-speaking .ring-2 { animation: pulseRing 1.8s ease-out infinite; }
-    .avatar-frame-box.is-speaking .ring-2 { animation-delay: 0.6s; }
-    .avatar-frame-box.is-listening .ring-1,
-    .avatar-frame-box.is-listening .ring-2 { border-color: rgba(248, 113, 113, 0.6); animation: pulseRing 1.8s ease-out infinite; }
-    .avatar-frame-box.is-listening .ring-2 { animation-delay: 0.6s; }
-    .avatar-frame-box.is-thinking .ring-1 { border-color: rgba(253, 224, 71, 0.6); animation: pulseRing 1.8s ease-out infinite; }
+    .sound-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(16, 185, 129, 0.65);
+      animation: soundRingExpand 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    }
+    .sound-ring.ring-2 { animation-delay: 0.6s; }
+    .sound-ring.ring-3 { animation-delay: 1.2s; }
 
-    @keyframes pulseRing {
-      0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+    @keyframes soundRingExpand {
+      0% { transform: scale(0.6); opacity: 0.85; }
+      100% { transform: scale(2.4); opacity: 0; }
     }
 
-    .avatar-name-badge {
+    .stage-overlay-bottom {
+      position: absolute;
+      bottom: 14px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .avatar-status-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(144, 224, 239, 0.35);
-      color: #E6F7FF;
-      font-size: 13px;
-      font-weight: 700;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
       padding: 6px 14px;
-      border-radius: 999px;
-      backdrop-filter: blur(6px);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s ease;
     }
 
-    .avatar-dot {
-      width: 9px;
-      height: 9px;
+    .avatar-status-pill.speaking {
+      background: rgba(5, 150, 105, 0.92);
+      border-color: rgba(52, 211, 153, 0.6);
+    }
+
+    .avatar-status-pill.listening {
+      background: rgba(220, 38, 38, 0.92);
+      border-color: rgba(248, 113, 113, 0.6);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: #34D399;
-      animation: liveDot 1.8s ease-in-out infinite;
+      background: #10B981;
+      box-shadow: 0 0 6px #10B981;
     }
-
-    @keyframes liveDot {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
-      50% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
-    }
-
-    .avatar-live-status {
-      color: #BFE7F5;
-      font-size: 12.5px;
-      letter-spacing: 0.2px;
-      min-height: 18px;
-    }
-
-    .lip-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 10.5px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-      text-transform: uppercase;
-      color: #7FB3C8;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(127, 179, 200, 0.28);
-      padding: 4px 10px;
-      border-radius: 999px;
-    }
-    .lip-badge .material-icons { font-size: 13px; }
-    .lip-badge.synced {
-      color: #6EE7B7;
-      border-color: rgba(110, 231, 183, 0.45);
-      background: rgba(16, 185, 129, 0.12);
-    }
+    .speaking .status-dot { background: #34D399; box-shadow: 0 0 8px #34D399; }
+    .listening .status-dot { background: #F87171; box-shadow: 0 0 8px #F87171; }
 
     .avatar-eq {
-      position: absolute;
-      bottom: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
+      display: inline-flex;
       align-items: flex-end;
-      gap: 4px;
-      height: 26px;
-      opacity: 0.25;
-      transition: opacity 0.25s ease;
-      z-index: 3;
+      gap: 3px;
+      height: 22px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
-
-    .avatar-eq.active { opacity: 1; }
 
     .avatar-eq span {
-      width: 4px;
-      height: 8px;
-      border-radius: 3px;
-      background: linear-gradient(180deg, #90E0EF, #00B4D8);
+      width: 3px;
+      height: 6px;
+      background: #94A3B8;
+      border-radius: 2px;
+      transition: height 0.15s ease;
     }
 
-    .avatar-eq.active span { animation: eqBar 0.9s ease-in-out infinite; }
-
-    .avatar-eq span:nth-child(1) { animation-delay: 0.05s; }
-    .avatar-eq span:nth-child(2) { animation-delay: 0.2s; }
-    .avatar-eq span:nth-child(3) { animation-delay: 0.35s; }
-    .avatar-eq span:nth-child(4) { animation-delay: 0.5s; }
-    .avatar-eq span:nth-child(5) { animation-delay: 0.3s; }
-    .avatar-eq span:nth-child(6) { animation-delay: 0.15s; }
-    .avatar-eq span:nth-child(7) { animation-delay: 0.45s; }
+    .avatar-eq.active span {
+      background: #10B981;
+      animation: eqBar 0.8s ease-in-out infinite alternate;
+    }
+    .avatar-eq.active span:nth-child(1) { animation-delay: 0.1s; }
+    .avatar-eq.active span:nth-child(2) { animation-delay: 0.25s; }
+    .avatar-eq.active span:nth-child(3) { animation-delay: 0.4s; }
+    .avatar-eq.active span:nth-child(4) { animation-delay: 0.15s; }
+    .avatar-eq.active span:nth-child(5) { animation-delay: 0.35s; }
+    .avatar-eq.active span:nth-child(6) { animation-delay: 0.2s; }
+    .avatar-eq.active span:nth-child(7) { animation-delay: 0.3s; }
 
     @keyframes eqBar {
-      0%, 100% { height: 8px; }
-      50% { height: 24px; }
-    }
-
-    @media (max-width: 640px) {
-      .avatar-frame-box { min-height: 240px; }
-      .native-avatar-inner { gap: 8px; padding: 16px; }
-      .avatar-live-status { font-size: 11.5px; }
-      .lip-badge { font-size: 9.5px; }
+      0% { height: 4px; }
+      100% { height: 18px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .doctor-avatar-circle,
-      .avatar-frame-box.is-speaking .doctor-avatar-circle,
-      .avatar-eq.active span { animation: none !important; }
+      .clinic-doctor-photo,
+      .avatar-eq.active span,
+      .sound-ring { animation: none !important; }
     }
   `],
 })
@@ -363,9 +289,9 @@ export class VirtualAvatarComponent implements OnChanges, OnDestroy {
   get statusText(): string {
     switch (this.state) {
       case 'thinking': return 'Réflexion clinique en cours…';
-      case 'speaking': return 'Réponse vocale en cours…';
-      case 'listening': return 'Je vous écoute…';
-      default: return 'En ligne — prêt à vous conseiller';
+      case 'speaking': return `${this.name} s'exprime à voix haute…`;
+      case 'listening': return `${this.name} écoute votre voix…`;
+      default: return `${this.name} • Cabinet Médical Ouvert`;
     }
   }
 
