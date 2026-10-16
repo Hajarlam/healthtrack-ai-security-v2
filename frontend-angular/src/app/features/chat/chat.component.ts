@@ -9,7 +9,7 @@ import { ChatService } from "../../core/services/chat.service";
 import { environment } from "../../../environments/environment";
 
 interface Contact { id: number; firstName: string; lastName: string; role: string; email: string; }
-interface Msg { id: number; sender: {id:number; firstName:string; lastName:string}; receiver: {id:number}; content: string; sentAt: string; readByReceiver: boolean; }
+interface Msg { id: number; sender: {id:number; firstName:string; lastName:string}; receiver: {id:number}; content: string; sentAt: string; readByReceiver: boolean; photoUrl?: string; }
 
 @Component({
   selector: "app-chat",
@@ -132,7 +132,14 @@ interface Msg { id: number; sender: {id:number; firstName:string; lastName:strin
           @for (m of messages(); track m.id) {
             <div class="message-row" [class.mine]="m.sender.id === myId()" [class.other]="m.sender.id !== myId()">
               <div class="bubble">
-                <p class="bubble-content">{{ m.content }}</p>
+                @if (m.photoUrl) {
+                  <div class="bubble-photo-wrapper">
+                    <img [src]="m.photoUrl" alt="Document médical" class="chat-photo-img" (click)="activePhotoModal.set(m.photoUrl)">
+                  </div>
+                }
+                @if (m.content) {
+                  <p class="bubble-content">{{ m.content }}</p>
+                }
                 <div class="bubble-footer">
                   <span class="bubble-time">{{ formatTime(m.sentAt) }}</span>
                   @if (m.sender.id === myId()) {
@@ -149,22 +156,82 @@ interface Msg { id: number; sender: {id:number; firstName:string; lastName:strin
                 <span class="material-icons">waving_hand</span>
               </div>
               <h4>Nouvelle conversation</h4>
-              <p>Envoyez votre premier message médical à <strong>{{ selectedContact()!.firstName }} {{ selectedContact()!.lastName }}</strong>.</p>
+              <p>Envoyez votre premier message médical ou une photo à <strong>{{ selectedContact()!.firstName }} {{ selectedContact()!.lastName }}</strong>.</p>
             </div>
           }
         </div>
 
-        <!-- Chat Input Capsule -->
+        <!-- Chat Input Capsule with Photo & Emoji Support -->
         <div class="chat-composer">
+          <!-- Photo Preview Bar (Shown when an image is selected) -->
+          @if (selectedPhoto()) {
+            <div class="photo-preview-bar">
+              <div class="preview-thumb-box">
+                <img [src]="selectedPhoto()" alt="Aperçu photo" class="preview-thumb">
+                <span class="preview-tag">Photo médicale prête à être envoyée</span>
+              </div>
+              <button type="button" class="btn-clear-photo" (click)="clearPhoto()" title="Supprimer la photo">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+          }
+
+          <!-- Emoji Picker Popover -->
+          @if (showEmojiPicker()) {
+            <div class="emoji-picker-container">
+              <div class="emoji-header">
+                <span>🩺 Santé & Médecine</span>
+                <button type="button" class="close-emoji" (click)="showEmojiPicker.set(false)"><span class="material-icons">close</span></button>
+              </div>
+              <div class="emoji-row">
+                @for (e of medicalEmojis; track e) {
+                  <button type="button" class="emoji-btn" (click)="addEmoji(e)">{{e}}</button>
+                }
+              </div>
+              <div class="emoji-header">
+                <span>💬 Échanges Quotidiens</span>
+              </div>
+              <div class="emoji-row">
+                @for (e of convoEmojis; track e) {
+                  <button type="button" class="emoji-btn" (click)="addEmoji(e)">{{e}}</button>
+                }
+              </div>
+            </div>
+          }
+
           <div class="composer-container">
+            <!-- Hidden photo input -->
+            <input type="file" #photoInput accept="image/*" (change)="onPhotoSelected($event)" style="display:none">
+
+            <button type="button" class="tool-btn" (click)="photoInput.click()" title="Joindre une photo, ordonnance ou document">
+              <span class="material-icons">add_a_photo</span>
+            </button>
+
+            <button type="button" class="tool-btn" (click)="showEmojiPicker.set(!showEmojiPicker())" title="Insérer un émoji médical">
+              <span class="material-icons">mood</span>
+            </button>
+
             <input type="text" [(ngModel)]="newMessage" (keydown.enter)="send()"
                    placeholder="Écrivez votre message sécurisé... (Entrée pour envoyer)"
                    class="composer-input">
-            <button class="send-btn" (click)="send()" [disabled]="!newMessage.trim()" title="Envoyer le message">
+
+            <button class="send-btn" (click)="send()" [disabled]="!newMessage.trim() && !selectedPhoto()" title="Envoyer le message">
               <span class="material-icons">send</span>
             </button>
           </div>
         </div>
+
+        <!-- Fullscreen Photo Modal -->
+        @if (activePhotoModal()) {
+          <div class="photo-modal-backdrop" (click)="activePhotoModal.set(null)">
+            <div class="photo-modal-dialog" (click)="$event.stopPropagation()">
+              <button class="modal-close-btn" (click)="activePhotoModal.set(null)" title="Fermer">
+                <span class="material-icons">close</span>
+              </button>
+              <img [src]="activePhotoModal()" alt="Photo médicale agrandie" class="modal-full-img">
+            </div>
+          </div>
+        }
 
       } @else {
         <!-- MODERN EMPTY STATE (NO CONTACT SELECTED) -->
@@ -960,6 +1027,172 @@ interface Msg { id: number; sender: {id:number; firstName:string; lastName:strin
       max-width: none;
     }
   }
+
+  /* Photo Attachment and Emoji Picker Styles */
+  .bubble-photo-wrapper {
+    margin-bottom: 8px;
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 280px;
+    cursor: pointer;
+  }
+  .chat-photo-img {
+    width: 100%;
+    max-height: 240px;
+    object-fit: cover;
+    display: block;
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+  }
+  .chat-photo-img:hover {
+    transform: scale(1.02);
+  }
+
+  .photo-preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    border-radius: 12px;
+    padding: 8px 14px;
+    margin-bottom: 8px;
+  }
+  .preview-thumb-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .preview-thumb {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #86EFAC;
+  }
+  .preview-tag {
+    font-size: 13px;
+    font-weight: 600;
+    color: #166534;
+  }
+  .btn-clear-photo {
+    background: #DC2626;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .btn-clear-photo .material-icons {
+    font-size: 16px;
+  }
+
+  .tool-btn {
+    background: transparent;
+    border: none;
+    color: #0077B6;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .tool-btn:hover {
+    background: #E0F2FE;
+    transform: scale(1.08);
+  }
+  .tool-btn .material-icons {
+    font-size: 22px;
+  }
+
+  .emoji-picker-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    border: 1px solid #E2E8F0;
+    padding: 12px;
+    margin-bottom: 8px;
+    animation: popUp 0.15s ease-out;
+  }
+  .emoji-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    margin: 6px 0 4px;
+  }
+  .close-emoji {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94A3B8;
+  }
+  .close-emoji .material-icons { font-size: 16px; }
+  .emoji-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .emoji-btn {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 20px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.1s;
+  }
+  .emoji-btn:hover {
+    background: #E0F2FE;
+    transform: scale(1.2);
+  }
+
+  .photo-modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .photo-modal-dialog {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+  }
+  .modal-full-img {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal-close-btn {
+    position: absolute;
+    top: -16px;
+    right: -16px;
+    background: white;
+    color: #1E293B;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
   `]
 })
 export class ChatComponent implements OnInit, AfterViewChecked {
@@ -973,6 +1206,13 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   newMessage = "";
   myId = signal(0);
   private shouldScroll = false;
+
+  selectedPhoto = signal<string | null>(null);
+  showEmojiPicker = signal<boolean>(false);
+  activePhotoModal = signal<string | null>(null);
+
+  medicalEmojis = ['🩺', '💊', '🩹', '🏥', '🌡️', '💉', '📋', '🧬', '⚠️', '❤️', '🫀', '🫁', '🦷', '🩸', '🚑', '🚨'];
+  convoEmojis = ['😊', '👍', '👋', '🙏', '🤝', '💬', '🙋‍♂️', '🙋‍♀️', '🕒', '✅', '❌', '📞', '😷', '🤒', '🤕', '💡'];
 
   filteredContacts = computed(() => {
     const list = this.contacts();
@@ -989,13 +1229,13 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   constructor(private http: HttpClient, public auth: AuthService, public chatService: ChatService) {}
 
   private unreadInterval: any = null;
+  private convoInterval: any = null;
 
   ngOnInit() {
-    this.myId.set(this.auth.currentUser()?.id || 0);
+    this.myId.set(this.auth.currentUser()?.id || (this.auth.getRole() === 'DOCTOR' ? 2 : 1));
     this.loadContacts();
     this.chatService.refreshUnreadCount();
     
-    // Refresh unread counts periodically
     this.unreadInterval = setInterval(() => this.loadUnreadCounts(), 5000);
   }
 
@@ -1006,6 +1246,27 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
   ngAfterViewChecked() {
     if (this.shouldScroll) { this.scrollBottom(); this.shouldScroll = false; }
+  }
+
+  addEmoji(emoji: string) {
+    this.newMessage += emoji;
+  }
+
+  onPhotoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.selectedPhoto.set(reader.result as string);
+        input.value = '';
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  clearPhoto() {
+    this.selectedPhoto.set(null);
   }
 
   loadContacts() {
@@ -1062,7 +1323,64 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  private convoInterval: any = null;
+  private getStorageKey(userA: number, userB: number): string {
+    const min = Math.min(userA, userB);
+    const max = Math.max(userA, userB);
+    return `sihati_chat_store_${min}_${max}`;
+  }
+
+  private getStoredConvo(userA: number, userB: number): Msg[] {
+    const key = this.getStorageKey(userA, userB);
+    try {
+      const data = localStorage.getItem(key);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+
+    // Default initial seeded discussion between Sara (1) and Dr. Bennani (2)
+    if ((userA === 1 && userB === 2) || (userA === 2 && userB === 1)) {
+      const now = new Date();
+      const initial: Msg[] = [
+        {
+          id: 101,
+          sender: { id: 1, firstName: 'Sara', lastName: 'El Amrani' },
+          receiver: { id: 2 },
+          content: "Bonjour Dr. Bennani, j'ai enregistré mes constantes de santé ce matin (tension 142/88 mmHg).",
+          sentAt: new Date(now.getTime() - 7200000).toISOString(),
+          readByReceiver: true
+        },
+        {
+          id: 102,
+          sender: { id: 2, firstName: 'Dr. Ahmed', lastName: 'Bennani' },
+          receiver: { id: 1 },
+          content: "Bonjour Sara. Bien reçu. Poursuivez votre Kardégic à midi et prévoyez une mesure de repos ce soir.",
+          sentAt: new Date(now.getTime() - 3600000).toISOString(),
+          readByReceiver: true
+        },
+        {
+          id: 103,
+          sender: { id: 1, firstName: 'Sara', lastName: 'El Amrani' },
+          receiver: { id: 2 },
+          content: "Parfait Docteur, merci pour votre réactivité !",
+          sentAt: new Date(now.getTime() - 1800000).toISOString(),
+          readByReceiver: true
+        }
+      ];
+      this.saveStoredConvo(userA, userB, initial);
+      return initial;
+    }
+
+    return [];
+  }
+
+  private saveStoredConvo(userA: number, userB: number, msgs: Msg[]): void {
+    const key = this.getStorageKey(userA, userB);
+    try {
+      localStorage.setItem(key, JSON.stringify(msgs));
+    } catch (e) {}
+  }
 
   selectContact(c: Contact) {
     this.selectedContact.set(c);
@@ -1082,93 +1400,99 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     if (this.convoInterval) {
       clearInterval(this.convoInterval);
     }
+    // Check for incoming messages in shared store every 2.5s
     this.convoInterval = setInterval(() => {
       if (this.selectedContact()?.id === c.id) {
-        this.loadMessages(c.id);
+        this.syncMessagesFromStorage(c.id);
       }
-    }, 5000);
+    }, 2500);
+  }
+
+  syncMessagesFromStorage(contactId: number) {
+    const myId = this.myId();
+    const stored = this.getStoredConvo(myId, contactId);
+    if (stored.length !== this.messages().length || (stored.length > 0 && stored[stored.length - 1].id !== this.messages()[this.messages().length - 1]?.id)) {
+      this.messages.set(stored);
+      this.shouldScroll = true;
+    }
   }
 
   loadMessages(contactId: number) {
-    this.http.get<Msg[]>(`${environment.apiUrl}/chat/conversation/${contactId}`).subscribe({
-      next: m => { 
-        if (m && m.length > 0) {
-          this.messages.set(m); 
-          this.shouldScroll = true; 
-          this.loadUnreadCounts();
-          this.chatService.refreshUnreadCount();
-        } else {
-          this.loadDemoConversation(contactId);
-        }
-      }, 
-      error: () => {
-        this.loadDemoConversation(contactId);
+    const myId = this.myId();
+    const localMsgs = this.getStoredConvo(myId, contactId);
+
+    // Mark as read in local store
+    let updated = false;
+    for (const m of localMsgs) {
+      if (m.receiver.id === myId && !m.readByReceiver) {
+        m.readByReceiver = true;
+        updated = true;
       }
-    });
-  }
+    }
+    if (updated) this.saveStoredConvo(myId, contactId, localMsgs);
 
-  loadDemoConversation(contactId: number) {
-    const myId = this.auth.currentUser()?.id || 1;
-    const now = new Date();
-    const t1 = new Date(now.getTime() - 7200000).toISOString();
-    const t2 = new Date(now.getTime() - 3600000).toISOString();
-    const t3 = new Date(now.getTime() - 1800000).toISOString();
-
-    const convos: Record<number, Msg[]> = {
-      2: [
-        { id: 101, sender: { id: myId, firstName: this.auth.currentUser()?.firstName || 'Sara', lastName: this.auth.currentUser()?.lastName || 'El Amrani' }, receiver: { id: 2 }, content: "Bonjour Dr. Bennani, j'ai enregistré mes constantes de santé ce matin (tension 142/88 mmHg).", sentAt: t1, readByReceiver: true },
-        { id: 102, sender: { id: 2, firstName: 'Dr. Ahmed', lastName: 'Bennani' }, receiver: { id: myId }, content: "Bonjour Sara. Bien reçu. Poursuivez votre Kardégic à midi et prévoyez une mesure de repos ce soir.", sentAt: t2, readByReceiver: true },
-        { id: 103, sender: { id: myId, firstName: this.auth.currentUser()?.firstName || 'Sara', lastName: this.auth.currentUser()?.lastName || 'El Amrani' }, receiver: { id: 2 }, content: "Parfait Docteur, merci pour votre réactivité !", sentAt: t3, readByReceiver: true }
-      ],
-      1: [
-        { id: 201, sender: { id: 1, firstName: 'Sara', lastName: 'El Amrani' }, receiver: { id: myId }, content: "Bonjour Docteur, mes constantes sont stables aujourd'hui.", sentAt: t1, readByReceiver: true },
-        { id: 202, sender: { id: myId, firstName: 'Dr. Ahmed', lastName: 'Bennani' }, receiver: { id: 1 }, content: "Très bien Sara. Continuez ainsi et n'hésitez pas en cas de symptôme inhabituel.", sentAt: t2, readByReceiver: true }
-      ]
-    };
-
-    const msgs = convos[contactId] || [
-      { id: 301, sender: { id: contactId, firstName: 'Contact', lastName: 'Médical' }, receiver: { id: myId }, content: "Bonjour, le canal de messagerie sécurisée Sihati AI est actif. Comment pouvons-nous vous assister ?", sentAt: t1, readByReceiver: true }
-    ];
-    this.messages.set(msgs);
+    this.messages.set(localMsgs);
     this.shouldScroll = true;
+
+    // Also sync with server if available
+    this.http.get<Msg[]>(`${environment.apiUrl}/chat/conversation/${contactId}`).subscribe({
+      next: (serverMsgs) => {
+        if (serverMsgs && serverMsgs.length > 0) {
+          const merged = [...localMsgs];
+          for (const sm of serverMsgs) {
+            if (!merged.some(lm => lm.id === sm.id)) merged.push(sm);
+          }
+          this.messages.set(merged);
+          this.saveStoredConvo(myId, contactId, merged);
+          this.shouldScroll = true;
+        }
+      },
+      error: () => {}
+    });
   }
 
   send() {
     const content = this.newMessage.trim();
-    if (!content || !this.selectedContact()) return;
+    const photo = this.selectedPhoto();
+    if ((!content && !photo) || !this.selectedContact()) return;
+
     const contact = this.selectedContact()!;
-    const myId = this.auth.currentUser()?.id || 1;
+    const myId = this.myId();
     const me = this.auth.currentUser();
 
-    const localMsg: Msg = {
+    const senderFirst = me?.firstName || (this.auth.getRole() === 'DOCTOR' ? 'Dr. Ahmed' : 'Sara');
+    const senderLast = me?.lastName || (this.auth.getRole() === 'DOCTOR' ? 'Bennani' : 'El Amrani');
+
+    const newMsg: Msg = {
       id: Date.now(),
-      sender: { id: myId, firstName: me?.firstName || 'Moi', lastName: me?.lastName || '' },
+      sender: {
+        id: myId,
+        firstName: senderFirst,
+        lastName: senderLast
+      },
       receiver: { id: contact.id },
-      content,
+      content: content || (photo ? 'Photo médicale transmise' : ''),
+      photoUrl: photo || undefined,
       sentAt: new Date().toISOString(),
       readByReceiver: false
     };
 
-    this.messages.update(msgs => [...msgs, localMsg]);
-    this.newMessage = "";
+    // Save to shared localStorage store immediately so it never disappears!
+    const currentList = this.getStoredConvo(myId, contact.id);
+    currentList.push(newMsg);
+    this.saveStoredConvo(myId, contact.id, currentList);
+
+    // Update UI immediately
+    this.messages.set([...currentList]);
+    this.newMessage = '';
+    this.selectedPhoto.set(null);
+    this.showEmojiPicker.set(false);
     this.shouldScroll = true;
 
-    this.http.post<Msg>(`${environment.apiUrl}/chat/send/${contact.id}`, {content}).subscribe({
-      next: m => {},
-      error: () => {
-        setTimeout(() => {
-          const reply: Msg = {
-            id: Date.now() + 1,
-            sender: { id: contact.id, firstName: contact.firstName, lastName: contact.lastName },
-            receiver: { id: myId },
-            content: `Message bien reçu concernant votre suivi médical. Nos praticiens restent à votre disposition.`,
-            sentAt: new Date().toISOString(),
-            readByReceiver: true
-          };
-          this.messages.update(msgs => [...msgs, reply]);
-          this.shouldScroll = true;
-        }, 1200);
-      }
+    // Send to backend if available
+    this.http.post<Msg>(`${environment.apiUrl}/chat/send/${contact.id}`, { content: newMsg.content }).subscribe({
+      next: () => {},
+      error: () => {}
     });
   }
 
