@@ -1833,10 +1833,19 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     "Quels sont les signaux d'alerte cardiovasculaires majeurs ?"
   ];
 
+  doctorMode     = signal<'native' | 'liveavatar'>('native');
   isListening    = signal<boolean>(false);
   isSpeaking     = signal<boolean>(false);
   loadingChatbot = signal<boolean>(false);
   chatInputText  = '';
+
+  setDoctorMode(mode: 'native' | 'liveavatar') {
+    this.doctorMode.set(mode);
+    if (mode === 'liveavatar') {
+      this.stopSpeaking();
+      this.stopVoiceRecognition();
+    }
+  }
 
   private recognition: any = null;
   private currentUtterance: SpeechSynthesisUtterance | null = null;
