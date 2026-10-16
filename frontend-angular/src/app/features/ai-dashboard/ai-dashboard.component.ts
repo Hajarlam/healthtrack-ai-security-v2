@@ -214,7 +214,7 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
         <!-- Video Frame Container (LiveAvatar Original) -->
         <div class="avatar-frame-box">
           <iframe id="doctorIframe"
-                  src="https://embed.liveavatar.com/v1/fc9c1f9f-bc99-4fd9-a6b2-8b4b5669a046?orientation=horizontal" 
+                  src="https://embed.liveavatar.com/v1/a310c6c3-b86d-4531-92a7-94c912c9614c?orientation=horizontal" 
                   allow="camera; microphone; autoplay; encrypted-media; display-capture; fullscreen; geolocation" 
                   allowfullscreen="true"
                   loading="eager"
