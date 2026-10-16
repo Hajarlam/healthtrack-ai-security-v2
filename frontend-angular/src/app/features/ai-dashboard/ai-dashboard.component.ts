@@ -201,26 +201,28 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
               <span class="lang-badge" [class.active]="selectedLang === 'DAR'" (click)="setLang('DAR')">الدارجة</span>
             </div>
 
-            <button type="button" (click)="toggleAvatarFullscreen()" class="btn-fullscreen" title="Afficher en plein écran">
-              <span class="material-icons">fullscreen</span> Plein Écran
-            </button>
-            <button type="button" (click)="resetConversation()" class="btn-reload" title="Nouvelle consultation">
+            <a href="https://app.liveavatar.com/fc9c1f9f-bc99-4fd9-a6b2-8b4b5669a046" 
+               target="_blank" class="btn-fullscreen" title="Afficher en plein écran">
+              <span class="material-icons">open_in_new</span> Plein Écran
+            </a>
+            <button type="button" (click)="reloadDoctorIframe()" class="btn-reload" title="Recharger la vidéo">
               <span class="material-icons">refresh</span>
             </button>
           </div>
         </div>
 
-        <!--
-          Dr. Virtuel — 100% gratuit : aucune iframe, aucun crédit, aucune clé API.
-          L'image de l'avatar est conservée telle quelle ([imageSrc]) et animée
-          pendant la parole. Voir <app-virtual-avatar> et le moteur de lip-sync
-          remplaçable dans core/avatar/.
-        -->
-        <app-virtual-avatar
-          [imageSrc]="doctorImageUrl"
-          [name]="'Dr. Virtuel'"
-          [state]="avatarState()">
-        </app-virtual-avatar>
+        <!-- Video Frame Container (LiveAvatar Original) -->
+        <div class="avatar-frame-box">
+          <iframe id="doctorIframe"
+                  src="https://embed.liveavatar.com/v1/fc9c1f9f-bc99-4fd9-a6b2-8b4b5669a046?orientation=horizontal" 
+                  allow="camera; microphone; autoplay; encrypted-media; display-capture; fullscreen; geolocation" 
+                  allowfullscreen="true"
+                  loading="eager"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  title="Dr. Virtuel — Médecin Conseiller Interactif - LiveAvatar"
+                  class="doctor-iframe">
+          </iframe>
+        </div>
 
         <!-- Section Consultation Écrite & Réponse Orale par l'IA -->
         <div class="consultation-chat-station">
@@ -994,8 +996,25 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
 
   .btn-reload .material-icons { font-size: 18px; }
 
-  /* L'avatar Dr. Virtuel (image conservée + animation de parole) est rendu par
-     <app-virtual-avatar> : tout son style est encapsulé dans ce composant. */
+  /* Video Frame Container (LiveAvatar Original) */
+  .avatar-frame-box {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #0B1120;
+    width: 100%;
+    aspect-ratio: 16/9;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(0, 119, 182, 0.2);
+    margin-bottom: 20px;
+  }
+
+  .doctor-iframe {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: none;
+  }
 
   /* Consultation Station (Écrit + Réponse Orale) */
   .consultation-chat-station {
@@ -1805,6 +1824,16 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     }
     const label = lang === 'FR' ? 'Français' : lang === 'AR' ? 'العربية' : lang === 'DAR' ? 'الدارجة' : 'English';
     this.snack.open(`Langue sélectionnée : ${label}`, 'OK', { duration: 2500 });
+  }
+
+  reloadDoctorIframe() {
+    const iframe = document.getElementById('doctorIframe') as HTMLIFrameElement;
+    if (iframe) {
+      const src = iframe.src;
+      iframe.src = '';
+      setTimeout(() => { iframe.src = src; }, 150);
+      this.snack.open('Rechargement du Dr. Virtuel en cours...', 'OK', { duration: 2000 });
+    }
   }
 
   toggleAvatarFullscreen() {
