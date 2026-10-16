@@ -226,18 +226,18 @@ interface OcrResult {
           </div>
         </div>
 
-        <!-- LiveAvatar HD video mode (optional — requires active LiveAvatar credits) -->
+        <!-- LiveAvatar HD video mode (default) — switch to « Avatar IA » if LiveAvatar credits run out -->
         @if (doctorMode() === 'liveavatar') {
           <div class="avatar-frame-box avatar-video-mode">
             <iframe id="doctorIframe"
-                    src="https://embed.liveavatar.com/v1/a310c6c3-b86d-4531-92a7-94c912c9614c?orientation=horizontal"
+                    src="https://embed.liveavatar.com/v1/4714424f-aff5-4581-8457-a228a4e6a5ef?orientation=horizontal"
                     allow="camera; microphone; autoplay; encrypted-media; display-capture; fullscreen"
                     allowfullscreen="true"
                     referrerpolicy="no-referrer-when-downgrade"
-                    title="Dr. Virtuel — LiveAvatar (Ann Doctor Sitting)"
+                    title="Dr. Virtuel — LiveAvatar (Ann Doctor Standing)"
                     class="doctor-iframe"></iframe>
             <div class="avatar-video-note">
-              Mode vidéo LiveAvatar — nécessite des crédits LiveAvatar actifs (app.liveavatar.com). Sinon, utilisez « Avatar IA » (gratuit).
+              Vidéo HD LiveAvatar — si des crédits sont requis, cliquez sur « Avatar IA » (gratuit).
             </div>
           </div>
         } @else {
@@ -1087,7 +1087,7 @@ interface OcrResult {
   .doctor-iframe { width: 100%; height: 100%; display: block; border: none; }
   .avatar-video-note {
     position: absolute;
-    bottom: 12px;
+    top: 12px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(2, 62, 88, 0.85);
@@ -2045,7 +2045,7 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
   ];
 
   selectedLang: 'FR' | 'AR' | 'EN' | 'DAR' = 'FR';
-  doctorMode     = signal<'native' | 'liveavatar'>('native');
+  doctorMode     = signal<'native' | 'liveavatar'>('liveavatar');
   isListening    = signal<boolean>(false);
   isSpeaking     = signal<boolean>(false);
   loadingChatbot = signal<boolean>(false);
