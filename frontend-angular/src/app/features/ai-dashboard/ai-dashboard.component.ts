@@ -208,6 +208,15 @@ interface OcrResult {
               <span class="lang-badge" [class.active]="selectedLang === 'DAR'" (click)="setLang('DAR')">الدارجة</span>
             </div>
 
+            <div class="avatar-mode-pills" title="Choisir le mode du médecin virtuel">
+              <button type="button" class="mode-pill" [class.active]="doctorMode() === 'native'" (click)="setDoctorMode('native')">
+                <span class="material-icons">smart_toy</span> Avatar IA
+              </button>
+              <button type="button" class="mode-pill" [class.active]="doctorMode() === 'liveavatar'" (click)="setDoctorMode('liveavatar')">
+                <span class="material-icons">videocam</span> Vidéo HD
+              </button>
+            </div>
+
             <button type="button" (click)="toggleAvatarFullscreen()" class="btn-fullscreen" title="Afficher en plein écran">
               <span class="material-icons">fullscreen</span> Plein Écran
             </button>
@@ -216,6 +225,22 @@ interface OcrResult {
             </button>
           </div>
         </div>
+
+        <!-- LiveAvatar HD video mode (optional — requires active LiveAvatar credits) -->
+        @if (doctorMode() === 'liveavatar') {
+          <div class="avatar-frame-box avatar-video-mode">
+            <iframe id="doctorIframe"
+                    src="https://embed.liveavatar.com/v1/a310c6c3-b86d-4531-92a7-94c912c9614c?orientation=horizontal"
+                    allow="camera; microphone; autoplay; encrypted-media; display-capture; fullscreen"
+                    allowfullscreen="true"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    title="Dr. Virtuel — LiveAvatar (Ann Doctor Sitting)"
+                    class="doctor-iframe"></iframe>
+            <div class="avatar-video-note">
+              Mode vidéo LiveAvatar — nécessite des crédits LiveAvatar actifs (app.liveavatar.com). Sinon, utilisez « Avatar IA » (gratuit).
+            </div>
+          </div>
+        } @else {
 
         <!-- Native Virtual Doctor Avatar (100% gratuit — aucun service payant, aucune clé API) -->
         <div class="avatar-frame-box"
@@ -264,6 +289,7 @@ interface OcrResult {
             <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
           </div>
         </div>
+        }
 
         <!-- Section Consultation Écrite & Réponse Orale par l'IA -->
         <div class="consultation-chat-station">
@@ -963,6 +989,8 @@ interface OcrResult {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .lang-pills {
@@ -1034,6 +1062,45 @@ interface OcrResult {
   }
 
   .btn-reload .material-icons { font-size: 18px; }
+
+  .avatar-mode-pills { display: flex; gap: 6px; }
+  .mode-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid #CBD5E1;
+    background: #FFFFFF;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .mode-pill .material-icons { font-size: 16px; }
+  .mode-pill:hover { border-color: #0077B6; color: #0077B6; }
+  .mode-pill.active { background: #0077B6; border-color: #0077B6; color: #FFFFFF; }
+
+  /* LiveAvatar HD video mode (optional — requires LiveAvatar credits) */
+  .avatar-video-mode { background: #0B1120; }
+  .doctor-iframe { width: 100%; height: 100%; display: block; border: none; }
+  .avatar-video-note {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(2, 62, 88, 0.85);
+    color: #E6F7FF;
+    font-size: 11.5px;
+    line-height: 1.3;
+    padding: 7px 14px;
+    border-radius: 12px;
+    z-index: 5;
+    max-width: 90%;
+    text-align: center;
+    pointer-events: none;
+  }
 
   /* Native Virtual Doctor Avatar Stage (100% gratuit — sans iframe ni service payant) */
   .avatar-frame-box {
@@ -2024,6 +2091,7 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
   }
 
   setDoctorMode(mode: 'native' | 'liveavatar') {
+    this.stopSpeaking();
     this.doctorMode.set(mode);
   }
 
