@@ -332,16 +332,21 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
               <!-- Top Medical Certificate Header -->
               <div class="presc-header">
                 <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                  <div class="presc-clinic-badge">
-                    <span class="material-icons">verified</span>
+                  <div class="presc-clinic-badge" [class.badge-manual]="ocrConfidence() !== 'high'">
+                    <span class="material-icons">{{ ocrConfidence() === 'high' ? 'verified' : 'fact_check' }}</span>
                     ORDONNANCE NUMÉRISÉE SIHATI AI
                   </div>
                   <button type="button" class="btn-reset-ocr" (click)="resetOcrPrescription()" title="Réinitialiser" style="background: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
                     <span class="material-icons" style="font-size: 16px;">refresh</span> Nouveau Scan
                   </button>
                 </div>
-                <h1 class="presc-main-title">RÉPUBLIQUE CLINIQUE &bull; EXTRACTION CERTIFIÉE</h1>
-                <span class="presc-hint-edit"><span class="material-icons">edit_note</span> Vous pouvez vérifier et modifier chaque champ directement avant l'enregistrement ou l'exportation</span>
+                <h1 class="presc-main-title">{{ ocrConfidence() === 'high' ? 'RÉPUBLIQUE CLINIQUE • EXTRACTION CERTIFIÉE' : 'RÉPUBLIQUE CLINIQUE • VÉRIFICATION DES CHAMPS' }}</h1>
+                <span class="presc-hint-edit" [class.hint-manual]="ocrConfidence() !== 'high'">
+                  <span class="material-icons">{{ ocrConfidence() === 'high' ? 'edit_note' : 'info' }}</span>
+                  <span>{{ ocrConfidence() === 'high'
+                    ? "Vous pouvez vérifier et modifier chaque champ directement avant l'enregistrement ou l'exportation"
+                    : (ocrStatusMessage() || "Aucun texte exploitable détecté automatiquement. Vérifiez, complétez ou saisissez les informations manuellement avant l'enregistrement.") }}</span>
+                </span>
               </div>
 
 
@@ -389,6 +394,12 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
                           <span class="material-icons">delete_outline</span>
                         </button>
                       </div>
+                    </div>
+                  }
+                  @if (prescItems().length === 0) {
+                    <div class="med-empty-row">
+                      <span class="material-icons">search_off</span>
+                      <span>Aucun médicament détecté automatiquement. Ajoutez les traitements prescrits ci-dessous.</span>
                     </div>
                   }
                 </div>
@@ -1959,6 +1970,13 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
 
   .presc-clinic-badge .material-icons { font-size: 15px; }
 
+  .presc-clinic-badge.badge-manual {
+    background: #FEF3C7;
+    color: #B45309;
+  }
+
+  .presc-hint-edit.hint-manual { color: #B45309; }
+
   .presc-main-title {
     margin: 0;
     font-size: 20px;
@@ -2045,6 +2063,20 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
   }
 
   .med-table-row:hover { background: #F8FAFD; }
+
+  .med-empty-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px;
+    border-top: 1px solid #F1F5F9;
+    background: #FFFBEB;
+    color: #B45309;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .med-empty-row .material-icons { font-size: 20px; color: #D97706; }
 
   .med-name-cell {
     display: flex;
@@ -2139,10 +2171,12 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
   loadingAnomaly  = signal(false);
   loadingOcr      = signal(false);
 
-  prescDoctor  = signal<string>('Dr. Praticien');
-  prescPatient = signal<string>('Patient');
-  prescDate    = signal<string>(new Date().toLocaleDateString('fr-FR'));
+  prescDoctor  = signal<string>('');
+  prescPatient = signal<string>('');
+  prescDate    = signal<string>('');
   prescItems   = signal<Array<{ name: string; dosage: string }>>([]);
+  ocrConfidence = signal<'high' | 'partial' | 'manual'>('high');
+  ocrStatusMessage = signal<string>('');
 
   quickQuestions = [
     "Ma tension est un peu élevée, quels sont les premiers réflexes ?",
@@ -2744,8 +2778,112 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     });
   }
 
+  /** Loads any image source (File | data URL | HTMLCanvasElement) into an HTMLImageElement. */
+  private loadImage(source: File | string): Promise<HTMLImageElement> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const url = typeof source === 'string' ? source : await this.fileToDataUrl(source);
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = (e) => reject(e);
+        img.src = url;
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  /**
+   * Normalises a document image before OCR: upscales small photos, converts to
+   * grayscale and boosts contrast. This dramatically improves Tesseract results
+   * on phone photos of printed prescriptions.
+   */
+  private preprocessCanvas(src: HTMLCanvasElement): HTMLCanvasElement {
+    const w = src.width || 1;
+    const h = src.height || 1;
+    const longest = Math.max(w, h);
+    let factor = 1;
+    if (longest < 1400) factor = 1400 / longest;          // too small -> enlarge
+    else if (longest > 2600) factor = 2600 / longest;      // huge -> downscale
+
+    const cw = Math.max(1, Math.round(w * factor));
+    const ch = Math.max(1, Math.round(h * factor));
+    const out = document.createElement('canvas');
+    out.width = cw;
+    out.height = ch;
+    const ctx = out.getContext('2d');
+    if (!ctx) return src;
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, cw, ch);
+    ctx.drawImage(src, 0, 0, cw, ch);
+
+    try {
+      const data = ctx.getImageData(0, 0, cw, ch);
+      const px = data.data;
+      // Contrast stretch around the mid-gray, then grayscale in one pass.
+      const contrast = 1.35;
+      for (let i = 0; i < px.length; i += 4) {
+        const gray = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+        let v = (gray - 128) * contrast + 128;
+        v = v < 0 ? 0 : v > 255 ? 255 : v;
+        px[i] = px[i + 1] = px[i + 2] = v;
+      }
+      ctx.putImageData(data, 0, 0);
+    } catch (e) {
+      // getImageData may fail on tainted canvases; keep the drawn image.
+    }
+    return out;
+  }
+
+  /**
+   * Runs Tesseract OCR with the bundled offline assets first (assets/tesseract),
+   * then transparently falls back to the public CDN if the local files are absent.
+   */
+  private async recognizeTextFromSource(source: File | string | HTMLCanvasElement): Promise<string> {
+    let canvas: HTMLCanvasElement;
+    if (source instanceof HTMLCanvasElement) {
+      canvas = this.preprocessCanvas(source);
+    } else {
+      const img = await this.loadImage(source as any);
+      const raw = document.createElement('canvas');
+      raw.width = img.naturalWidth || img.width;
+      raw.height = img.naturalHeight || img.height;
+      const rctx = raw.getContext('2d');
+      if (rctx) rctx.drawImage(img, 0, 0);
+      canvas = this.preprocessCanvas(raw);
+    }
+
+    const { createWorker } = await import('tesseract.js');
+    let localBase = '';
+    try { localBase = new URL('assets/tesseract/', document.baseURI).href; } catch (e) { localBase = ''; }
+
+    const optionSets: any[] = [];
+    if (localBase) {
+      optionSets.push({ workerPath: localBase + 'worker.min.js', corePath: localBase, langPath: localBase, gzip: false });
+    }
+    optionSets.push({}); // Tesseract.js defaults (CDN)
+
+    let lastError: any = null;
+    for (const options of optionSets) {
+      let worker: any = null;
+      try {
+        worker = await createWorker('fra', 1, options);
+        const ret = await worker.recognize(canvas);
+        const text = ret?.data?.text || '';
+        await worker.terminate();
+        if (text.trim().length > 0) return text;
+      } catch (err) {
+        lastError = err;
+        try { await worker?.terminate(); } catch (e) {}
+      }
+    }
+    if (lastError) throw lastError;
+    return '';
+  }
+
   async callGeminiVision(base64Image: string, mimeType: string, apiKey: string): Promise<OcrResult | null> {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
     const prompt = `Tu es un médecin spécialiste et pharmacologue expert en déchiffrement d'ordonnances médicales manuscrites et imprimées.
 Analyse cette ordonnance médicale et extrais fidèlement :
 1. "doctor_name": Le nom complet du médecin avec Dr. ou Cabinet
@@ -2776,14 +2914,25 @@ Réponds STRICTEMENT au format JSON comme suit :
       }
     };
 
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    let data: any = null;
+    let lastErr: any = null;
+    for (const model of models) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) { lastErr = new Error(`Gemini Vision ${model} HTTP ${res.status}`); continue; }
+        data = await res.json();
+        if (data?.candidates?.[0]?.content?.parts?.[0]?.text) break;
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    if (!data) { throw lastErr || new Error('Gemini Vision unavailable'); }
 
-    if (!res.ok) throw new Error(`Gemini Vision HTTP ${res.status}`);
-    const data = await res.json();
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) return null;
     const cleaned = text.replace(/^```json/i, '').replace(/```$/i, '').trim();
@@ -2801,13 +2950,14 @@ Réponds STRICTEMENT au format JSON comme suit :
     }
 
     return {
-      doctorName: parsed.doctor_name || 'Dr. Praticien',
-      patientName: parsed.patient_name || this.getPatientFullName(),
-      prescriptionDate: parsed.prescription_date || new Date().toLocaleDateString('fr-FR'),
+      doctorName: parsed.doctor_name || '',
+      patientName: parsed.patient_name || '',
+      prescriptionDate: parsed.prescription_date || '',
       detectedMedications,
       detectedDosages,
       rawText: text,
-      success: detectedMedications.length > 0
+      success: detectedMedications.length > 0,
+      confidence: 'high'
     };
   }
 
@@ -2821,9 +2971,9 @@ Réponds STRICTEMENT au format JSON comme suit :
 
   syncPrescriptionSignals(result: OcrResult) {
     this.ocrResult.set(result);
-    this.prescDoctor.set(result.doctorName || 'Dr. Praticien');
-    this.prescPatient.set(result.patientName || this.getPatientFullName());
-    this.prescDate.set(result.prescriptionDate || new Date().toLocaleDateString('fr-FR'));
+    this.prescDoctor.set((result.doctorName || '').trim());
+    this.prescPatient.set((result.patientName || '').trim());
+    this.prescDate.set((result.prescriptionDate || '').trim());
 
     const items: Array<{ name: string; dosage: string }> = [];
     const meds = result.detectedMedications || [];
@@ -2838,10 +2988,24 @@ Réponds STRICTEMENT au format JSON comme suit :
         });
       }
     }
-    if (items.length === 0) {
-      items.push({ name: '', dosage: '1 comprimé par jour' });
-    }
     this.prescItems.set(items);
+
+    // Real, honest confidence: never claim a certified extraction when nothing was read.
+    const detectedCount = [this.prescDoctor(), this.prescPatient(), this.prescDate()]
+      .filter(v => v.length > 0).length;
+    let confidence: 'high' | 'partial' | 'manual' = result.confidence || 'manual';
+    if (!result.confidence) {
+      if (items.length > 0) confidence = 'high';
+      else if (detectedCount > 0) confidence = 'partial';
+      else confidence = 'manual';
+    }
+    this.ocrConfidence.set(confidence);
+    this.ocrStatusMessage.set(
+      result.message || (confidence === 'manual'
+        ? "Aucun texte exploitable n'a pu être déchiffré (photo floue, écriture manuscrite ou document scanné). Complétez les champs puis enregistrez."
+        : '')
+    );
+
     try {
       localStorage.setItem('lastOcrResult', JSON.stringify({
         ...result,
@@ -2849,7 +3013,9 @@ Réponds STRICTEMENT au format JSON comme suit :
         patientName: this.prescPatient(),
         prescriptionDate: this.prescDate(),
         detectedMedications: items.map(it => it.name),
-        detectedDosages: items.map(it => it.dosage)
+        detectedDosages: items.map(it => it.dosage),
+        confidence,
+        message: this.ocrStatusMessage()
       }));
     } catch(e) {}
   }
@@ -2887,6 +3053,11 @@ Réponds STRICTEMENT au format JSON comme suit :
     this.selectedFile.set(null);
     this.imagePreviewUrl.set(null);
     this.prescItems.set([]);
+    this.prescDoctor.set('');
+    this.prescPatient.set('');
+    this.prescDate.set('');
+    this.ocrConfidence.set('manual');
+    this.ocrStatusMessage.set('');
     try { localStorage.removeItem('lastOcrResult'); } catch(e) {}
     this.snack.open("Module OCR réinitialisé. Vous pouvez déposer une nouvelle ordonnance.", "OK", { duration: 3000 });
   }
@@ -2895,118 +3066,115 @@ Réponds STRICTEMENT au format JSON comme suit :
     const file = this.selectedFile();
     if (!file) return;
     this.loadingOcr.set(true);
+    this.ocrStatusMessage.set('');
 
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    let recognizedText = '';
 
     try {
-      // 1. If PDF: Extract text via PDF.js client-side
       if (isPdf) {
+        // 1a. Machine-readable PDF -> real text layer (best quality, no OCR needed)
         try {
-          const extractedText = await this.extractTextFromPdf(file);
-          if (extractedText && extractedText.trim().length > 15) {
-            const parsed = this.parsePrescriptionText(extractedText);
-            this.syncPrescriptionSignals(parsed);
-            this.loadingOcr.set(false);
-            const count = parsed.detectedMedications.length;
-            this.snack.open(`✅ Ordonnance PDF analysée ! ${count} médicament(s) identifié(s).`, "OK", { duration: 4000 });
-            return;
-          }
+          recognizedText = await this.extractTextFromPdf(file);
         } catch (pdfErr) {
           console.warn("PDF direct text extraction attempt:", pdfErr);
         }
 
-        // If PDF contains scanned images instead of text, render page 1 to canvas
-        try {
-          const { canvas, previewDataUrl } = await this.renderPdfPageToCanvas(file, 1, 2.0);
-          this.imagePreviewUrl.set(previewDataUrl);
+        // 1b. Scanned / image-only PDF -> render page 1 and OCR it
+        if (!recognizedText || recognizedText.trim().length < 15) {
+          recognizedText = '';
+          try {
+            const { canvas, previewDataUrl } = await this.renderPdfPageToCanvas(file, 1, 2.0);
+            this.imagePreviewUrl.set(previewDataUrl);
 
-          const geminiApiKey = this.geminiKey();
-          if (geminiApiKey) {
-            const base64 = previewDataUrl.includes(',') ? previewDataUrl.split(',')[1] : previewDataUrl;
-            const aiRes = await this.callGeminiVision(base64, 'image/png', geminiApiKey);
-            if (aiRes && aiRes.success && aiRes.detectedMedications && aiRes.detectedMedications.length > 0) {
-              this.syncPrescriptionSignals(aiRes);
-              this.loadingOcr.set(false);
-              this.snack.open("✅ Ordonnance numérisée déchiffrée par Gemini Vision IA !", "OK", { duration: 4000 });
-              return;
+            const geminiApiKey = this.geminiKey();
+            if (geminiApiKey) {
+              const base64 = previewDataUrl.includes(',') ? previewDataUrl.split(',')[1] : previewDataUrl;
+              const aiRes = await this.callGeminiVision(base64, 'image/png', geminiApiKey);
+              if (aiRes && aiRes.detectedMedications && aiRes.detectedMedications.length > 0) {
+                aiRes.confidence = 'high';
+                this.finishOcr(aiRes, "✅ Ordonnance PDF déchiffrée par Gemini Vision IA !");
+                return;
+              }
             }
-          }
 
-          // Otherwise OCR the canvas with Tesseract.js
-          const { createWorker } = await import('tesseract.js');
-          const worker = await createWorker('fra');
-          const ret = await worker.recognize(canvas);
-          const rawText = ret?.data?.text || '';
-          await worker.terminate();
-
-          if (rawText && rawText.trim().length > 6) {
-            const parsed = this.parsePrescriptionText(rawText);
-            this.syncPrescriptionSignals(parsed);
-            this.loadingOcr.set(false);
-            this.snack.open(`✅ Scan OCR réussi ! ${parsed.detectedMedications.length} médicament(s) extrait(s).`, "OK", { duration: 4000 });
-            return;
+            recognizedText = await this.recognizeTextFromSource(canvas);
+          } catch (scanErr) {
+            console.warn("PDF canvas OCR fallback:", scanErr);
           }
-        } catch (scanErr) {
-          console.warn("PDF canvas OCR fallback:", scanErr);
         }
+      } else {
+        // 2. Image file -> optional Gemini Vision, then local Tesseract
+        const geminiApiKey = this.geminiKey();
+        let geminiDone = false;
+        if (geminiApiKey) {
+          try {
+            const base64 = await this.fileToBase64(file);
+            const aiRes = await this.callGeminiVision(base64, file.type, geminiApiKey);
+            if (aiRes && aiRes.detectedMedications && aiRes.detectedMedications.length > 0) {
+              aiRes.confidence = 'high';
+              this.finishOcr(aiRes, "✅ Ordonnance déchiffrée avec succès par Gemini Vision IA !");
+              geminiDone = true;
+            }
+          } catch (err) {
+            console.warn("Gemini vision fallback to local engine:", err);
+          }
+        }
+        if (geminiDone) return;
+
+        const source = this.imagePreviewUrl() || file;
+        recognizedText = await this.recognizeTextFromSource(source);
       }
 
-      // 2. If Image: Check Gemini Vision first if key configured
-      const geminiApiKey = this.geminiKey();
-      if (geminiApiKey) {
-        try {
-          const base64 = await this.fileToBase64(file);
-          const aiRes = await this.callGeminiVision(base64, file.type, geminiApiKey);
-          if (aiRes && aiRes.success && aiRes.detectedMedications && aiRes.detectedMedications.length > 0) {
-            this.syncPrescriptionSignals(aiRes);
-            this.loadingOcr.set(false);
-            this.snack.open("✅ Ordonnance déchiffrée avec succès par Gemini Vision IA !", "OK", { duration: 4000 });
-            return;
-          }
-        } catch (err) {
-          console.warn("Gemini vision fallback to hybrid local engine:", err);
-        }
+      if (recognizedText && recognizedText.trim().length > 6) {
+        const parsed = this.parsePrescriptionText(recognizedText);
+        parsed.success = true;
+        const isEmpty = parsed.detectedMedications.length === 0;
+        parsed.confidence = isEmpty ? 'partial' : 'high';
+        parsed.message = isEmpty
+          ? "Le texte du document a bien été lu, mais aucun médicament n'a été identifié automatiquement. Vérifiez ou complétez la liste ci-dessous."
+          : '';
+        this.finishOcr(parsed, isEmpty
+          ? "⚠️ Document lu, mais aucun médicament reconnu. Vérifiez ou complétez la liste."
+          : `✅ Analyse OCR réussie ! ${parsed.detectedMedications.length} médicament(s) détecté(s).`);
+        return;
       }
 
-      // 3. Tesseract.js OCR directly on the image file
-      try {
-        const { createWorker } = await import('tesseract.js');
-        const worker = await createWorker('fra');
-        const imageSource = this.imagePreviewUrl() || await this.fileToDataUrl(file);
-        const ret = await worker.recognize(imageSource);
-        const rawText = ret?.data?.text || '';
-        await worker.terminate();
-
-        if (rawText && rawText.trim().length > 6) {
-          const parsed = this.parsePrescriptionText(rawText);
-          this.syncPrescriptionSignals(parsed);
-          this.loadingOcr.set(false);
-          this.snack.open(`✅ Analyse OCR réussie ! ${parsed.detectedMedications.length} médicament(s) détecté(s).`, "OK", { duration: 4000 });
-          return;
-        }
-      } catch (err) {
-        console.warn("Client Tesseract engine note:", err);
-      }
-
-      // 4. Default clean editable result (zero fake drugs injected)
+      // 3. Nothing usable was read -> honest empty editable form (no fake data)
       const fallbackResult: OcrResult = {
         rawText: '',
         detectedMedications: [],
         detectedDosages: [],
-        doctorName: 'Dr. Praticien',
-        patientName: this.getPatientFullName(),
-        prescriptionDate: new Date().toLocaleDateString('fr-FR'),
-        success: true
+        doctorName: '',
+        patientName: '',
+        prescriptionDate: '',
+        success: true,
+        confidence: 'manual',
+        message: "Aucun texte exploitable n'a pu être lu dans ce document (image floue, faible résolution ou écriture manuscrite). Saisissez les informations manuellement, ou activez l'IA Cloud (clé Gemini) pour le manuscrit."
       };
-      this.syncPrescriptionSignals(fallbackResult);
-      this.loadingOcr.set(false);
-      this.snack.open("ℹ️ Document chargé. Vous pouvez vérifier ou ajouter vos médicaments ci-dessous.", "OK", { duration: 4000 });
-
+      this.finishOcr(fallbackResult, "ℹ️ Aucune donnée détectée automatiquement. Complétez le formulaire puis enregistrez.");
     } catch (globalErr) {
       console.error("Global OCR error:", globalErr);
-      this.loadingOcr.set(false);
-      this.snack.open("Erreur lors de la lecture du document. Vous pouvez saisir les informations manuellement.", "OK", { duration: 4000 });
+      const fallbackResult: OcrResult = {
+        rawText: '',
+        detectedMedications: [],
+        detectedDosages: [],
+        doctorName: '',
+        patientName: '',
+        prescriptionDate: '',
+        success: true,
+        confidence: 'manual',
+        message: "La lecture automatique du document a échoué. Saisissez les informations manuellement."
+      };
+      this.finishOcr(fallbackResult, "Erreur lors de la lecture du document. Saisie manuelle disponible.");
     }
+  }
+
+  /** Centralised completion: sync signals, stop the spinner, show a single toast. */
+  private finishOcr(result: OcrResult, message: string) {
+    this.syncPrescriptionSignals(result);
+    this.loadingOcr.set(false);
+    this.snack.open(message, "OK", { duration: 4500 });
   }
 
   parsePrescriptionText(rawText: string): OcrResult {
@@ -3014,89 +3182,98 @@ Réponds STRICTEMENT au format JSON comme suit :
 
     // 1. Detect Doctor Name
     let doctorName = '';
-    // Check top lines (lines 0 to 6) for doctor header
-    for (let i = 0; i < Math.min(6, rawLines.length); i++) {
-      const l = rawLines[i];
-      const docMatch = l.match(/(?:Dr|Docteur|Pr|Professeur)\.?\s+([A-Za-zÀ-ÿ\s\.\-']{2,40})/i);
+    // Word-boundary + single-char-lookbehind guard prevents "Dr" matching inside words.
+    const docRx = /(?:^|[^\p{L}])(?:Dr|Docteur|Pr|Professeur)\.?\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s\.\-']{1,40})/iu;
+    const cleanDoctor = (raw: string): string => {
+      let d = (raw || '').replace(/^[^\p{L}]*/u, '').trim();
+      d = d.replace(/^[^\w\s]*Le\s+/i, '');
+      d = d.replace(/[\/\\\|®©_]+.*$/, '').trim();
+      d = d.replace(/\s+[-–—]\s+.*$/, '').trim();                                   // drop "- Spécialité"
+      d = d.replace(/\s*[,;].*$/, '').trim();                                        // drop ", Chirurgien Dentiste"
+      d = d.replace(/\s+(?:Spécialiste|Généraliste|Cardiologue|Chirurgien(?:\s+Dentiste)?|Dentiste|Médecin|Pédiatre|Dermatologue|Ophtalmologue|Gynécologue|Neurologue|Tél|Téléphone|Adresse|Ordre|RPPS|CHU|Cabinet|Clinique|Centre).*$/i, '').trim();
+      return d;
+    };
+    // Header (top lines)
+    for (let i = 0; i < Math.min(8, rawLines.length); i++) {
+      const docMatch = rawLines[i].match(docRx);
       if (docMatch) {
-        let d = docMatch[0].trim();
-        d = d.replace(/^[^\w\s]*Le\s+/i, '');
-        d = d.replace(/[\/\\\|®©_]+.*$/, '').trim();
-        d = d.replace(/\s+(?:Spécialiste|Généraliste|Cardiologue|Chirurgien|Médecin|Tél|Adresse|Ordre|RPPS|CHU).*$/i, '').trim();
-        if (d.length >= 5) {
-          doctorName = d;
-          break;
-        }
+        const d = cleanDoctor(docMatch[0]);
+        if (d.length >= 5) { doctorName = d; break; }
       }
     }
-
-    // If not found in header, check bottom signature lines upward
+    // Signature (bottom lines, upward)
     if (!doctorName) {
       for (let i = rawLines.length - 1; i >= 0; i--) {
-        const l = rawLines[i];
-        const docMatch = l.match(/(?:Dr|Docteur|Pr|Professeur)\.?\s+([A-Za-zÀ-ÿ\s\.\-']{2,40})/i);
+        const docMatch = rawLines[i].match(docRx);
         if (docMatch) {
-          let d = docMatch[0].trim();
-          d = d.replace(/^[^\w\s]*Le\s+/i, '');
-          d = d.replace(/[\/\\\|®©_]+.*$/, '').trim();
-          d = d.replace(/\s+(?:Spécialiste|Généraliste|Cardiologue|Chirurgien|Médecin|Tél|Adresse|Ordre|RPPS|CHU).*$/i, '').trim();
-          if (d.length >= 5) {
-            doctorName = d;
-            break;
-          }
+          const d = cleanDoctor(docMatch[0]);
+          if (d.length >= 5) { doctorName = d; break; }
         }
       }
     }
-
-    if (!doctorName) doctorName = 'Dr. Praticien';
 
     // 2. Detect Patient Name
     let patientName = '';
+    const patientClean = (raw: string): string => {
+      let p = (raw || '').replace(/\s+/g, ' ').trim();
+      p = p.replace(/\s+n[ée]e?\s*\(\s*e?\s*\)\s*(?:le|:)\b.*$/i, '');   // "Ne(e) le : ..." / "Né(e) le : ..."
+      p = p.replace(/\s+n[ée]e?\s*\(?\s*e?\s*\)?\s*(?:le|:)\b.*$/i, '');  // "Ne le : ..." / "né : ..."
+      p = p.replace(/\s+\b(?:DATE|AGE|POIDS|TAILLE|SEXE|ALLERGIES|DOSSIER|DDN|T[ÉE]L|ADRESSE|RPPS|ORDRE|NNI)\b\s*:?.*$/i, '');
+      p = p.replace(/\s+\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}.*$/, '');   // trailing date
+      p = p.replace(/[()]/g, ' ').replace(/\s+/g, ' ').trim();
+      p = p.replace(/^[^\p{L}]+/u, '').replace(/[\s\.\-–—:;,]+$/, '').trim();
+      return p;
+    };
+    // Label-based headers, e.g. "PATIENT(E) : ...", "NOM ET PRENOM : ...", "Bénéficiaire : ..."
+    const patHeaderRx = /(?:PATIENT\s*\(?[EÉ]?\)?|B[ÉE]N[ÉE]FICIAIRE|NOM\s*(?:ET|&)?\s*PR[ÉE]NOM|NOM\s+COMPLET|MALADE)\s*:\s*([A-Za-zÀ-ÿ(][A-Za-zÀ-ÿ\s\.\-'()]{2,45})/i;
+    // Civil-title based, e.g. "M. Karim IDRISSI", "Mme. Nadia C."
+    const titleRx = /(?:^|[^\p{L}])(M\.|Mme\.?|Mlle\.?|Mle\.?|Mine\.|Mne\.|Monsieur|Madame|Mademoiselle)\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s\.\-']{1,40})/iu;
     for (const l of rawLines) {
-      const patHeaderMatch = l.match(/(?:PATIENT(?:E)?|Nom\s*(?:et\s*Prénom)?|Bénéficiaire)\s*:(?:[^A-Za-zÀ-ÿ]*(?:DATE|AGE|POIDS)\s*:)*\s*([A-Za-zÀ-ÿ\s\.\-']{2,40})/i);
+      const patHeaderMatch = l.match(patHeaderRx);
       if (patHeaderMatch && patHeaderMatch[1]) {
-        let p = patHeaderMatch[1].replace(/\s+\b(?:DATE|AGE|POIDS|TAILLE|ALLERGIES|\d{2}\/|\d+\s*ans|ans|kg|cm|née?|sexe|dossier)\b.*$/i, '').trim();
-        if (p.length >= 3 && !/^(?:DATE|AGE|POIDS|TAILLE)$/i.test(p)) {
-          patientName = p;
-          break;
-        }
+        const p = patientClean(patHeaderMatch[1]);
+        if (p.length >= 3 && !/^(?:DATE|AGE|POIDS|TAILLE)$/i.test(p)) { patientName = p; break; }
       }
 
-      const titleMatch = l.match(/(?:M\.|Mme\.?|Mlle\.?|Mine\.?|Mne\.?|Monsieur|Madame|Mademoiselle)\s+([A-Za-zÀ-ÿ\s\.\-']{2,35})/i);
-      if (titleMatch) {
-        let p = titleMatch[0].replace(/^Mine\.?/i, 'Mme.').replace(/^Mne\.?/i, 'Mme.');
-        p = p.replace(/\s+\b(?:âgé|née?|dossier|sexe|ns|y&s|\d+)\b.*$/i, '').trim();
-        patientName = p;
-        break;
+      const titleMatch = l.match(titleRx);
+      if (titleMatch && titleMatch[2]) {
+        const t = titleMatch[1].replace(/^Mine\./i, 'Mme.').replace(/^Mne\./i, 'Mme.');
+        const p = patientClean(`${t} ${titleMatch[2]}`);
+        if (p.length >= 3) { patientName = p; break; }
       }
 
-      const neMatch = l.match(/([A-ZÀ-ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-ÿ][a-zà-ÿ]+)+),?\s+né/i);
-      if (neMatch && neMatch[1]) {
-        patientName = neMatch[1].trim();
-        break;
-      }
+      const neMatch = l.match(/([A-ZÀ-ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-ÿ][a-zà-ÿ]+)+),?\s+n[ée]e?\b/i);
+      if (neMatch && neMatch[1]) { patientName = patientClean(neMatch[1]); break; }
     }
-    if (!patientName) patientName = this.getPatientFullName();
 
     // 3. Detect Prescription Date
     let prescriptionDate = '';
-    const textDateMatch = rawText.match(/(?:Date\s*:?\s*|le\s+)([0-3]?\d\s+[A-Za-zÀ-ÿ]+\s+(?:20)?\d{2})/i);
+    const normalizeDate = (s: string): string => {
+      const t = (s || '').trim().replace(/[\-\.]/g, '/');
+      const ymd = t.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+      if (ymd) return `${ymd[3].padStart(2, '0')}/${ymd[2].padStart(2, '0')}/${ymd[1]}`;
+      const dmy = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+      if (dmy) return `${dmy[1].padStart(2, '0')}/${dmy[2].padStart(2, '0')}/${dmy[3]}`;
+      return t;
+    };
+    const MONTHS = 'janvier|f[ée]vrier|mars|avril|mai|juin|juillet|ao[ûu]t|septembre|octobre|novembre|d[ée]cembre';
+    // Textual date, tolerating "DATE D'EMISSION :", "Date :", "le", "du"
+    const textDateRx = new RegExp(
+      `\\b(?:date\\s*(?:d['’]?\\s*[ée]mission)?|le|du)\\s*:?\\s*([0-3]?\\d(?:er)?\\s+(?:${MONTHS})\\s+(?:20)?\\d{2})`, 'i');
+    const textDateMatch = rawText.match(textDateRx);
     if (textDateMatch) {
-      prescriptionDate = textDateMatch[1].trim();
-    } else {
+      prescriptionDate = textDateMatch[1].replace(/\s+/g, ' ').trim();
+    }
+    if (!prescriptionDate) {
       for (const l of rawLines) {
-        if (!/n[ée]|naissance/i.test(l)) {
-          const numDate = l.match(/\b([0-3]?\d[\/\-\.][0-1]?\d[\/\-\.](?:20)?\d{2})\b/);
-          if (numDate) {
-            prescriptionDate = numDate[1].replace(/[\-\.]/g, '/');
-            break;
-          }
-        }
+        if (/\b(?:n[ée]e?|naissance|ddn|date\s*de\s*naissance)\b/i.test(l)) continue;
+        const m = l.match(/\b(\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})\b/);
+        if (m) { prescriptionDate = normalizeDate(m[1]); break; }
       }
     }
     if (!prescriptionDate) {
-      const generalDate = rawText.match(/\b([0-3]?\d[\/\-\.][0-1]?\d[\/\-\.](?:20)?\d{2})\b/);
-      prescriptionDate = generalDate ? generalDate[1].replace(/[\-\.]/g, '/') : new Date().toLocaleDateString('fr-FR');
+      const generalDate = rawText.match(/\b(\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})\b/);
+      prescriptionDate = generalDate ? normalizeDate(generalDate[1]) : '';
     }
 
     // 4. Medications & Posologies Extraction

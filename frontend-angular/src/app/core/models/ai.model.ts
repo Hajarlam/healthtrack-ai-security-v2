@@ -19,4 +19,8 @@ export interface OcrResult {
   patientName?: string;
   success: boolean;
   errorMessage?: string;
+  /** How trustworthy the extraction is: 'high' = fields + meds detected, 'partial' = some fields, 'manual' = nothing usable. */
+  confidence?: 'high' | 'partial' | 'manual';
+  /** Human readable status shown to the user (why fields may be empty). */
+  message?: string;
 }

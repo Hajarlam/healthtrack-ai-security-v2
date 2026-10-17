@@ -19,3 +19,7 @@ scratch/
 !RAPPORT_PFE_SIHATI_AI_2026_FINAL_MODIFIE.pdf
 *.log
 *.traineddata
+!frontend-angular/src/assets/tesseract/*.traineddata
+.playwright-mcp/
+apply_pdf_updates.py
+generate_figures.py
