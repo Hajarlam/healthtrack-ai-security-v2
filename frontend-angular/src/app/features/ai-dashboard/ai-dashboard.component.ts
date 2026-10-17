@@ -2029,8 +2029,29 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     if (q.includes('coeur') || q.includes('pouls') || q.includes('battement') || q.includes('cardio') || q.includes('bpm')) {
       return "La fréquence cardiaque normale au repos se situe généralement entre 60 et 100 battements par minute. Si vous ressentez des palpitations fortes, des essoufflements inhabituels ou des étourdissements, asseyez-vous, respirez calmement et prenez un avis médical sans tarder.";
     }
-    if (q.includes('douleur') || q.includes('mal') || q.includes('poitrine')) {
-      return "Toute douleur thoracique constrictive, irradiant vers le bras gauche ou la mâchoire, est une urgence absolue nécessitant d'appeler immédiatement le 15 ou le 141. Pour les autres douleurs persistantes, un examen clinique complet avec votre médecin traitant est recommandé.";
+    if (q.includes('tête') || q.includes('tete') || q.includes('migraine') || q.includes('céphal') || q.includes('cephale')) {
+      return "Pour un mal de tête, reposez-vous dans un endroit calme et sombre, hydratez-vous et limitez les écrans. Une fièvre associée peut l'expliquer. Consultez rapidement si la douleur est brutale et très intense, s'accompagne d'une raideur de la nuque, de vomissements, de troubles de la vision ou d'une faiblesse d'un côté du corps.";
+    }
+    if (q.includes('fièvre') || q.includes('fievre') || q.includes('température') || q.includes('temperature') || q.includes('frison') || q.includes('grippe') || q.includes('infection')) {
+      return "En cas de fièvre, reposez-vous et hydratez-vous abondamment, et surveillez votre température matin et soir. Du paracétamol peut soulager en respectant les doses. Consultez sans tarder si la fièvre dépasse 39 °C, persiste plus de 3 jours, ou s'accompagne de difficultés respiratoires, de confusion ou de douleurs intenses.";
+    }
+    if (q.includes('toux') || q.includes('gorge') || q.includes('rhume') || q.includes('respir') || q.includes('essouffl') || q.includes('nez') || q.includes('angine')) {
+      return "Pour une toux, un rhume ou un mal de gorge, buvez des boissons tièdes, faites des gargarismes à l'eau salée, aérez les pièces et reposez votre voix. Consultez un médecin si une gêne respiratoire, une fièvre élevée ou des crachats colorés apparaissent, ou si les symptômes durent plus de 10 jours.";
+    }
+    if (q.includes('ventre') || q.includes('estomac') || q.includes('nausée') || q.includes('nausee') || q.includes('vomiss') || q.includes('diarrh') || q.includes('digest') || q.includes('abdomen') || q.includes('intestin')) {
+      return "Pour des troubles digestifs (nausées, douleurs abdominales, diarrhée), hydratez-vous par petites quantités et privilégiez une alimentation légère et sans graisses. Consultez en urgence si la douleur abdominale est intense et localisée, en cas de sang dans les selles ou de vomissements persistants.";
+    }
+    if (q.includes('fatigue') || q.includes('épuis') || q.includes('epuis') || q.includes('sommeil') || q.includes('insomnie') || q.includes('stress') || q.includes('anxiété') || q.includes('anxiete')) {
+      return "Une fatigue, un sommeil perturbé ou un stress peuvent avoir de nombreuses causes (hygiène de vie, carence, thyroïde...). Dormez à heures régulières, limitez la caféine en fin de journée et bougez un peu chaque jour. Si cela persiste plus de deux semaines, un bilan chez votre médecin est conseillé.";
+    }
+    if (q.includes('dos') || q.includes('lombaire') || q.includes('articul') || q.includes('genou') || q.includes('muscul') || q.includes('épaule') || q.includes('epaule')) {
+      return "Pour une douleur musculaire ou articulaire, reposez la zone, appliquez du froid les 48 premières heures puis de la chaleur, et évitez les gestes brusques. Consultez si la douleur est très intense, s'accompagne d'un gonflement, d'une perte de mobilité ou de fourmillements.";
+    }
+    if (q.includes('poitrine') || q.includes('thorac') || q.includes('thorax') || (q.includes('coeur') && (q.includes('douleur') || q.includes('mal')))) {
+      return "Toute douleur thoracique constrictive, irradiant vers le bras gauche ou la mâchoire, accompagnée de sueurs ou d'un essoufflement, est une urgence : appelez immédiatement le 15 ou le 141. Pour une douleur légère et passagère, un avis médical reste recommandé.";
+    }
+    if (q.includes('douleur') || q.includes('mal')) {
+      return "Merci de préciser la localisation de votre douleur (tête, poitrine, ventre, dos...). En attendant, reposez-vous, hydratez-vous et évitez l'effort. Une douleur intense, brutale ou qui s'aggrave doit faire consulter rapidement un médecin.";
     }
     return "Je comprends votre préoccupation médicale. Vos constantes vitales enregistrées sur Sihati.ai constituent un excellent repère pour votre suivi. Continuez à les mesurer régulièrement et n'hésitez pas à partager l'historique complet avec votre médecin traitant lors de votre prochaine consultation.";
   }
