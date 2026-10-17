@@ -82,25 +82,23 @@ Accessible via le menu **Messagerie** (`/chat`) :
 
 Situé dans l'espace **IA & Innovations** (`/analyse-ia` -> Onglet **Module 7.3 OCR**) :
 
-### 5.1. Pipeline de Reconnaissance Hybride Tri-Niveaux
-1. **Intelligence Multimodale Cloud (Google Gemini 2.5 / 1.5 Flash Vision)** : Accessible dès saisie d'une clé API Gemini pour un déchiffrement sémantique des ordonnances les plus complexes.
-2. **Moteur OCR Client (Tesseract.js avec Prétraitement Haute Définition)** : Analyse locale binarisée avec filtrage phonétique et dictionnaire pharmacologique français/marocain (Kardégic, Triatec, Velmetia, Tahor, Amoxicilline, Doliprane, Augmentin, Spasfon, Voltarène, Inexium...).
-3. **Classificateur Visuel Intelligent (Pixel & Dimension Analysis)** :
-   * Détection automatique de la texture et du profil du document : distingue instantanément une ordonnance imprimée d'une ordonnance manuscrite sans jamais renvoyer de champ vide.
+### 5.1. Pipeline de Reconnaissance Optique & Multimodale Réelle
+1. **Extraction Directe PDF (PDF.js / Mozilla pdfjs-dist)** :
+   * Analyse native des flux textuels et coordonnées géométriques (Y-coordinate tracking) pour tous les fichiers PDF d'ordonnances (ordonnances informatisées de cabinets, cliniques ou hôpitaux).
+   * Rendu graphique instantané de la première page en `<canvas>` pour prévisualisation visuelle haute fidélité avec effet de balayage laser vert en temps réel.
+2. **Intelligence Multimodale Cloud (Google Gemini 2.5 / 1.5 Flash Vision)** :
+   * Déchiffrement sémantique des manuscrits difficiles et ordonnances manuscrites complexes par analyse visuelle multimodale.
+3. **Moteur OCR Client & Hybride (Tesseract.js fra+eng)** :
+   * Analyse binarisée sur canvas haute définition pour les images ou les scans PDF sans couche texte numérique.
+   * Analyseur contextuel pharmacologique intelligent : détection des noms de médicaments, dosages (`mg`, `g`, `ml`, `µg`...), formes galéniques et posologies associées (matin, midi, soir, fréquence journalière).
 
-### 5.2. Sélecteur Rapide de Profils d'Ordonnances
-Boutons interactifs permettant de basculer ou d'ajuster le modèle en un clic :
-* 📄 **Ordonnance Imprimée** : Dr Julien G. | Patient Éric R. (Kardégic 75mg, Triatec 10mg, Velmetia 50/1000mg, Tahor 10mg, Amoxicilline 1g).
-* ✍️ **Ordonnance Manuscrite** : Cabinet Médical | Patiente Mme Benali (Doliprane 1g, Augmentin 1g, Spasfon Lyoc 80mg, Voltarène 50mg).
-* 💊 **Douleurs & Fièvre** : Dr. Sarah Alami | Sara El Amrani (Doliprane 1g, Spasfon Lyoc, Solupred 20mg).
-
-### 5.3. Fiche d'Extraction Médicale 100% Modifiable en Direct
+### 5.2. Fiche d'Extraction Médicale 100% Modifiable en Direct
 * **Champs Éditables en Two-Way Binding** :
-  * Nom du Médecin Prescripteur
-  * Nom du Patient Identifié
-  * Date d'émission de l'ordonnance
-  * Liste des Médicaments et Posologies journalières individuelles.
-* **Ajout & Suppression Dynamique** : Bouton `+ Ajouter un médicament` et icône de suppression par ligne pour une flexibilité clinique totale.
+  * Nom réel du Médecin Prescripteur extrait du document.
+  * Nom du Patient Identifié dans l'ordonnance.
+  * Date d'émission exacte de l'ordonnance.
+  * Liste complète des Médicaments et Posologies journalières individuelles.
+* **Ajout & Suppression Dynamique** : Bouton `+ Ajouter un médicament` et icône de suppression par ligne pour ajustement direct avant enregistrement.
 
 ### 5.4. Export PDF Certifié & Enregistrement dans le Pilulier
 * **Bouton « Exporter PDF Certifié »** : Génère un document médical officiel prêt à l'impression avec sceau numérique, identifiant d'intégrité et mise en page soignée.

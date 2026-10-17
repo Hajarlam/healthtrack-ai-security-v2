@@ -42,7 +42,10 @@ public class OcrService {
         "atorvastatine","omeprazole","lisinopril","levothyroxine","atenolol","furosemide",
         "prednisolone","doxycycline","azithromycine","ciprofloxacine","ranitidine",
         "salbutamol","insuline","metoprolol","ramipril","simvastatine","bisoprolol",
-        "chlorhexidine","doliprane","augmentin","kardegic","spafon"
+        "chlorhexidine","doliprane","augmentin","kardegic","spasfon","spafon","triatec",
+        "tahor","velmetia","solupred","voltarene","inexium","coversyl","aprovel","amlor",
+        "lasilix","aerius","flagyl","ventoline","advil","plavix","crestor","glucophage",
+        "tramadol","lyrica","xanax","lexomil"
     );
 
     public OcrResult analyzeFile(MultipartFile file) {
@@ -325,8 +328,23 @@ public class OcrService {
         
         String doctor = detectDoctor(text);
         String date = detectDate(text);
+        String patient = detectPatient(text);
         
-        return new OcrResult(text, medications, dosages, doctor, date);
+        return new OcrResult(text, medications, dosages, doctor, date, patient);
+    }
+
+    private String detectPatient(String text) {
+        Pattern p = Pattern.compile("(?:Patient(?:e)?|Nom\\s*(?:et\\s*Prénom)?|Pour)\\s*:\\s*([A-Za-zÀ-ÿ\\s\\.\\-]{2,40})", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(text);
+        if (m.find()) {
+            return m.group(1).trim();
+        }
+        Pattern p2 = Pattern.compile("(?:M\\.|Mme|Mlle)\\s+([A-Za-zÀ-ÿ\\s\\.\\-]{2,35})", Pattern.CASE_INSENSITIVE);
+        Matcher m2 = p2.matcher(text);
+        if (m2.find()) {
+            return m2.group(0).trim();
+        }
+        return "Patient(e)";
     }
 
     private String detectDoctor(String text) {

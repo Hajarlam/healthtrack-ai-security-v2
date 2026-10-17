@@ -16,5 +16,6 @@ scratch/
 *.env
 *.lock
 *.pdf
+!RAPPORT_PFE_SIHATI_AI_2026_FINAL_MODIFIE.pdf
 *.log
 *.traineddata

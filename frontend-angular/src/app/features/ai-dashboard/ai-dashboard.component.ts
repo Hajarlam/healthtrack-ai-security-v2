@@ -240,19 +240,6 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
             <span class="ai-ocr-badge">IA MULTIMODALE 2026</span>
           </div>
 
-          <!-- Instant Presets -->
-          <div class="ocr-sample-pills">
-            <span class="sample-label">⚡ Démos d'ordonnances types :</span>
-            <button type="button" class="btn-sample-pill" (click)="loadPresetPrescription('printed')">
-              <span class="material-icons">description</span> Ordonnance Imprimée (Dr Julien G.)
-            </button>
-            <button type="button" class="btn-sample-pill" (click)="loadPresetPrescription('handwritten')">
-              <span class="material-icons">draw</span> Ordonnance Manuscrite (Cabinet Médical)
-            </button>
-            <button type="button" class="btn-sample-pill" (click)="loadPresetPrescription('pain')">
-              <span class="material-icons">medication</span> Douleurs & Fièvre (Doliprane + Spasfon)
-            </button>
-          </div>
 
           <!-- AI Vision Mode Selector Banner -->
           <div class="ai-mode-selector">
@@ -357,21 +344,6 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
                 <span class="presc-hint-edit"><span class="material-icons">edit_note</span> Vous pouvez vérifier et modifier chaque champ directement avant l'enregistrement ou l'exportation</span>
               </div>
 
-              <!-- Quick Prescription Profile Switcher -->
-              <div class="presc-type-selector" style="display: flex; gap: 8px; margin: 16px 0 20px; flex-wrap: wrap; align-items: center; background: #F8FAFC; padding: 12px 16px; border-radius: 14px; border: 1px solid #CBD5E1;">
-                <span style="font-size: 12px; font-weight: 800; color: #334155; display: inline-flex; align-items: center; gap: 6px;">
-                  <span class="material-icons" style="font-size: 18px; color: #0284C7;">auto_awesome</span> Profil de déchiffrement IA :
-                </span>
-                <button type="button" (click)="loadPresetPrescription('printed')" [style.background]="prescDoctor().includes('Julien') ? '#0284C7' : '#FFFFFF'" [style.color]="prescDoctor().includes('Julien') ? '#FFFFFF' : '#334155'" style="border: 1px solid #94A3B8; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
-                  📄 Imprimée (Kardégic, Triatec, Velmetia, Tahor, Amox)
-                </button>
-                <button type="button" (click)="loadPresetPrescription('handwritten')" [style.background]="prescDoctor().includes('Cabinet') ? '#0284C7' : '#FFFFFF'" [style.color]="prescDoctor().includes('Cabinet') ? '#FFFFFF' : '#334155'" style="border: 1px solid #94A3B8; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
-                  ✍️ Manuscrite (Doliprane, Augmentin, Spasfon, Voltarène)
-                </button>
-                <button type="button" (click)="loadPresetPrescription('pain')" [style.background]="prescDoctor().includes('Sarah') ? '#0284C7' : '#FFFFFF'" [style.color]="prescDoctor().includes('Sarah') ? '#FFFFFF' : '#334155'" style="border: 1px solid #94A3B8; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
-                  💊 Douleurs &amp; Fièvre (Doliprane, Spasfon, Solupred)
-                </button>
-              </div>
 
               <!-- Doctor and Patient Row -->
               <div class="presc-parties-grid">
@@ -1447,48 +1419,6 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
 
   .prompt-chip .material-icons { font-size: 16px; color: #0077B6; }
 
-  /* Instant Sample Pills */
-  .ocr-sample-pills {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
-    background: #F8FAFD;
-    border: 1px solid #E2E8F0;
-    border-radius: 14px;
-    padding: 10px 16px;
-  }
-
-  .sample-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: #475569;
-  }
-
-  .btn-sample-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #FFFFFF;
-    color: #0077B6;
-    border: 1px solid #BAE6FD;
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 12.5px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .btn-sample-pill:hover {
-    background: #E0F2FE;
-    color: #023E58;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 119, 182, 0.15);
-  }
-
-  .btn-sample-pill .material-icons { font-size: 16px; }
 
   .presc-hint-edit {
     display: flex;
@@ -2210,7 +2140,7 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
   loadingOcr      = signal(false);
 
   prescDoctor  = signal<string>('Dr. Praticien');
-  prescPatient = signal<string>('Sara El Amrani');
+  prescPatient = signal<string>('Patient');
   prescDate    = signal<string>(new Date().toLocaleDateString('fr-FR'));
   prescItems   = signal<Array<{ name: string; dosage: string }>>([]);
 
@@ -2715,115 +2645,81 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     }
   }
 
-  private createImagePreview(file: File) {
+  private async createImagePreview(file: File) {
     if (file.type && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = () => {
         this.imagePreviewUrl.set(reader.result as string);
       };
       reader.readAsDataURL(file);
+    } else if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+      try {
+        const { previewDataUrl } = await this.renderPdfPageToCanvas(file, 1, 1.5);
+        this.imagePreviewUrl.set(previewDataUrl);
+      } catch (err) {
+        console.warn('Could not generate PDF canvas preview:', err);
+        this.imagePreviewUrl.set(null);
+      }
     } else {
       this.imagePreviewUrl.set(null);
     }
   }
 
-  private analyzeImageVisually(file: File): Promise<'printed' | 'handwritten' | 'standard'> {
-    return new Promise((resolve) => {
-      const fileName = (file.name || '').toLowerCase();
-      if (fileName.includes('553aa') || fileName.includes('julien') || fileName.includes('triat') || fileName.includes('kardeg') || fileName.includes('print')) {
-        resolve('printed');
-        return;
-      }
-      if (fileName.includes('8e67') || fileName.includes('benali') || fileName.includes('hand') || fileName.includes('manu') || fileName.includes('spasf') || fileName.includes('voltar')) {
-        resolve('handwritten');
-        return;
-      }
-
-      if (!file.type || !file.type.startsWith('image/')) {
-        resolve('printed');
-        return;
-      }
-
-      const img = new Image();
-      const objectUrl = URL.createObjectURL(file);
-      img.onload = () => {
-        try {
-          const w = img.naturalWidth || img.width;
-          const h = img.naturalHeight || img.height;
-          const ratio = w / (h || 1);
-
-          // Exact resolution or aspect ratio match for the two reference sample prescriptions
-          if ((w === 803 && h === 1024) || (Math.abs(ratio - 0.784) < 0.03 && file.size > 50000)) {
-            URL.revokeObjectURL(objectUrl);
-            resolve('printed');
-            return;
-          }
-          if ((w === 712 && h === 960) || (Math.abs(ratio - 0.741) < 0.03 && file.size < 70000)) {
-            URL.revokeObjectURL(objectUrl);
-            resolve('handwritten');
-            return;
-          }
-
-          // Sample canvas pixels to distinguish clean white paper from desk/photo handwriting
-          const canvas = document.createElement('canvas');
-          const sampleW = 80;
-          const sampleH = 80;
-          canvas.width = sampleW;
-          canvas.height = sampleH;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, sampleW, sampleH);
-            const data = ctx.getImageData(0, 0, sampleW, sampleH).data;
-            let whiteCount = 0;
-            const total = sampleW * sampleH;
-            for (let i = 0; i < data.length; i += 4) {
-              const r = data[i], g = data[i+1], b = data[i+2];
-              if (r > 235 && g > 235 && b > 235) whiteCount++;
-            }
-            if (whiteCount / total > 0.55) {
-              URL.revokeObjectURL(objectUrl);
-              resolve('printed');
-              return;
-            }
-          }
-          URL.revokeObjectURL(objectUrl);
-          if (ratio > 0.76) {
-            resolve('printed');
-          } else {
-            resolve('handwritten');
-          }
-        } catch(e) {
-          URL.revokeObjectURL(objectUrl);
-          resolve('printed');
-        }
-      };
-      img.onerror = () => {
-        URL.revokeObjectURL(objectUrl);
-        resolve('printed');
-      };
-      img.src = objectUrl;
-    });
+  private async getPdfJs(): Promise<any> {
+    const pdfjsLib = await import('pdfjs-dist');
+    if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version || '3.11.174'}/pdf.worker.min.js`;
+    }
+    return pdfjsLib;
   }
 
-  private getImageDimensions(file: File): Promise<{ width: number; height: number; ratio: number }> {
-    return new Promise((resolve) => {
-      if (!file.type || !file.type.startsWith('image/')) {
-        resolve({ width: 0, height: 0, ratio: 0 });
-        return;
+  private async renderPdfPageToCanvas(file: File, pageNum = 1, scale = 1.6): Promise<{ canvas: HTMLCanvasElement; previewDataUrl: string }> {
+    const pdfjsLib = await this.getPdfJs();
+    const arrayBuffer = await file.arrayBuffer();
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+    const pdf = await loadingTask.promise;
+    const page = await pdf.getPage(pageNum);
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas 2D context unavailable');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    const previewDataUrl = canvas.toDataURL('image/png');
+    return { canvas, previewDataUrl };
+  }
+
+  private async extractTextFromPdf(file: File): Promise<string> {
+    const pdfjsLib = await this.getPdfJs();
+    const arrayBuffer = await file.arrayBuffer();
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+    const pdf = await loadingTask.promise;
+    let fullText = '';
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const pageLines: string[] = [];
+      let lastY: number | null = null;
+      let currentLine = '';
+
+      for (const item of (textContent.items as any[])) {
+        const str = item.str || '';
+        if (!str && !item.hasEOL) continue;
+        const y = item.transform ? item.transform[5] : null;
+        if (lastY !== null && y !== null && Math.abs(y - lastY) > 5) {
+          if (currentLine.trim()) pageLines.push(currentLine.trim());
+          currentLine = str;
+        } else {
+          currentLine += (currentLine ? ' ' : '') + str;
+        }
+        if (y !== null) lastY = y;
       }
-      const img = new Image();
-      const objectUrl = URL.createObjectURL(file);
-      img.onload = () => {
-        const ratio = img.naturalWidth / (img.naturalHeight || 1);
-        resolve({ width: img.naturalWidth, height: img.naturalHeight, ratio });
-        URL.revokeObjectURL(objectUrl);
-      };
-      img.onerror = () => {
-        resolve({ width: 0, height: 0, ratio: 0 });
-        URL.revokeObjectURL(objectUrl);
-      };
-      img.src = objectUrl;
-    });
+      if (currentLine.trim()) pageLines.push(currentLine.trim());
+
+      fullText += pageLines.join('\n') + '\n\n';
+    }
+    return fullText.trim();
   }
 
   private fileToBase64(file: File): Promise<string> {
@@ -2842,8 +2738,8 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
   async callGeminiVision(base64Image: string, mimeType: string, apiKey: string): Promise<OcrResult | null> {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     const prompt = `Tu es un médecin spécialiste et pharmacologue expert en déchiffrement d'ordonnances médicales manuscrites et imprimées.
-Analyse cette photo d'ordonnance médicale et extrais fidèlement :
-1. "doctor_name": Le nom du médecin (avec Dr.)
+Analyse cette ordonnance médicale et extrais fidèlement :
+1. "doctor_name": Le nom complet du médecin avec Dr. ou Cabinet
 2. "patient_name": Le nom du patient
 3. "prescription_date": La date de l'ordonnance
 4. "medications": Liste des médicaments prescrits avec nom exact, dosage et posologie.
@@ -2897,7 +2793,7 @@ Réponds STRICTEMENT au format JSON comme suit :
 
     return {
       doctorName: parsed.doctor_name || 'Dr. Praticien',
-      patientName: parsed.patient_name || 'Patient',
+      patientName: parsed.patient_name || this.getPatientFullName(),
       prescriptionDate: parsed.prescription_date || new Date().toLocaleDateString('fr-FR'),
       detectedMedications,
       detectedDosages,
@@ -2906,10 +2802,18 @@ Réponds STRICTEMENT au format JSON comme suit :
     };
   }
 
+  private getPatientFullName(): string {
+    const user = this.auth.currentUser();
+    if (user && (user.firstName || user.lastName)) {
+      return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    }
+    return 'Patient';
+  }
+
   syncPrescriptionSignals(result: OcrResult) {
     this.ocrResult.set(result);
-    this.prescDoctor.set(result.doctorName || 'Dr Julien G. (Médecin généraliste)');
-    this.prescPatient.set(result.patientName || 'Sara El Amrani');
+    this.prescDoctor.set(result.doctorName || 'Dr. Praticien');
+    this.prescPatient.set(result.patientName || this.getPatientFullName());
     this.prescDate.set(result.prescriptionDate || new Date().toLocaleDateString('fr-FR'));
 
     const items: Array<{ name: string; dosage: string }> = [];
@@ -2921,17 +2825,12 @@ Réponds STRICTEMENT au format JSON comme suit :
       if (name.length > 0) {
         items.push({
           name: name,
-          dosage: doses[i] || 'Selon avis médical'
+          dosage: (doses[i] || 'Selon avis médical').trim()
         });
       }
     }
     if (items.length === 0) {
-      items.push(
-        { name: 'Acétylsalicylate de lysine (Kardégic) 75 mg', dosage: '1 sachet à 12 h (au déjeuner)' },
-        { name: 'Ramipril (Triatec) 10 mg', dosage: '1 comprimé par jour (le matin)' },
-        { name: 'Atorvastatine (Tahor) 10 mg', dosage: '1 comprimé par jour (le soir)' },
-        { name: 'Amoxicilline 1 g', dosage: '1 comprimé 2 fois par jour pendant 10 jours' }
-      );
+      items.push({ name: '', dosage: '1 comprimé par jour' });
     }
     this.prescItems.set(items);
     try {
@@ -2983,268 +2882,310 @@ Réponds STRICTEMENT au format JSON comme suit :
     this.snack.open("Module OCR réinitialisé. Vous pouvez déposer une nouvelle ordonnance.", "OK", { duration: 3000 });
   }
 
-  loadPresetPrescription(type: 'printed' | 'handwritten' | 'pain') {
-    if (type === 'pain') {
-      const parsed: OcrResult = {
-        doctorName: 'Dr. Sarah Alami (Médecin Généraliste)',
-        patientName: 'Sara El Amrani',
-        prescriptionDate: '15/10/2026',
-        detectedMedications: [
-          'Doliprane 1 g (Paracétamol)',
-          'Spasfon Lyoc 80 mg (Phloroglucinol)',
-          'Solupred 20 mg (Prednisolone)'
-        ],
-        detectedDosages: [
-          '1 comprimé toutes les 6h si douleur/fièvre (max 3/j)',
-          '1 lyophilisat oral au moment des crises de spasmes',
-          '1 comprimé le matin au petit-déjeuner pendant 5 jours'
-        ],
-        rawText: 'Ordonnance Douleurs & Fièvre',
-        success: true
-      };
-      this.syncPrescriptionSignals(parsed);
-      this.snack.open("✅ Ordonnance Douleurs & Fièvre chargée ! Vous pouvez modifier les lignes et exporter.", "OK", { duration: 4000 });
-      return;
-    }
-    if (type === 'handwritten') {
-      const parsed: OcrResult = {
-        doctorName: 'Cabinet Médical (Consultations sans RDV)',
-        patientName: 'Mme Benali',
-        prescriptionDate: '21/05/2017',
-        detectedMedications: [
-          'Doliprane 1 g (Paracétamol)',
-          'Augmentin 1 g / 125 mg (Amoxicilline / Ac. Clavulanique)',
-          'Spasfon Lyoc 80 mg (Phloroglucinol)',
-          'Voltarène 50 mg (Diclofénac)'
-        ],
-        detectedDosages: [
-          '1 comprimé toutes les 6h si douleur/fièvre (max 3/j)',
-          '1 sachet matin et soir au milieu des repas pendant 7 jours',
-          '1 lyophilisat oral au moment des spasmes (max 3/j)',
-          '1 comprimé matin et soir au cours du repas'
-        ],
-        rawText: 'Ordonnance manuscrite Urgences Cabinet Médical',
-        success: true
-      };
-      this.syncPrescriptionSignals(parsed);
-      this.snack.open("✅ Ordonnance manuscrite chargée ! Vous pouvez vérifier ou modifier les lignes.", "OK", { duration: 4000 });
-    } else {
-      const parsed: OcrResult = {
-        doctorName: 'Dr Julien G. (Médecin généraliste)',
-        patientName: 'Éric R.',
-        prescriptionDate: '01/10/2024',
-        detectedMedications: [
-          'Acétylsalicylate de lysine (Kardégic) 75 mg',
-          'Ramipril (Triatec) 10 mg',
-          'Sitagliptine-metformine (Velmetia) 50 mg/1000 mg',
-          'Atorvastatine (Tahor) 10 mg',
-          'Amoxicilline 1 g'
-        ],
-        detectedDosages: [
-          '1 sachet à 12 h (au déjeuner)',
-          '1 comprimé par jour (le matin)',
-          '1 comprimé matin et soir (au cours des repas)',
-          '1 comprimé par jour (le soir)',
-          '1 comprimé 2 fois par jour pendant 10 jours'
-        ],
-        rawText: 'Ordonnance imprimée Dr Julien G.',
-        success: true
-      };
-      this.syncPrescriptionSignals(parsed);
-      this.snack.open("✅ Ordonnance imprimée chargée ! Vous pouvez vérifier ou modifier les lignes.", "OK", { duration: 4000 });
-    }
-  }
-
   async analyzeOcr() {
     const file = this.selectedFile();
     if (!file) return;
     this.loadingOcr.set(true);
 
-    const fileName = (file.name || '').toLowerCase();
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
-    // 1. Direct Keyword Match on filename
-    if (fileName.includes('553aa') || fileName.includes('julien') || fileName.includes('triat') || fileName.includes('kardeg') || fileName.includes('print')) {
-      await new Promise(r => setTimeout(r, 600));
-      this.loadingOcr.set(false);
-      this.loadPresetPrescription('printed');
-      return;
-    }
-    if (fileName.includes('8e67') || fileName.includes('benali') || fileName.includes('hand') || fileName.includes('manu') || fileName.includes('spasf') || fileName.includes('voltar')) {
-      await new Promise(r => setTimeout(r, 600));
-      this.loadingOcr.set(false);
-      this.loadPresetPrescription('handwritten');
-      return;
-    }
+    try {
+      // 1. If PDF: Extract text via PDF.js client-side
+      if (isPdf) {
+        try {
+          const extractedText = await this.extractTextFromPdf(file);
+          if (extractedText && extractedText.trim().length > 15) {
+            const parsed = this.parsePrescriptionText(extractedText);
+            this.syncPrescriptionSignals(parsed);
+            this.loadingOcr.set(false);
+            const count = parsed.detectedMedications.length;
+            this.snack.open(`✅ Ordonnance PDF analysée ! ${count} médicament(s) identifié(s).`, "OK", { duration: 4000 });
+            return;
+          }
+        } catch (pdfErr) {
+          console.warn("PDF direct text extraction attempt:", pdfErr);
+        }
 
-    // 2. Try Gemini Vision AI directly if key is configured (LLM Multimodal Cloud)
-    const geminiApiKey = this.geminiKey();
-    if (geminiApiKey) {
+        // If PDF contains scanned images instead of text, render page 1 to canvas
+        try {
+          const { canvas, previewDataUrl } = await this.renderPdfPageToCanvas(file, 1, 2.0);
+          this.imagePreviewUrl.set(previewDataUrl);
+
+          const geminiApiKey = this.geminiKey();
+          if (geminiApiKey) {
+            const base64 = previewDataUrl.includes(',') ? previewDataUrl.split(',')[1] : previewDataUrl;
+            const aiRes = await this.callGeminiVision(base64, 'image/png', geminiApiKey);
+            if (aiRes && aiRes.success && aiRes.detectedMedications && aiRes.detectedMedications.length > 0) {
+              this.syncPrescriptionSignals(aiRes);
+              this.loadingOcr.set(false);
+              this.snack.open("✅ Ordonnance numérisée déchiffrée par Gemini Vision IA !", "OK", { duration: 4000 });
+              return;
+            }
+          }
+
+          // Otherwise OCR the canvas with Tesseract.js
+          const { createWorker } = await import('tesseract.js');
+          const worker = await createWorker('fra');
+          const ret = await worker.recognize(canvas);
+          const rawText = ret?.data?.text || '';
+          await worker.terminate();
+
+          if (rawText && rawText.trim().length > 6) {
+            const parsed = this.parsePrescriptionText(rawText);
+            this.syncPrescriptionSignals(parsed);
+            this.loadingOcr.set(false);
+            this.snack.open(`✅ Scan OCR réussi ! ${parsed.detectedMedications.length} médicament(s) extrait(s).`, "OK", { duration: 4000 });
+            return;
+          }
+        } catch (scanErr) {
+          console.warn("PDF canvas OCR fallback:", scanErr);
+        }
+      }
+
+      // 2. If Image: Check Gemini Vision first if key configured
+      const geminiApiKey = this.geminiKey();
+      if (geminiApiKey) {
+        try {
+          const base64 = await this.fileToBase64(file);
+          const aiRes = await this.callGeminiVision(base64, file.type, geminiApiKey);
+          if (aiRes && aiRes.success && aiRes.detectedMedications && aiRes.detectedMedications.length > 0) {
+            this.syncPrescriptionSignals(aiRes);
+            this.loadingOcr.set(false);
+            this.snack.open("✅ Ordonnance déchiffrée avec succès par Gemini Vision IA !", "OK", { duration: 4000 });
+            return;
+          }
+        } catch (err) {
+          console.warn("Gemini vision fallback to hybrid local engine:", err);
+        }
+      }
+
+      // 3. Tesseract.js OCR directly on the image file
       try {
-        const base64 = await this.fileToBase64(file);
-        const aiRes = await this.callGeminiVision(base64, file.type, geminiApiKey);
-        if (aiRes && aiRes.success && aiRes.detectedMedications && aiRes.detectedMedications.length > 0) {
-          this.syncPrescriptionSignals(aiRes);
+        const { createWorker } = await import('tesseract.js');
+        const worker = await createWorker('fra');
+        const ret = await worker.recognize(file);
+        const rawText = ret?.data?.text || '';
+        await worker.terminate();
+
+        if (rawText && rawText.trim().length > 6) {
+          const parsed = this.parsePrescriptionText(rawText);
+          this.syncPrescriptionSignals(parsed);
           this.loadingOcr.set(false);
-          this.snack.open("✅ Ordonnance déchiffrée avec succès par Gemini Vision IA !", "OK", { duration: 4000 });
+          this.snack.open(`✅ Analyse OCR terminée ! ${parsed.detectedMedications.length} médicament(s) détecté(s).`, "OK", { duration: 4000 });
           return;
         }
       } catch (err) {
-        console.warn("Gemini vision fallback to hybrid local engine:", err);
+        console.warn("Client Tesseract engine note:", err);
       }
-    }
 
-    // 3. Dynamic OCR with Tesseract.js directly on the user's uploaded file
-    try {
-      const { createWorker } = await import('tesseract.js');
-      const worker = await createWorker('fra');
-      const ret = await worker.recognize(file);
-      const rawText = ret?.data?.text || '';
-      await worker.terminate();
+      // 4. Default clean editable result (zero fake drugs injected)
+      const fallbackResult: OcrResult = {
+        rawText: '',
+        detectedMedications: [],
+        detectedDosages: [],
+        doctorName: 'Dr. Praticien',
+        patientName: this.getPatientFullName(),
+        prescriptionDate: new Date().toLocaleDateString('fr-FR'),
+        success: true
+      };
+      this.syncPrescriptionSignals(fallbackResult);
+      this.loadingOcr.set(false);
+      this.snack.open("ℹ️ Document chargé. Vous pouvez vérifier ou ajouter vos médicaments ci-dessous.", "OK", { duration: 4000 });
 
-      if (rawText && rawText.trim().length > 6) {
-        const parsed = this.parsePrescriptionText(rawText);
-        if (parsed.detectedMedications && parsed.detectedMedications.length > 0) {
-          this.syncPrescriptionSignals(parsed);
-          this.loadingOcr.set(false);
-          this.snack.open("✅ Ordonnance analysée ! Données et médicaments extraits avec succès.", "OK", { duration: 4500 });
-          return;
-        }
-      }
-    } catch (err) {
-      console.warn("Client OCR engine note:", err);
-    }
-
-    // 4. Intelligent Visual Classifier Fallback (Canvas pixels & aspect ratio inspection)
-    const visualType = await this.analyzeImageVisually(file);
-    await new Promise(r => setTimeout(r, 600));
-    this.loadingOcr.set(false);
-    if (visualType === 'handwritten') {
-      this.loadPresetPrescription('handwritten');
-    } else {
-      this.loadPresetPrescription('printed');
+    } catch (globalErr) {
+      console.error("Global OCR error:", globalErr);
+      this.loadingOcr.set(false);
+      this.snack.open("Erreur lors de la lecture du document. Vous pouvez saisir les informations manuellement.", "OK", { duration: 4000 });
     }
   }
 
   parsePrescriptionText(rawText: string): OcrResult {
-    const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const rawLines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     const fullLower = rawText.toLowerCase();
 
     // 1. Detect Doctor Name
-    let doctorName = 'Dr. Praticien Hospitalier';
-    if (fullLower.includes('julien')) {
-      doctorName = 'Dr Julien G. (Médecin généraliste)';
-    } else if (fullLower.includes('sarah') || fullLower.includes('alami')) {
-      doctorName = 'Dr. Sarah Alami (Médecin Généraliste)';
-    } else if (fullLower.includes('cabinet') || fullLower.includes('consultation') || fullLower.includes('lundi')) {
-      doctorName = 'Cabinet Médical (Consultations)';
-    } else {
-      for (const line of lines) {
-        const docMatch = line.match(/^(?:Dr|Docteur|Pr|Professeur)\.?\s+([A-Za-zÀ-ÿ\s\.\-]+)/i) ||
-                         line.match(/(?:Cabinet|Clinique|Centre Médical)\s+([A-Za-zÀ-ÿ\s\.\-]+)/i);
-        if (docMatch) {
-          doctorName = docMatch[0].trim();
+    let doctorName = '';
+    for (const line of rawLines) {
+      const docMatch = line.match(/(?:Dr|Docteur|Pr|Professeur)\.?\s+([A-Za-zÀ-ÿ\s\.\-']{2,40})/i);
+      if (docMatch) {
+        let name = docMatch[0].trim();
+        name = name.replace(/\s+(?:Spécialiste|Généraliste|Cardiologue|Chirurgien|Médecin|Tél|Adresse|Ordre).*$/i, '');
+        doctorName = name.trim();
+        break;
+      }
+      const cabinetMatch = line.match(/(?:Cabinet\s+Médical|Clinique|Centre\s+Hospitalier|Centre\s+Médical)\s*([A-Za-zÀ-ÿ\s\.\-']*)/i);
+      if (cabinetMatch) {
+        doctorName = cabinetMatch[0].trim();
+        break;
+      }
+    }
+    if (!doctorName) {
+      for (let i = 0; i < Math.min(3, rawLines.length); i++) {
+        const l = rawLines[i];
+        if (/^(?:dr|docteur|pr|cabinet|centre|polyclinique)/i.test(l)) {
+          doctorName = l;
           break;
         }
       }
+    }
+    if (!doctorName) {
+      doctorName = 'Dr. Praticien';
     }
 
     // 2. Detect Patient Name
-    let patientName = 'Sara El Amrani';
-    if (fullLower.includes('eric') || fullLower.includes('éric')) {
-      patientName = 'Éric R.';
-    } else if (fullLower.includes('benali')) {
-      patientName = 'Mme Benali';
+    let patientName = '';
+    for (const line of rawLines) {
+      const patMatch = line.match(/(?:Patient(?:e)?|Nom\s*(?:et\s*Prénom)?|Pour|Bénéficiaire)\s*:\s*([A-Za-zÀ-ÿ\s\.\-']{2,40})/i);
+      if (patMatch && patMatch[1]) {
+        patientName = patMatch[1].replace(/\s+(?:âgé|né|le|sexe|dossier).*$/i, '').trim();
+        break;
+      }
+      const titleMatch = line.match(/(?:M\.|Mme|Mlle|Monsieur|Madame|Mademoiselle)\s+([A-Za-zÀ-ÿ\s\.\-']{2,35})/i);
+      if (titleMatch) {
+        patientName = titleMatch[0].replace(/\s+(?:âgé|né|le|dossier).*$/i, '').trim();
+        break;
+      }
+      const neMatch = line.match(/([A-ZÀ-ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-ÿ][a-zà-ÿ]+)+),?\s+né/i);
+      if (neMatch && neMatch[1]) {
+        patientName = neMatch[1].trim();
+        break;
+      }
+    }
+    if (!patientName) {
+      patientName = this.getPatientFullName();
+    }
+
+    // 3. Detect Prescription Date
+    let prescriptionDate = '';
+    const dateMatch = rawText.match(/\b([0-3]?\d[\/\-\.][0-1]?\d[\/\-\.](?:20)?\d{2})\b/);
+    if (dateMatch) {
+      prescriptionDate = dateMatch[1].replace(/[\-\.]/g, '/');
     } else {
-      for (const line of lines) {
-        const patMatch = line.match(/(?:Patient|M\.|Mme|Mlle|Nom\s*:)\s*([A-Za-zÀ-ÿ\s\.\-]+)/i) ||
-                         line.match(/([A-ZÀ-ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-ÿ]\.?)),?\s+né/i);
-        if (patMatch) {
-          patientName = (patMatch[1] || patMatch[0]).trim();
-          break;
-        }
+      const textDateMatch = rawText.match(/le\s+([0-3]?\d\s+[A-Za-zÀ-ÿ]+\s+(?:20)?\d{2})/i);
+      if (textDateMatch) {
+        prescriptionDate = textDateMatch[1];
+      } else {
+        prescriptionDate = new Date().toLocaleDateString('fr-FR');
       }
     }
 
-    // 3. Detect Date
-    let prescriptionDate = new Date().toLocaleDateString('fr-FR');
-    if (fullLower.includes('21/05') || fullLower.includes('2/15') || fullLower.includes('2017')) {
-      prescriptionDate = '21/05/2017';
-    } else if (fullLower.includes('01/10/2024') || fullLower.includes('01/10')) {
-      prescriptionDate = '01/10/2024';
-    } else {
-      const dateMatch = rawText.match(/\b(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})\b/);
-      if (dateMatch) {
-        prescriptionDate = dateMatch[1];
-      }
-    }
-
+    // 4. Medications & Posologies Extraction
     const detectedMedications: string[] = [];
     const detectedDosages: string[] = [];
+    const addedKeys = new Set<string>();
 
-    // 4. Comprehensive French/Moroccan Medical Pharmacopoeia & Fuzzy Matcher
-    const MEDICAL_FUZZY_DICT = [
-      { pattern: /kard[ée]g|acetyl|lysine|aspeg/i, name: 'Acétylsalicylate de lysine (Kardégic) 75 mg', dosage: '1 sachet par jour au déjeuner' },
-      { pattern: /triat|ramip/i, name: 'Ramipril (Triatec) 10 mg', dosage: '1 comprimé par jour le matin' },
-      { pattern: /tahor|atorv/i, name: 'Atorvastatine (Tahor) 10 mg', dosage: '1 comprimé par jour le soir' },
-      { pattern: /velmet|sitagl|metfor/i, name: 'Sitagliptine-metformine (Velmetia) 50 mg/1000 mg', dosage: '1 comprimé matin et soir' },
-      { pattern: /amoxi|augm|clavul|\bbun\b/i, name: 'Amoxicilline / Augmentin 1 g', dosage: '1 comprimé 2 fois par jour pendant 7 jours' },
-      { pattern: /doli|parac[ée]t|dowl|perb/i, name: 'Doliprane 1 g (Paracétamol)', dosage: '1 comprimé toutes les 6h si douleur/fièvre' },
-      { pattern: /spasf|spaf|phloro/i, name: 'Spasfon Lyoc 80 mg (Phloroglucinol)', dosage: '1 lyophilisat oral au moment des crises' },
-      { pattern: /solup|predni|soller/i, name: 'Solupred 20 mg (Prednisolone)', dosage: '1 comprimé le matin pendant 5 jours' },
-      { pattern: /volt|diclo|velur|luben/i, name: 'Voltarène 50 mg (Diclofénac)', dosage: '1 comprimé matin et soir au cours du repas' },
-      { pattern: /inex|esomep|mopr|omepr/i, name: 'Inexium 20 mg (Ésoméprazole)', dosage: '1 gélule le matin à jeun' },
-      { pattern: /covers|perindo/i, name: 'Coversyl 5 mg (Périndopril)', dosage: '1 comprimé le matin' },
-      { pattern: /aprov|irbes/i, name: 'Aprovel 150 mg (Irbésartan)', dosage: '1 comprimé par jour' },
-      { pattern: /amlor|amlod/i, name: 'Amlor 5 mg (Amlodipine)', dosage: '1 gélule par jour' },
-      { pattern: /lasil|furo/i, name: 'Lasilix 40 mg (Furosémide)', dosage: '1 comprimé le matin' },
-      { pattern: /aerius|deslor/i, name: 'Aerius 5 mg (Desloratadine)', dosage: '1 comprimé le soir' },
-      { pattern: /flagyl|metron/i, name: 'Flagyl 500 mg (Métronidazole)', dosage: '1 comprimé 3 fois par jour' }
+    const addMed = (name: string, dose: string) => {
+      const cleanName = name.replace(/^[\d\.\-\s\*\•\)\/]+/, '').trim();
+      const key = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (cleanName.length >= 3 && !addedKeys.has(key)) {
+        addedKeys.add(key);
+        detectedMedications.push(cleanName);
+        detectedDosages.push(dose.trim() || '1 comprimé par jour');
+      }
+    };
+
+    // Dictionary of clinical patterns
+    const DRUG_PATTERNS = [
+      { rx: /kard[ée]g(?:ic)?/i, name: 'Acétylsalicylate de lysine (Kardégic) 75 mg', dose: '1 sachet par jour au déjeuner' },
+      { rx: /triatec|ramipril/i, name: 'Ramipril (Triatec) 10 mg', dose: '1 comprimé par jour le matin' },
+      { rx: /tahor|atorvastatine/i, name: 'Atorvastatine (Tahor) 10 mg', dose: '1 comprimé par jour le soir' },
+      { rx: /velmetia|sitagliptine|metformine/i, name: 'Sitagliptine-metformine (Velmetia) 50 mg/1000 mg', dose: '1 comprimé matin et soir au cours du repas' },
+      { rx: /amoxicilline|amox\b|clamoxyl/i, name: 'Amoxicilline 1 g', dose: '1 comprimé 2 fois par jour pendant 7 jours' },
+      { rx: /augmentin/i, name: 'Augmentin 1 g / 125 mg (Amoxicilline / Ac. Clavulanique)', dose: '1 sachet matin et soir au milieu des repas pendant 7 jours' },
+      { rx: /doliprane|parac[ée]tamol|dafalgan|efferalgan/i, name: 'Doliprane 1 g (Paracétamol)', dose: '1 comprimé toutes les 6h si douleur/fièvre (max 3/j)' },
+      { rx: /spasfon|phloroglucinol/i, name: 'Spasfon Lyoc 80 mg (Phloroglucinol)', dose: '1 lyophilisat oral au moment des crises de spasmes' },
+      { rx: /solupred|prednisolone/i, name: 'Solupred 20 mg (Prednisolone)', dose: '1 comprimé le matin au petit-déjeuner pendant 5 jours' },
+      { rx: /voltar[eè]ne|diclof[eé]nac/i, name: 'Voltarène 50 mg (Diclofénac)', dose: '1 comprimé matin et soir au cours du repas' },
+      { rx: /inexium|[ée]som[ée]prazole/i, name: 'Inexium 20 mg (Ésoméprazole)', dose: '1 gélule le matin à jeun' },
+      { rx: /coversyl|p[ée]rindopril/i, name: 'Coversyl 5 mg (Périndopril)', dose: '1 comprimé le matin' },
+      { rx: /aprovel|irb[ée]sartan/i, name: 'Aprovel 150 mg (Irbésartan)', dose: '1 comprimé par jour' },
+      { rx: /amlor|amlodipine/i, name: 'Amlor 5 mg (Amlodipine)', dose: '1 gélule par jour' },
+      { rx: /lasilix|furos[ée]mide/i, name: 'Lasilix 40 mg (Furosémide)', dose: '1 comprimé le matin' },
+      { rx: /aerius|desloratadine/i, name: 'Aerius 5 mg (Desloratadine)', dose: '1 comprimé le soir' },
+      { rx: /flagyl|m[ée]tronidazole/i, name: 'Flagyl 500 mg (Métronidazole)', dose: '1 comprimé 3 fois par jour' },
+      { rx: /ventoline|salbutamol/i, name: 'Ventoline 100 µg (Salbutamol)', dose: '1 à 2 bouffées en cas de crise' },
+      { rx: /advil|ibuprof[eè]ne/i, name: 'Ibuprofène (Advil) 400 mg', dose: '1 comprimé 3 fois par jour pendant les repas' },
+      { rx: /plavix|clopidogrel/i, name: 'Plavix 75 mg (Clopidogrel)', dose: '1 comprimé par jour' },
+      { rx: /crestor|rosuvastatine/i, name: 'Crestor 10 mg (Rosuvastatine)', dose: '1 comprimé par jour le soir' },
+      { rx: /levothyrox|l[eé]vothyroxine/i, name: 'Levothyrox 50 µg', dose: '1 comprimé le matin à jeun' },
+      { rx: /glucophage/i, name: 'Glucophage 1000 mg (Metformine)', dose: '1 comprimé matin et soir' },
+      { rx: /tramadol|ixprim|topalgic/i, name: 'Tramadol / Paracétamol (Ixprim)', dose: '1 comprimé si douleur intense (max 4/jour)' },
+      { rx: /lyrica|pr[eé]gabaline/i, name: 'Lyrica 75 mg (Prégabaline)', dose: '1 gélule matin et soir' },
+      { rx: /xanax|alprazolam/i, name: 'Xanax 0.25 mg (Alprazolam)', dose: '1 comprimé en cas d\'anxiété' },
+      { rx: /lexomil|bromaz[eé]pam/i, name: 'Lexomil 6 mg (Bromazépam)', dose: '1/4 de baguette matin, midi et soir' }
     ];
 
-    // Stage A: Search lines and full text against the medical fuzzy dictionary
-    for (const entry of MEDICAL_FUZZY_DICT) {
-      if (entry.pattern.test(fullLower)) {
-        if (!detectedMedications.includes(entry.name)) {
-          detectedMedications.push(entry.name);
-          detectedDosages.push(entry.dosage);
-        }
-      }
-    }
+    // Stage 1: Line by line inspection for known medicines or explicit dosage units
+    for (let i = 0; i < rawLines.length; i++) {
+      const line = rawLines[i];
+      const lowerLine = line.toLowerCase();
 
-    // Stage B: Detect any custom line with explicit dosage units (e.g. "500 mg", "1 g", "10 ml")
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const lower = line.toLowerCase();
-      if (lower.startsWith('dr') || lower.startsWith('docteur') || lower.startsWith('cabinet') || 
-          lower.startsWith('date') || lower.includes('ordonnance') || lower.startsWith('traitement pour')) {
+      if (/^(?:dr|docteur|pr|professeur|cabinet|clinique|patient|nom|date|t[ée]l|signature|ordonnance|republique)/i.test(lowerLine)) {
         continue;
       }
 
-      const hasDosageUnit = /(\d+\s*(?:mg|g|ml|µg|ug|ui|cp|comprimé|sachet|gélule|flacon|ampoule))/i.test(line);
-      if (hasDosageUnit) {
-        let medName = line.trim();
-        let dosage = '1 comprimé par jour';
+      let matchedDictionary = false;
+      for (const d of DRUG_PATTERNS) {
+        if (d.rx.test(lowerLine)) {
+          let customDose = d.dose;
+          if (i + 1 < rawLines.length) {
+            const nextL = rawLines[i + 1];
+            if (/(?:comprim[ée]|sachet|g[ée]lule|prise|matin|midi|soir|par jour|pendant|fois|jour|crise|repas)/i.test(nextL)) {
+              customDose = nextL.replace(/^[\d\.\-\s\*\•\)\/]+/, '').trim();
+            }
+          }
+          if (line.includes(':') || line.includes(' - ')) {
+            const parts = line.split(/[:\-]/);
+            if (parts.length > 1 && parts[1].trim().length > 3) {
+              customDose = parts.slice(1).join(' ').trim();
+            }
+          }
+          addMed(d.name, customDose);
+          matchedDictionary = true;
+          break;
+        }
+      }
+      if (matchedDictionary) continue;
+
+      // Check if line contains explicit dosage units (e.g., "500 mg", "1 g", "10 ml", "100 µg")
+      const dosageUnitRx = /\b(\d+[\.,]?\d*\s*(?:mg|g|ml|mcg|µg|ui|cp|comprim[ée]s?|g[ée]lules?|sachets?|ampoules?|flacons?))\b/i;
+      const unitMatch = line.match(dosageUnitRx);
+      if (unitMatch) {
+        let medName = line;
+        let posology = '1 comprimé par jour';
+
         if (line.includes(':')) {
           const parts = line.split(':');
           medName = parts[0].trim();
-          dosage = parts.slice(1).join(':').trim() || dosage;
+          posology = parts.slice(1).join(':').trim() || posology;
+        } else if (line.includes(' - ')) {
+          const parts = line.split(' - ');
+          medName = parts[0].trim();
+          posology = parts.slice(1).join(' ').trim() || posology;
+        } else if (i + 1 < rawLines.length) {
+          const nextL = rawLines[i + 1];
+          if (/(?:comprim[ée]|sachet|g[ée]lule|prise|matin|midi|soir|par jour|pendant|fois|jour|repas)/i.test(nextL)) {
+            posology = nextL.replace(/^[\d\.\-\s\*\•\)\/]+/, '').trim();
+          }
         }
-        medName = medName.replace(/^[\d\.\-\s\*\•]+/, '').trim();
-        if (medName.length >= 3 && !detectedMedications.some(m => m.toLowerCase().includes(medName.toLowerCase()))) {
-          detectedMedications.push(medName);
-          detectedDosages.push(dosage);
+        addMed(medName, posology);
+      }
+    }
+
+    // Stage 2: Fallback to fullText search for known medicines
+    if (detectedMedications.length === 0) {
+      for (const d of DRUG_PATTERNS) {
+        if (d.rx.test(fullLower)) {
+          addMed(d.name, d.dose);
         }
       }
     }
 
-    // Stage C: If no known drug was matched at all, provide candidate non-empty lines
-    if (detectedMedications.length === 0 && lines.length > 0) {
-      for (const line of lines) {
-        const l = line.trim();
-        if (l.length >= 4 && !l.toLowerCase().includes('date') && !l.toLowerCase().includes('docteur') && !l.toLowerCase().includes('ordonnance')) {
-          detectedMedications.push(l.replace(/^[\d\.\-\s\*\•]+/, '').trim());
-          detectedDosages.push('Selon avis médical');
-          if (detectedMedications.length >= 4) break;
+    // Stage 3: If still empty, check lines with numbering (e.g., "1. ...", "2- ...")
+    if (detectedMedications.length === 0) {
+      for (const line of rawLines) {
+        if (/^[\d][\.\-\)\/]\s*[A-Za-zÀ-ÿ]/.test(line)) {
+          addMed(line, 'Selon avis médical');
         }
       }
     }
@@ -3262,7 +3203,7 @@ Réponds STRICTEMENT au format JSON comme suit :
 
   exportPrescriptionPdf() {
     const doctor = this.prescDoctor() || 'Cabinet Médical';
-    const patient = this.prescPatient() || 'Sara El Amrani';
+    const patient = this.prescPatient() || this.getPatientFullName();
     const date = this.prescDate() || new Date().toLocaleDateString('fr-FR');
     const items = this.prescItems().filter(it => it.name && it.name.trim().length > 0);
 
