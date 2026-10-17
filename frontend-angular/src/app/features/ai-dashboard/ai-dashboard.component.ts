@@ -331,7 +331,7 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
 
               <!-- Top Medical Certificate Header -->
               <div class="presc-header">
-                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
                   <div class="presc-clinic-badge" [class.badge-manual]="ocrConfidence() !== 'high'">
                     <span class="material-icons">{{ ocrConfidence() === 'high' ? 'verified' : 'fact_check' }}</span>
                     ORDONNANCE NUMÉRISÉE SIHATI AI
@@ -367,7 +367,7 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
 
               <!-- Prescribed Medications Table -->
               <div class="medications-block">
-                <div class="block-title-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div class="block-title-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
                   <div class="block-title" style="margin-bottom: 0;">
                     <span class="material-icons">medication</span>
                     TRAITEMENTS &amp; POSOLOGIES STRUCTURÉES (100% MODIFIABLES EN DIRECT)
@@ -508,15 +508,22 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
   /* Subnav Pills */
   .ai-subnav {
     display: flex;
-    gap: 10px;
-    margin-bottom: 24px;
+    gap: 8px;
+    margin-bottom: 20px;
     background: #FFFFFF;
-    padding: 8px;
+    padding: 6px;
     border-radius: 16px;
     box-shadow: 0 2px 12px rgba(0, 119, 182, 0.05);
     border: 1px solid #E2E8F0;
-    width: fit-content;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    box-sizing: border-box;
   }
+  .ai-subnav::-webkit-scrollbar { display: none; }
+  .subnav-pill { white-space: nowrap; flex-shrink: 0; }
+
 
   .subnav-pill {
     display: flex;
@@ -2319,9 +2326,107 @@ const DOCTOR_AVATAR_IMAGE = 'assets/images/doctor-avatar.png';
 
   @media(max-width: 900px) {
     .cards-grid, .presc-parties-grid { grid-template-columns: 1fr; }
-    .ai-hero-card { flex-direction: column; align-items: flex-start; }
+    .ai-hero-card { flex-direction: column; align-items: flex-start; padding: 24px 20px; }
     .hero-icon-visual { display: none; }
+    .studio-topbar { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .studio-actions { width: 100%; justify-content: flex-start; }
   }
+
+  @media(max-width: 768px) {
+    .digital-prescription-paper { padding: 20px 16px; border-radius: 16px; }
+    .ocr-drop-card { padding: 20px 16px; border-radius: 16px; }
+    .upload-dropzone { padding: 28px 16px; border-radius: 16px; }
+    .presc-main-title { font-size: 17px; }
+    .presc-header { padding-bottom: 12px; margin-bottom: 18px; }
+    .party-box { padding: 12px 14px; }
+    .party-name-input { font-size: 14px; }
+    .med-item-card { padding: 12px 14px; border-radius: 12px; }
+    .selected-file-banner { flex-direction: column; align-items: stretch; gap: 12px; }
+    .selected-file-banner .btn-analyze-ocr { width: 100%; justify-content: center; }
+    .presc-footer { flex-direction: column; align-items: stretch; gap: 12px; }
+    .presc-footer button { width: 100%; justify-content: center; }
+    .presc-certif-info { min-width: 0 !important; }
+  }
+
+  @media(max-width: 600px) {
+    .med-card-row-main {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .med-card-row-main .name-field,
+    .med-card-row-main .dci-field,
+    .med-card-row-main .strength-field,
+    .med-card-row-main .form-field {
+      width: 100%;
+      min-width: 0;
+      flex: none;
+    }
+    .med-card-row-main .verif-field,
+    .med-card-row-main .action-field {
+      width: 100%;
+      flex: none;
+    }
+    .med-card-row-details {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .med-card-row-details .dose-field,
+    .med-card-row-details .freq-field,
+    .med-card-row-details .dur-field,
+    .med-card-row-details .instr-field,
+    .med-card-row-details .qty-field {
+      width: 100%;
+      min-width: 0;
+      flex: none;
+    }
+    .btn-toggle-verif {
+      width: 100%;
+      justify-content: center;
+      height: 42px;
+      font-size: 12px;
+    }
+    .btn-delete-row {
+      width: 100%;
+      height: 38px;
+      border: 1px solid #FECACA;
+      background: #FEF2F2;
+      border-radius: 8px;
+      justify-content: center;
+    }
+    .btn-delete-row::after {
+      content: ' Supprimer ce traitement';
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 6px;
+    }
+    .hero-left h1 { font-size: 20px; }
+    .hero-left p { font-size: 13px; margin-bottom: 16px; }
+    .btn-scan { width: 100%; justify-content: center; }
+    .risk-hero { flex-direction: column; align-items: flex-start; gap: 14px; padding: 18px 16px; }
+    .risk-title-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  }
+
+  @media(max-width: 480px) {
+    .digital-prescription-paper { padding: 14px 10px; }
+    .ocr-header-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .ai-key-input-box .key-field-row { flex-direction: column; }
+    .btn-save-key { width: 100%; justify-content: center; }
+    .lang-pills { width: 100%; justify-content: space-around; }
+    .btn-fullscreen { font-size: 11px; padding: 6px 10px; }
+    .presc-input-table { font-size: 13px; padding: 10px 10px; }
+    .watermark-bg { display: none; }
+    .prompts-grid { grid-template-columns: 1fr; }
+  }
+
+  @media(max-width: 360px) {
+    .digital-prescription-paper { padding: 10px 6px; }
+    .party-box { padding: 10px 8px; }
+    .med-item-card { padding: 10px 8px; }
+  }
+
   `]
 })
 export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy {

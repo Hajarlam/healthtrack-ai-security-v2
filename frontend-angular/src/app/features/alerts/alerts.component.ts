@@ -79,6 +79,14 @@ import { AuthService } from '../../core/services/auth.service';
   .empty-state{text-align:center;padding:48px 24px;}
   .empty-state .material-icons{font-size:64px;color:#4caf50;margin-bottom:16px;display:block;}
   .empty-state p{font-size:16px;color:#757575;font-weight:500;margin:0;}
+  @media(max-width:768px){
+    .stats-row{grid-template-columns:1fr;gap:12px;}
+    .alert-card{flex-direction:column;align-items:flex-start;gap:12px;}
+    .alert-card button{align-self:flex-end;}
+  }
+  @media(max-width:480px){
+    .alert-card button{width:100%;}
+  }
   `]
 })
 export class AlertsComponent implements OnInit {

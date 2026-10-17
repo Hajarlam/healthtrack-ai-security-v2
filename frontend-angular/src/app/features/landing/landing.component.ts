@@ -1075,7 +1075,59 @@ import { AuthService } from '../../core/services/auth.service';
       .features-grid {
         grid-template-columns: repeat(2, 1fr);
       }
+      .ai-demo-container {
+        flex-direction: column;
+        gap: 30px;
+      }
+      .stats-dashboard-container {
+        flex-direction: column;
+        gap: 24px;
+      }
     }
+
+    @media(max-width: 768px) {
+      .landing-header {
+        padding: 14px 16px;
+      }
+      .nav-links {
+        display: none;
+      }
+      .nav-actions .btn-primary, .nav-actions .btn-outline {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+      .section-features, .section-ai, .section-stats-dashboard {
+        padding: 40px 16px;
+      }
+      .hero-section {
+        padding: 40px 16px;
+      }
+      .hero-content h1 {
+        font-size: 30px;
+      }
+      .hero-actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .hero-actions a, .hero-actions button {
+        width: 100%;
+        text-align: center;
+      }
+      .ai-chat-window {
+        min-width: 0;
+        width: 100%;
+        height: 380px;
+      }
+      .stats-counter-banner {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 20px;
+      }
+      .stat-counter-item strong {
+        font-size: 32px;
+      }
+    }
+
     @media(max-width: 600px) {
       .features-grid {
         grid-template-columns: 1fr;
@@ -1085,7 +1137,10 @@ import { AuthService } from '../../core/services/auth.service';
         gap: 30px;
       }
       .hero-content h1 {
-        font-size: 36px;
+        font-size: 26px;
+      }
+      .hero-visual {
+        display: none;
       }
     }
   `]

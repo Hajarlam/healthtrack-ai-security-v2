@@ -107,7 +107,19 @@ import { AuthService } from '../../../core/services/auth.service';
   .link-row{text-align:center;margin-top:16px;font-size:14px;color:#4A7C94;}
   .link-row a{color:#0077B6;font-weight:600;text-decoration:none;}
   .link-row a:hover{text-decoration:underline;}
-  @media(max-width:768px){.auth-left{display:none;}.auth-right{padding:24px;}}
+  @media(max-width:768px){
+    .auth-left{display:none;}
+    .auth-right{padding:20px 14px;}
+    .form-box{padding:24px 18px;border-radius:16px;}
+  }
+  @media(max-width:480px){
+    .auth-right{padding:14px 10px;}
+    .form-box{padding:20px 14px;border-radius:14px;}
+    .form-box h2{font-size:24px;}
+    .demo-row{grid-template-columns:repeat(2,1fr);gap:8px;}
+    .demo-btn{padding:10px 4px;font-size:12px;}
+  }
+
   `]
 })
 export class LoginComponent {

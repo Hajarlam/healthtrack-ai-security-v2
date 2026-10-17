@@ -206,6 +206,20 @@ import { User } from '../../core/models/user.model';
     .header-banner { flex-direction: column; align-items: flex-start; }
   }
 
+  @media(max-width: 768px) {
+    .card { padding: 18px 16px; border-radius: 16px; }
+    .header-banner { padding: 16px; border-radius: 16px; gap: 12px; }
+    .appt-card { padding: 14px 14px; }
+  }
+
+  @media(max-width: 480px) {
+    .card { padding: 14px 12px; border-radius: 14px; }
+    .header-banner { padding: 14px 12px; }
+    .page-title { font-size: 19px; }
+    .appt-top-line { flex-direction: column; align-items: flex-start; gap: 6px; }
+  }
+
+
   .card {
     background: #FFFFFF;
     border-radius: 20px;

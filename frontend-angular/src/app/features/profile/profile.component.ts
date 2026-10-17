@@ -192,6 +192,12 @@ import { User } from '../../core/models/user.model';
     .form-row { grid-template-columns: 1fr; }
     .profile-header { flex-direction: column; text-align: center; }
   }
+  @media(max-width: 480px) {
+    .page-container { padding: 14px 10px !important; }
+    .card { padding: 18px 14px !important; border-radius: 14px !important; }
+    .form-actions { justify-content: stretch !important; width: 100%; }
+    .form-actions button { width: 100% !important; justify-content: center; }
+  }
   `]
 })
 export class ProfileComponent implements OnInit {

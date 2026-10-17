@@ -119,6 +119,11 @@ import { RouterLink } from '@angular/router';
     
     .status-indicator { font-weight: 500; font-size: 13px; color: #d32f2f; }
     .status-indicator.active { color: #388e3c; }
+    @media(max-width: 768px) {
+      .page-container { padding: 14px 10px !important; }
+      .page-title { font-size: 20px; }
+      .header-section { margin-bottom: 16px !important; }
+    }
   `]
 })
 export class UsersComponent implements OnInit {

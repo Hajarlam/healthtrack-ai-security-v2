@@ -697,6 +697,20 @@ import { MatTableModule } from '@angular/material/table';
     .hover-target {
       cursor: pointer;
     }
+    @media(max-width: 768px) {
+      .emergency-header { padding: 18px 16px; border-radius: 14px; }
+      .header-content { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .search-box { flex-direction: column; align-items: stretch; gap: 10px; }
+      .btn-search { width: 100%; height: 46px; }
+      .patient-identity { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .emergency-vitals-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .vital-badge { padding: 8px 4px; }
+    }
+    @media(max-width: 480px) {
+      .emergency-header h1 { font-size: 20px; }
+      .emergency-vitals-grid { grid-template-columns: 1fr; }
+      .vitals-values-grid { grid-template-columns: 1fr; }
+    }
   `]
 })
 export class EmergencyComponent implements OnInit {

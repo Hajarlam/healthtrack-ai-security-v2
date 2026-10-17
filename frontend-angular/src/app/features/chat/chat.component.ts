@@ -1050,8 +1050,66 @@ interface Msg { id: number; sender: {id:number; firstName:string; lastName:strin
     .contacts-panel {
       width: 100%;
       max-width: none;
+      min-width: 0;
+    }
+    .bubble {
+      max-width: 85%;
+      padding: 10px 14px;
+    }
+    .chat-topbar {
+      padding: 10px 14px;
+      gap: 8px;
+    }
+    .chat-composer {
+      padding: 8px 12px;
     }
   }
+
+  @media(max-width: 480px) {
+    .contacts-panel {
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+    }
+    .panel-header {
+      padding: 14px 12px 10px;
+    }
+    .contact-card {
+      padding: 10px 8px;
+      gap: 10px;
+    }
+    .chat-topbar {
+      padding: 8px 10px;
+      gap: 6px;
+    }
+    .chat-user-meta h3 {
+      font-size: 14px;
+    }
+    .role-chip {
+      display: none;
+    }
+    .security-badge {
+      display: none;
+    }
+    .bubble {
+      max-width: 90%;
+    }
+    .composer-container {
+      padding: 4px 6px;
+      gap: 4px;
+    }
+    .tool-btn {
+      padding: 6px;
+    }
+    .tool-btn .material-icons {
+      font-size: 20px;
+    }
+    .send-btn {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
 
   /* Photo Attachment and Emoji Picker Styles */
   .bubble-photo-wrapper {

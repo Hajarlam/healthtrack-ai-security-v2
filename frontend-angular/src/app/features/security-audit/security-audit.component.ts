@@ -23,7 +23,7 @@ interface AuditLog {
   imports: [CommonModule, MatCardModule, MatTableModule, MatIconModule, MatButtonModule, MatSnackBarModule],
   template: `
     <div class="page-container" style="padding: 24px; max-width: 1280px; margin: 0 auto;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
         <div>
           <h1 class="page-title" style="margin: 0 0 6px; font-weight: 800; color: #023E58;">🛡️ Audit de Sécurité & Traçabilité HDS</h1>
           <p style="margin: 0; color: #64748B; font-size: 13.5px;">Journal d'audit cryptographique et détection d'intrusions (Conforme CNDP &amp; HDS)</p>
@@ -195,6 +195,15 @@ interface AuditLog {
       border-radius: 6px;
       font-size: 12px;
       border: 1px solid #E2E8F0;
+    }
+    @media(max-width: 768px) {
+      .page-container { padding: 14px 10px !important; }
+      .page-title { font-size: 20px; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .kpi-card { padding: 12px 14px; }
+    }
+    @media(max-width: 480px) {
+      .kpi-grid { grid-template-columns: 1fr; }
     }
   `]
 })

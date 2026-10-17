@@ -946,8 +946,31 @@ interface Alert { id:number; message:string; severity:string; acknowledged:boole
     .main-grid-2 { grid-template-columns: 1fr; }
     .grid-4, .grid-3 { grid-template-columns: 1fr; }
     .quick-tiles-grid { grid-template-columns: repeat(2, 1fr); }
-    .welcome-hero { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .welcome-hero { flex-direction: column; align-items: flex-start; gap: 16px; padding: 20px 16px; border-radius: 16px; }
+    .welcome-hero h2 { font-size: 22px; }
+    .panel-card { padding: 20px 16px; border-radius: 16px; }
   }
+
+  @media(max-width: 480px) {
+    .welcome-hero { padding: 16px 14px; border-radius: 14px; }
+    .welcome-hero h2 { font-size: 19px; }
+    .panel-card { padding: 16px 12px; border-radius: 14px; }
+    .quick-tiles-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .tile-action { padding: 12px 6px; }
+    .tile-icon-box { width: 38px; height: 38px; margin-bottom: 6px; }
+    .tile-text strong { font-size: 12px; }
+    .tile-text small { font-size: 10px; }
+    .vitals-dual-display { grid-template-columns: 1fr; gap: 8px; }
+    .apt-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .apt-actions { width: 100%; justify-content: flex-end; }
+    .alert-feed-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .btn-ack { align-self: flex-end; }
+  }
+
+  @media(max-width: 360px) {
+    .quick-tiles-grid { grid-template-columns: 1fr; }
+  }
+
   `]
 })
 export class DashboardComponent implements OnInit {

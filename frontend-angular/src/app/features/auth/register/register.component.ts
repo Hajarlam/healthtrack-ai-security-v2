@@ -128,6 +128,19 @@ import { UserService } from '../../../core/services/user.service';
   .demo-btn:hover{background:#0077B6;color:white;}
   .link-row{text-align:center;margin-top:16px;font-size:14px;color:#4A7C94;}
   .link-row a{color:#0077B6;font-weight:600;text-decoration:none;}
+  @media(max-width:768px){
+    .reg-wrap{padding:16px;}
+    .reg-box{padding:24px 18px;border-radius:16px;}
+    .role-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+    .demo-row{grid-template-columns:repeat(2,1fr);gap:8px;}
+    .demo-btn{padding:10px 4px;font-size:12px;}
+  }
+  @media(max-width:480px){
+    .reg-wrap{padding:10px 8px;}
+    .reg-box{padding:18px 14px;border-radius:14px;}
+    .reg-header h2{font-size:20px;}
+    .role-card{padding:10px 4px;}
+  }
   `]
 })
 export class RegisterComponent {
