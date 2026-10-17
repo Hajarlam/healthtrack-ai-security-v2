@@ -11,6 +11,7 @@ public class OcrResult {
     private String patientName;
     private boolean success;
     private String errorMessage;
+    private List<java.util.Map<String, Object>> structuredMedications = new ArrayList<>();
 
     public OcrResult() {}
 
@@ -32,6 +33,8 @@ public class OcrResult {
     public void setDetectedMedications(List<String> v) { detectedMedications = v; }
     public List<String> getDetectedDosages()    { return detectedDosages; }
     public void setDetectedDosages(List<String> v) { detectedDosages = v; }
+    public List<java.util.Map<String, Object>> getStructuredMedications() { return structuredMedications; }
+    public void setStructuredMedications(List<java.util.Map<String, Object>> v) { structuredMedications = v; }
     public String getDoctorName()               { return doctorName; }
     public void setDoctorName(String v)         { doctorName = v; }
     public String getPrescriptionDate()         { return prescriptionDate; }

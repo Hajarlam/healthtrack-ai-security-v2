@@ -73,70 +73,8 @@ public class OcrService {
                 }
             }
 
-            // 3. Fallback intelligent d'analyse clinique pour images d'ordonnances
-            String filename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
-            long fileSize = file.getSize();
-
-            if (filename.contains("553aa") || filename.contains("julien") || filename.contains("triat") || filename.contains("kardeg") || filename.contains("print") || (fileSize > 75000 && fileSize < 95000)) {
-                return new OcrResult(
-                    "Ordonnance Imprimée Dr Julien G.",
-                    List.of(
-                        "Acétylsalicylate de lysine (Kardégic) 75 mg",
-                        "Ramipril (Triatec) 10 mg",
-                        "Sitagliptine-metformine (Velmetia) 50 mg/1000 mg",
-                        "Atorvastatine (Tahor) 10 mg",
-                        "Amoxicilline 1 g"
-                    ),
-                    List.of(
-                        "1 sachet à 12 h (au déjeuner)",
-                        "1 comprimé par jour (le matin)",
-                        "1 comprimé matin et soir (au cours des repas)",
-                        "1 comprimé par jour (le soir)",
-                        "1 comprimé 2 fois par jour pendant 10 jours"
-                    ),
-                    "Dr Julien G. (Médecin généraliste)",
-                    "01/10/2024",
-                    "Éric R."
-                );
-            }
-
-            if (filename.contains("8e67") || filename.contains("benali") || filename.contains("hand") || filename.contains("manu") || filename.contains("spasf") || filename.contains("voltar") || (fileSize > 40000 && fileSize < 55000)) {
-                return new OcrResult(
-                    "Ordonnance Manuscrite Urgences Cabinet Médical",
-                    List.of(
-                        "Doliprane 1 g (Paracétamol)",
-                        "Augmentin 1 g / 125 mg (Amoxicilline / Ac. Clavulanique)",
-                        "Spasfon Lyoc 80 mg (Phloroglucinol)",
-                        "Voltarène 50 mg (Diclofénac)"
-                    ),
-                    List.of(
-                        "1 comprimé toutes les 6h si douleur/fièvre (max 3/j)",
-                        "1 sachet matin et soir au milieu des repas pendant 7 jours",
-                        "1 lyophilisat oral au moment des spasmes (max 3/j)",
-                        "1 comprimé matin et soir au cours du repas"
-                    ),
-                    "Cabinet Médical (Consultations sans RDV)",
-                    "21/05/2017",
-                    "Mme Benali"
-                );
-            }
-
-            return new OcrResult(
-                "Ordonnance Numérisée Sihati AI",
-                List.of(
-                    "Doliprane 1 g (Paracétamol)",
-                    "Amoxicilline 1 g (Antibiotique)",
-                    "Inexium 20 mg (Ésoméprazole)"
-                ),
-                List.of(
-                    "1 comprimé toutes les 6h si douleur ou fièvre",
-                    "1 comprimé matin et soir pendant 6 jours",
-                    "1 gélule le matin à jeun"
-                ),
-                "Dr. Sarah Alami (Médecin Généraliste)",
-                java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-                "Sara El Amrani"
-            );
+            // 3. Fallback: Si aucune IA Cloud disponible et pas de PDF
+            return new OcrResult("Aucun texte exploitable n'a pu être extrait automatiquement. Vous pouvez compléter ou vérifier les informations manuellement.");
 
         } catch (Exception e) {
             return new OcrResult("Erreur lors de l'analyse : " + e.getMessage());
@@ -155,18 +93,24 @@ public class OcrService {
                 else mimeType = "image/jpeg";
             }
 
-            String prompt = "Tu es un médecin spécialiste et expert en OCR d'ordonnances médicales cliniques, imprimées ou manuscrites (même avec une écriture manuscrite difficile ou complexe). " +
+            String prompt = "Tu es un médecin spécialiste et pharmacologue expert en déchiffrement d'ordonnances médicales cliniques, imprimées et manuscrites (y compris les écritures complexes). " +
                 "Analyse avec la plus grande précision l'ordonnance médicale présente dans le document. " +
-                "Déchiffre chaque ligne avec soin et extrais fidèlement : " +
-                "1. 'doctor_name': Le nom complet du médecin prescripteur (avec Dr., ex: 'Dr. Julien G.'). " +
-                "2. 'patient_name': Le nom complet du patient ou de la patiente s'il est mentionné (ex: 'Éric R.'). " +
-                "3. 'prescription_date': La date de prescription ou date d'émission (ou 'Non précisée'). " +
-                "4. 'medications': La liste exacte de TOUS les médicaments prescrits. Pour chaque médicament : " +
-                "   - 'name': le nom exact du médicament avec son dosage et sa forme galénique (ex: 'Acétylsalicylate de lysine (Kardégic) 75 mg', 'Ramipril (Triatec) 10 mg', 'Amoxicilline 1 g', 'Valium 10mg'). " +
-                "   - 'dosage': la posologie exacte et les instructions détaillées de prise (ex: '1 sachet à 12 h', '1 comprimé par jour', '1 comprimé 2 fois par jour pendant 10 jours'). " +
-                "   - 'quantity': la quantité par prise. " +
-                "   - 'frequency': le nombre de fois par jour ou moment de prise. " +
-                "   - 'duration': la durée du traitement si indiquée.";
+                "Déchiffre chaque ligne avec soin et réponds STRICTEMENT sous forme d'objet JSON valide avec les clés suivantes : " +
+                "1. 'doctor_name': Le nom complet du médecin prescripteur (avec Dr., ex: 'Dr. Sophie DUBOIS'). " +
+                "2. 'patient_name': Le nom complet du patient ou de la patiente s'il est mentionné (ex: 'Mme. Catherine LEROY'). " +
+                "3. 'prescription_date': La date d'émission de l'ordonnance (format JJ/MM/AAAA ou JJ Mois AAAA). " +
+                "4. 'medications': Liste de TOUS les médicaments prescrits. Pour chaque médicament : " +
+                "   - 'name': Nom commercial exact (ex: 'AMOXICILLINE', 'DOLIPRANE', 'Amlodipine'). " +
+                "   - 'active_ingredient': DCI ou principe actif si identifiable (ex: 'Amoxicilline', 'Paracétamol'). " +
+                "   - 'strength': Dosage ou teneur unitaire (ex: '500 mg', '1000 mg', '10 mg'). " +
+                "   - 'form': Forme pharmaceutique (ex: 'Gélules', 'Comprimés', 'Sachets', 'Sirop'). " +
+                "   - 'dose': Dose unitaire par prise (ex: '1 gélule', '1 comprimé'). " +
+                "   - 'frequency': Fréquence d'administration journalière (ex: 'matin et soir', 'toutes les 6 heures', '1 fois par jour'). " +
+                "   - 'duration': Durée du traitement (ex: '7 jours', '3 mois', 'pendant 5 jours'). " +
+                "   - 'instructions': Conseils de prise (ex: 'au cours des repas', 'si douleur/fièvre (max 4/j)', 'à jeun'). " +
+                "   - 'quantity': Quantité totale (ex: '1 boîte', 'QSP 1 boîte', '3 boîtes'). " +
+                "   - 'needs_verification': true si le nom ou le dosage est difficilement lisible ou incertain, false si lisible avec certitude. " +
+                "Ne devine rien d'inexistant. Si une information est illisible ou absente, mets 'needs_verification': true plutôt que d'inventer.";
 
             Map<String, Object> textPart = new HashMap<>();
             textPart.put("text", prompt);
@@ -193,7 +137,7 @@ public class OcrService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
-            List<String> modelsToTry = List.of(geminiModel, "gemini-2.5-pro", "gemini-3-flash-preview");
+            List<String> modelsToTry = List.of(geminiModel, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash");
             for (String currentModel : modelsToTry) {
                 try {
                     String url = "https://generativelanguage.googleapis.com/v1beta/models/" + currentModel + ":generateContent?key=" + geminiApiKey;
@@ -212,7 +156,7 @@ public class OcrService {
                             JsonNode parsed = mapper.readTree(jsonText);
                             String doctor = parsed.has("doctor_name") ? parsed.get("doctor_name").asText() :
                                            parsed.has("doctorName") ? parsed.get("doctorName").asText() : "Dr. Non Détecté";
-                            if (!doctor.toLowerCase().startsWith("dr") && !doctor.equalsIgnoreCase("Unknown") && !doctor.equalsIgnoreCase("Non Détecté")) {
+                            if (!doctor.toLowerCase().startsWith("dr") && !doctor.toLowerCase().startsWith("pr") && !doctor.equalsIgnoreCase("Unknown") && !doctor.equalsIgnoreCase("Non Détecté")) {
                                 doctor = "Dr. " + doctor;
                             }
                             String patient = parsed.has("patient_name") ? parsed.get("patient_name").asText() :
@@ -222,24 +166,61 @@ public class OcrService {
 
                             List<String> meds = new ArrayList<>();
                             List<String> dosages = new ArrayList<>();
+                            List<Map<String, Object>> structuredList = new ArrayList<>();
 
                             JsonNode medsNode = parsed.get("medications");
                             if (medsNode != null && medsNode.isArray()) {
                                 for (JsonNode m : medsNode) {
-                                    String name = m.has("name") ? m.get("name").asText() : "";
-                                    String dosage = m.has("dosage") ? m.get("dosage").asText() :
-                                                   m.has("posologie") ? m.get("posologie").asText() : "";
-                                    String freq = m.has("frequency") ? m.get("frequency").asText() : "";
-                                    String fullPosologie = !dosage.isBlank() && !freq.isBlank() && !dosage.equalsIgnoreCase(freq) ? dosage + " - " + freq : (!dosage.isBlank() ? dosage : (!freq.isBlank() ? freq : "Selon avis médical"));
+                                    String name = m.has("name") ? m.get("name").asText().trim() : "";
+                                    String activeIngredient = m.has("active_ingredient") ? m.get("active_ingredient").asText().trim() : "";
+                                    String strength = m.has("strength") ? m.get("strength").asText().trim() : "";
+                                    String form = m.has("form") ? m.get("form").asText().trim() : "";
+                                    String dose = m.has("dose") ? m.get("dose").asText().trim() : "";
+                                    String freq = m.has("frequency") ? m.get("frequency").asText().trim() : "";
+                                    String duration = m.has("duration") ? m.get("duration").asText().trim() : "";
+                                    String instructions = m.has("instructions") ? m.get("instructions").asText().trim() : "";
+                                    String quantity = m.has("quantity") ? m.get("quantity").asText().trim() : "";
+                                    boolean needsVerification = m.has("needs_verification") && m.get("needs_verification").asBoolean();
+
+                                    String fullMedName = name;
+                                    if (!strength.isBlank() && !fullMedName.toLowerCase().contains(strength.toLowerCase())) {
+                                        fullMedName += " " + strength;
+                                    }
+                                    if (!form.isBlank() && !fullMedName.toLowerCase().contains(form.toLowerCase())) {
+                                        fullMedName += " (" + form + ")";
+                                    }
+
+                                    String fullPosologie = !dose.isBlank() ? dose : "";
+                                    if (!freq.isBlank()) fullPosologie += (fullPosologie.isBlank() ? "" : " ") + freq;
+                                    if (!duration.isBlank()) fullPosologie += (fullPosologie.isBlank() ? "" : " ") + (duration.toLowerCase().startsWith("pendant") ? duration : "pendant " + duration);
+                                    if (!instructions.isBlank()) fullPosologie += (fullPosologie.isBlank() ? "" : " ") + "(" + instructions + ")";
+                                    if (fullPosologie.isBlank()) fullPosologie = "Selon avis médical";
+
                                     if (!name.isBlank()) {
-                                        meds.add(name);
+                                        meds.add(fullMedName);
                                         dosages.add(fullPosologie);
+
+                                        Map<String, Object> itemMap = new HashMap<>();
+                                        itemMap.put("name", name);
+                                        itemMap.put("activeIngredient", activeIngredient);
+                                        itemMap.put("strength", strength);
+                                        itemMap.put("form", form);
+                                        itemMap.put("dose", dose);
+                                        itemMap.put("frequency", freq);
+                                        itemMap.put("duration", duration);
+                                        itemMap.put("instructions", instructions);
+                                        itemMap.put("quantity", quantity);
+                                        itemMap.put("needsVerification", needsVerification);
+                                        itemMap.put("dosage", fullPosologie);
+                                        structuredList.add(itemMap);
                                     }
                                 }
                             }
 
                             if (!meds.isEmpty()) {
-                                return new OcrResult(jsonText, meds, dosages, doctor, date, patient);
+                                OcrResult aiRes = new OcrResult(jsonText, meds, dosages, doctor, date, patient);
+                                aiRes.setStructuredMedications(structuredList);
+                                return aiRes;
                             }
                         }
                     }

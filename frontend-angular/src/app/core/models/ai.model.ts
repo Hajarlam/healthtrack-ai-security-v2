@@ -10,10 +10,25 @@ export interface AnomalyResult {
   confidenceScore: number;
 }
 
+export interface ExtractedMedication {
+  name: string;
+  activeIngredient?: string;
+  strength?: string;
+  form?: string;
+  dose?: string;
+  frequency?: string;
+  duration?: string;
+  instructions?: string;
+  quantity?: string;
+  needsVerification?: boolean;
+  dosage?: string;
+}
+
 export interface OcrResult {
   rawText: string;
   detectedMedications: string[];
   detectedDosages: string[];
+  structuredMedications?: ExtractedMedication[];
   doctorName: string;
   prescriptionDate: string;
   patientName?: string;
