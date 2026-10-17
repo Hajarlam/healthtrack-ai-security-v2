@@ -22,6 +22,7 @@
     "ng2-charts": "^5.0.0",
     "rxjs": "^7.8.0",
     "sockjs-client": "^1.6.1",
+    "tesseract.js": "^7.0.0",
     "tslib": "^2.6.0",
     "zone.js": "^0.14.0"
   },
