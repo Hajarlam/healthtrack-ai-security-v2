@@ -1,6 +1,7 @@
 # 🏥 HealthTrack AI (Sihati AI) — Documentation Intégrale & Exhaustive du Projet
 > **Plateforme Médicale Intelligente, Sécurisée & Conforme HDS / RGPD**  
-> **Architecture Tri-Tiers Unifiée : Backend Spring Boot 3.2 + Frontend Web Angular 17 + Mobile Android Natif (Java).**
+> **Architecture Tri-Tiers Unifiée : Backend Spring Boot 3.2 + Frontend Web Angular 17 + Mobile Android Natif (Java).**  
+> 🎓 **Rapport de PFE ISGA 2025–2026 Enrichi** : Consultez le document officiel d'addendum des modifications : [`RAPPORT_PFE_SIHATI_AI_NOUVELLES_MODIFICATIONS.md`](RAPPORT_PFE_SIHATI_AI_NOUVELLES_MODIFICATIONS.md)
 
 ---
 
