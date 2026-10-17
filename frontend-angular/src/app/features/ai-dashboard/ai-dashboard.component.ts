@@ -2735,6 +2735,15 @@ export class AiDashboardComponent implements OnInit, AfterViewChecked, OnDestroy
     });
   }
 
+  private fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+      reader.readAsDataURL(file);
+    });
+  }
+
   async callGeminiVision(base64Image: string, mimeType: string, apiKey: string): Promise<OcrResult | null> {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     const prompt = `Tu es un médecin spécialiste et pharmacologue expert en déchiffrement d'ordonnances médicales manuscrites et imprimées.
@@ -2963,7 +2972,8 @@ Réponds STRICTEMENT au format JSON comme suit :
       try {
         const { createWorker } = await import('tesseract.js');
         const worker = await createWorker('fra');
-        const ret = await worker.recognize(file);
+        const imageSource = this.imagePreviewUrl() || await this.fileToDataUrl(file);
+        const ret = await worker.recognize(imageSource);
         const rawText = ret?.data?.text || '';
         await worker.terminate();
 
@@ -2971,7 +2981,7 @@ Réponds STRICTEMENT au format JSON comme suit :
           const parsed = this.parsePrescriptionText(rawText);
           this.syncPrescriptionSignals(parsed);
           this.loadingOcr.set(false);
-          this.snack.open(`✅ Analyse OCR terminée ! ${parsed.detectedMedications.length} médicament(s) détecté(s).`, "OK", { duration: 4000 });
+          this.snack.open(`✅ Analyse OCR réussie ! ${parsed.detectedMedications.length} médicament(s) détecté(s).`, "OK", { duration: 4000 });
           return;
         }
       } catch (err) {
@@ -3001,72 +3011,92 @@ Réponds STRICTEMENT au format JSON comme suit :
 
   parsePrescriptionText(rawText: string): OcrResult {
     const rawLines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    const fullLower = rawText.toLowerCase();
 
     // 1. Detect Doctor Name
     let doctorName = '';
-    for (const line of rawLines) {
-      const docMatch = line.match(/(?:Dr|Docteur|Pr|Professeur)\.?\s+([A-Za-zÀ-ÿ\s\.\-']{2,40})/i);
+    // Check top lines (lines 0 to 6) for doctor header
+    for (let i = 0; i < Math.min(6, rawLines.length); i++) {
+      const l = rawLines[i];
+      const docMatch = l.match(/(?:Dr|Docteur|Pr|Professeur)\.?\s+([A-Za-zÀ-ÿ\s\.\-']{2,40})/i);
       if (docMatch) {
-        let name = docMatch[0].trim();
-        name = name.replace(/\s+(?:Spécialiste|Généraliste|Cardiologue|Chirurgien|Médecin|Tél|Adresse|Ordre).*$/i, '');
-        doctorName = name.trim();
-        break;
-      }
-      const cabinetMatch = line.match(/(?:Cabinet\s+Médical|Clinique|Centre\s+Hospitalier|Centre\s+Médical)\s*([A-Za-zÀ-ÿ\s\.\-']*)/i);
-      if (cabinetMatch) {
-        doctorName = cabinetMatch[0].trim();
-        break;
-      }
-    }
-    if (!doctorName) {
-      for (let i = 0; i < Math.min(3, rawLines.length); i++) {
-        const l = rawLines[i];
-        if (/^(?:dr|docteur|pr|cabinet|centre|polyclinique)/i.test(l)) {
-          doctorName = l;
+        let d = docMatch[0].trim();
+        d = d.replace(/^[^\w\s]*Le\s+/i, '');
+        d = d.replace(/[\/\\\|®©_]+.*$/, '').trim();
+        d = d.replace(/\s+(?:Spécialiste|Généraliste|Cardiologue|Chirurgien|Médecin|Tél|Adresse|Ordre|RPPS|CHU).*$/i, '').trim();
+        if (d.length >= 5) {
+          doctorName = d;
           break;
         }
       }
     }
+
+    // If not found in header, check bottom signature lines upward
     if (!doctorName) {
-      doctorName = 'Dr. Praticien';
+      for (let i = rawLines.length - 1; i >= 0; i--) {
+        const l = rawLines[i];
+        const docMatch = l.match(/(?:Dr|Docteur|Pr|Professeur)\.?\s+([A-Za-zÀ-ÿ\s\.\-']{2,40})/i);
+        if (docMatch) {
+          let d = docMatch[0].trim();
+          d = d.replace(/^[^\w\s]*Le\s+/i, '');
+          d = d.replace(/[\/\\\|®©_]+.*$/, '').trim();
+          d = d.replace(/\s+(?:Spécialiste|Généraliste|Cardiologue|Chirurgien|Médecin|Tél|Adresse|Ordre|RPPS|CHU).*$/i, '').trim();
+          if (d.length >= 5) {
+            doctorName = d;
+            break;
+          }
+        }
+      }
     }
+
+    if (!doctorName) doctorName = 'Dr. Praticien';
 
     // 2. Detect Patient Name
     let patientName = '';
-    for (const line of rawLines) {
-      const patMatch = line.match(/(?:Patient(?:e)?|Nom\s*(?:et\s*Prénom)?|Pour|Bénéficiaire)\s*:\s*([A-Za-zÀ-ÿ\s\.\-']{2,40})/i);
-      if (patMatch && patMatch[1]) {
-        patientName = patMatch[1].replace(/\s+(?:âgé|né|le|sexe|dossier).*$/i, '').trim();
-        break;
+    for (const l of rawLines) {
+      const patHeaderMatch = l.match(/(?:PATIENT(?:E)?|Nom\s*(?:et\s*Prénom)?|Bénéficiaire)\s*:(?:[^A-Za-zÀ-ÿ]*(?:DATE|AGE|POIDS)\s*:)*\s*([A-Za-zÀ-ÿ\s\.\-']{2,40})/i);
+      if (patHeaderMatch && patHeaderMatch[1]) {
+        let p = patHeaderMatch[1].replace(/\s+\b(?:DATE|AGE|POIDS|TAILLE|ALLERGIES|\d{2}\/|\d+\s*ans|ans|kg|cm|née?|sexe|dossier)\b.*$/i, '').trim();
+        if (p.length >= 3 && !/^(?:DATE|AGE|POIDS|TAILLE)$/i.test(p)) {
+          patientName = p;
+          break;
+        }
       }
-      const titleMatch = line.match(/(?:M\.|Mme|Mlle|Monsieur|Madame|Mademoiselle)\s+([A-Za-zÀ-ÿ\s\.\-']{2,35})/i);
+
+      const titleMatch = l.match(/(?:M\.|Mme\.?|Mlle\.?|Mine\.?|Mne\.?|Monsieur|Madame|Mademoiselle)\s+([A-Za-zÀ-ÿ\s\.\-']{2,35})/i);
       if (titleMatch) {
-        patientName = titleMatch[0].replace(/\s+(?:âgé|né|le|dossier).*$/i, '').trim();
+        let p = titleMatch[0].replace(/^Mine\.?/i, 'Mme.').replace(/^Mne\.?/i, 'Mme.');
+        p = p.replace(/\s+\b(?:âgé|née?|dossier|sexe|ns|y&s|\d+)\b.*$/i, '').trim();
+        patientName = p;
         break;
       }
-      const neMatch = line.match(/([A-ZÀ-ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-ÿ][a-zà-ÿ]+)+),?\s+né/i);
+
+      const neMatch = l.match(/([A-ZÀ-ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-ÿ][a-zà-ÿ]+)+),?\s+né/i);
       if (neMatch && neMatch[1]) {
         patientName = neMatch[1].trim();
         break;
       }
     }
-    if (!patientName) {
-      patientName = this.getPatientFullName();
-    }
+    if (!patientName) patientName = this.getPatientFullName();
 
     // 3. Detect Prescription Date
     let prescriptionDate = '';
-    const dateMatch = rawText.match(/\b([0-3]?\d[\/\-\.][0-1]?\d[\/\-\.](?:20)?\d{2})\b/);
-    if (dateMatch) {
-      prescriptionDate = dateMatch[1].replace(/[\-\.]/g, '/');
+    const textDateMatch = rawText.match(/(?:Date\s*:?\s*|le\s+)([0-3]?\d\s+[A-Za-zÀ-ÿ]+\s+(?:20)?\d{2})/i);
+    if (textDateMatch) {
+      prescriptionDate = textDateMatch[1].trim();
     } else {
-      const textDateMatch = rawText.match(/le\s+([0-3]?\d\s+[A-Za-zÀ-ÿ]+\s+(?:20)?\d{2})/i);
-      if (textDateMatch) {
-        prescriptionDate = textDateMatch[1];
-      } else {
-        prescriptionDate = new Date().toLocaleDateString('fr-FR');
+      for (const l of rawLines) {
+        if (!/n[ée]|naissance/i.test(l)) {
+          const numDate = l.match(/\b([0-3]?\d[\/\-\.][0-1]?\d[\/\-\.](?:20)?\d{2})\b/);
+          if (numDate) {
+            prescriptionDate = numDate[1].replace(/[\-\.]/g, '/');
+            break;
+          }
+        }
       }
+    }
+    if (!prescriptionDate) {
+      const generalDate = rawText.match(/\b([0-3]?\d[\/\-\.][0-1]?\d[\/\-\.](?:20)?\d{2})\b/);
+      prescriptionDate = generalDate ? generalDate[1].replace(/[\-\.]/g, '/') : new Date().toLocaleDateString('fr-FR');
     }
 
     // 4. Medications & Posologies Extraction
@@ -3075,118 +3105,140 @@ Réponds STRICTEMENT au format JSON comme suit :
     const addedKeys = new Set<string>();
 
     const addMed = (name: string, dose: string) => {
-      const cleanName = name.replace(/^[\d\.\-\s\*\•\)\/]+/, '').trim();
+      let cleanName = name.replace(/^[\d\.\-\s\*\•\)\/\>\}‘']*/, '').trim();
+      // Correct common OCR typos in drug dosages
+      cleanName = cleanName.replace(/[Ss][oO0]{2,3}\s*mg/gi, '500 mg')
+                           .replace(/S00\s*mg/i, '500 mg')
+                           .replace(/S0\s*mg/i, '50 mg')
+                           .replace(/O0\s*mg/i, '00 mg');
+      cleanName = cleanName.replace(/(\d+)\s*(mg|g|ml)/i, '$1 $2');
+      cleanName = cleanName.replace(/[\/\\\|®©_]+.*$/, '').trim();
+
+      let cleanDose = (dose || '1 comprimé par jour').replace(/^[\d\.\-\s\*\•\)\/\>\}‘']*/, '').trim();
+      cleanDose = cleanDose.replace(/\s*\(QSP.*$/i, '').trim();
+      cleanDose = cleanDose.replace(/[\+_,;]+$/, '').trim();
+      cleanDose = cleanDose.replace(/\s*&\s*/g, ' 6 ');
+      if (/^(?:g[ée]lule|comprim[ée]|sachet|cuill[eè]re)/i.test(cleanDose)) {
+        cleanDose = '1 ' + cleanDose;
+      }
+
       const key = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (cleanName.length >= 3 && !addedKeys.has(key)) {
         addedKeys.add(key);
         detectedMedications.push(cleanName);
-        detectedDosages.push(dose.trim() || '1 comprimé par jour');
+        detectedDosages.push(cleanDose || '1 comprimé par jour');
       }
     };
 
-    // Dictionary of clinical patterns
-    const DRUG_PATTERNS = [
+    const PHARMA_PATTERNS = [
       { rx: /kard[ée]g(?:ic)?/i, name: 'Acétylsalicylate de lysine (Kardégic) 75 mg', dose: '1 sachet par jour au déjeuner' },
-      { rx: /triatec|ramipril/i, name: 'Ramipril (Triatec) 10 mg', dose: '1 comprimé par jour le matin' },
-      { rx: /tahor|atorvastatine/i, name: 'Atorvastatine (Tahor) 10 mg', dose: '1 comprimé par jour le soir' },
-      { rx: /velmetia|sitagliptine|metformine/i, name: 'Sitagliptine-metformine (Velmetia) 50 mg/1000 mg', dose: '1 comprimé matin et soir au cours du repas' },
-      { rx: /amoxicilline|amox\b|clamoxyl/i, name: 'Amoxicilline 1 g', dose: '1 comprimé 2 fois par jour pendant 7 jours' },
-      { rx: /augmentin/i, name: 'Augmentin 1 g / 125 mg (Amoxicilline / Ac. Clavulanique)', dose: '1 sachet matin et soir au milieu des repas pendant 7 jours' },
-      { rx: /doliprane|parac[ée]tamol|dafalgan|efferalgan/i, name: 'Doliprane 1 g (Paracétamol)', dose: '1 comprimé toutes les 6h si douleur/fièvre (max 3/j)' },
-      { rx: /spasfon|phloroglucinol/i, name: 'Spasfon Lyoc 80 mg (Phloroglucinol)', dose: '1 lyophilisat oral au moment des crises de spasmes' },
-      { rx: /solupred|prednisolone/i, name: 'Solupred 20 mg (Prednisolone)', dose: '1 comprimé le matin au petit-déjeuner pendant 5 jours' },
-      { rx: /voltar[eè]ne|diclof[eé]nac/i, name: 'Voltarène 50 mg (Diclofénac)', dose: '1 comprimé matin et soir au cours du repas' },
-      { rx: /inexium|[ée]som[ée]prazole/i, name: 'Inexium 20 mg (Ésoméprazole)', dose: '1 gélule le matin à jeun' },
-      { rx: /coversyl|p[ée]rindopril/i, name: 'Coversyl 5 mg (Périndopril)', dose: '1 comprimé le matin' },
-      { rx: /aprovel|irb[ée]sartan/i, name: 'Aprovel 150 mg (Irbésartan)', dose: '1 comprimé par jour' },
-      { rx: /amlor|amlodipine/i, name: 'Amlor 5 mg (Amlodipine)', dose: '1 gélule par jour' },
-      { rx: /lasilix|furos[ée]mide/i, name: 'Lasilix 40 mg (Furosémide)', dose: '1 comprimé le matin' },
-      { rx: /aerius|desloratadine/i, name: 'Aerius 5 mg (Desloratadine)', dose: '1 comprimé le soir' },
-      { rx: /flagyl|m[ée]tronidazole/i, name: 'Flagyl 500 mg (Métronidazole)', dose: '1 comprimé 3 fois par jour' },
-      { rx: /ventoline|salbutamol/i, name: 'Ventoline 100 µg (Salbutamol)', dose: '1 à 2 bouffées en cas de crise' },
-      { rx: /advil|ibuprof[eè]ne/i, name: 'Ibuprofène (Advil) 400 mg', dose: '1 comprimé 3 fois par jour pendant les repas' },
-      { rx: /plavix|clopidogrel/i, name: 'Plavix 75 mg (Clopidogrel)', dose: '1 comprimé par jour' },
-      { rx: /crestor|rosuvastatine/i, name: 'Crestor 10 mg (Rosuvastatine)', dose: '1 comprimé par jour le soir' },
-      { rx: /levothyrox|l[eé]vothyroxine/i, name: 'Levothyrox 50 µg', dose: '1 comprimé le matin à jeun' },
-      { rx: /glucophage/i, name: 'Glucophage 1000 mg (Metformine)', dose: '1 comprimé matin et soir' },
-      { rx: /tramadol|ixprim|topalgic/i, name: 'Tramadol / Paracétamol (Ixprim)', dose: '1 comprimé si douleur intense (max 4/jour)' },
-      { rx: /lyrica|pr[eé]gabaline/i, name: 'Lyrica 75 mg (Prégabaline)', dose: '1 gélule matin et soir' },
-      { rx: /xanax|alprazolam/i, name: 'Xanax 0.25 mg (Alprazolam)', dose: '1 comprimé en cas d\'anxiété' },
-      { rx: /lexomil|bromaz[eé]pam/i, name: 'Lexomil 6 mg (Bromazépam)', dose: '1/4 de baguette matin, midi et soir' }
+      { rx: /triatec|ramipril/i, name: 'Ramipril 5 mg', dose: '1 gélule le soir' },
+      { rx: /tahor|atorvastatine/i, name: 'Atorvastatine 20 mg', dose: '1 comprimé le soir au coucher' },
+      { rx: /velmetia|sitagliptine|metformine/i, name: 'Metformine 850 mg', dose: '1 comprimé matin et soir au cours des repas' },
+      { rx: /amox(?:icilline|iciline|nicilline)?|clamoxyl/i, name: 'Amoxicilline', defaultDose: '1 gélule matin et soir pendant 7 jours' },
+      { rx: /augmentin/i, name: 'Augmentin 1 g / 125 mg', defaultDose: '1 sachet matin et soir pendant 7 jours' },
+      { rx: /doliprane|parac[ée]tamol|dafalgan|efferalgan/i, name: 'Doliprane', defaultDose: '1 comprimé toutes les 6 heures si douleur/fièvre' },
+      { rx: /spasfon|phloroglucinol/i, name: 'Spasfon Lyoc 80 mg', defaultDose: '1 lyophilisat oral au moment des crises' },
+      { rx: /solupred|prednisolone/i, name: 'Solupred 20 mg', defaultDose: '1 comprimé le matin' },
+      { rx: /voltar[eè]ne|diclof[eé]nac/i, name: 'Voltarène 50 mg', defaultDose: '1 comprimé matin et soir' },
+      { rx: /inexium|[ée]som[ée]prazole/i, name: 'Inexium 20 mg', defaultDose: '1 gélule le matin à jeun' },
+      { rx: /amlor|amlodipine/i, name: 'Amlodipine 10 mg', defaultDose: '1 comprimé le matin à jeun' },
+      { rx: /aspegic|asp[ée]gic/i, name: 'Aspegic 100 mg', defaultDose: '1 sachet le matin après le petit déjeuner' }
     ];
 
-    // Stage 1: Line by line inspection for known medicines or explicit dosage units
     for (let i = 0; i < rawLines.length; i++) {
       const line = rawLines[i];
-      const lowerLine = line.toLowerCase();
+      const lower = line.toLowerCase();
 
-      if (/^(?:dr|docteur|pr|professeur|cabinet|clinique|patient|nom|date|t[ée]l|signature|ordonnance|republique)/i.test(lowerLine)) {
+      // Skip non-drug header/footer lines
+      if (/^(?:dr|docteur|pr|professeur|chu|cabinet|clinique|patient|nom|date|t[ée]l|signature|ordonnance|republique|rpps|diagnostic|examens|note|qte|horaires|ce document)/i.test(lower)) {
+        continue;
+      }
+      // Skip posology line if it appears by itself
+      if (/^(?:posologie|prise|mode\s*d'emploi|surveiller|bilan|contr[oô]le)\b/i.test(lower)) {
         continue;
       }
 
-      let matchedDictionary = false;
-      for (const d of DRUG_PATTERNS) {
-        if (d.rx.test(lowerLine)) {
-          let customDose = d.dose;
-          if (i + 1 < rawLines.length) {
-            const nextL = rawLines[i + 1];
-            if (/(?:comprim[ée]|sachet|g[ée]lule|prise|matin|midi|soir|par jour|pendant|fois|jour|crise|repas)/i.test(nextL)) {
-              customDose = nextL.replace(/^[\d\.\-\s\*\•\)\/]+/, '').trim();
-            }
-          }
-          if (line.includes(':') || line.includes(' - ')) {
-            const parts = line.split(/[:\-]/);
+      let matchedPharma = false;
+      for (const p of PHARMA_PATTERNS) {
+        if (p.rx.test(lower)) {
+          let medTitle = line;
+          let posology = '';
+          let hasInlinePosology = false;
+
+          // Check if line contains inline posology separated by dash, colon or equal
+          if (line.includes('—') || line.includes('-') || line.includes(':') || line.includes('=')) {
+            const parts = line.split(/[—\-:=]/);
+            medTitle = parts[0].trim();
             if (parts.length > 1 && parts[1].trim().length > 3) {
-              customDose = parts.slice(1).join(' ').trim();
+              posology = parts.slice(1).join(' ').trim();
+              hasInlinePosology = true;
             }
           }
-          addMed(d.name, customDose);
-          matchedDictionary = true;
+
+          // Look ahead for continuation or posology line
+          for (let j = i + 1; j < Math.min(i + 4, rawLines.length); j++) {
+            const nextL = rawLines[j];
+            if (/^(?:posologie\s*:?|prise\s*:?)/i.test(nextL.trim())) {
+              const extracted = nextL.replace(/^(?:posologie\s*:?|prise\s*:?)/i, '').trim();
+              posology = posology ? (posology + ' ' + extracted) : extracted;
+              break;
+            } else if (/^(?:et\s+soir|pendant|toutes\s+les|si\s+douleur|le\s+matin|au\s+coucher|par\s+jour|en\s+cas)/i.test(nextL.trim())) {
+              posology = posology ? (posology + ' ' + nextL.trim()) : nextL.trim();
+              break;
+            } else if (!hasInlinePosology && /^(?:\d+\s*(?:comprim[ée]|g[ée]lule|sachet)|1\s+)/i.test(nextL.trim())) {
+              posology = nextL.trim();
+              break;
+            }
+          }
+
+          if (!posology) {
+            posology = p.defaultDose || p.dose || '1 comprimé par jour';
+          }
+
+          addMed(medTitle, posology);
+          matchedPharma = true;
           break;
         }
       }
-      if (matchedDictionary) continue;
+      if (matchedPharma) continue;
 
-      // Check if line contains explicit dosage units (e.g., "500 mg", "1 g", "10 ml", "100 µg")
-      const dosageUnitRx = /\b(\d+[\.,]?\d*\s*(?:mg|g|ml|mcg|µg|ui|cp|comprim[ée]s?|g[ée]lules?|sachets?|ampoules?|flacons?))\b/i;
-      const unitMatch = line.match(dosageUnitRx);
-      if (unitMatch) {
-        let medName = line;
-        let posology = '1 comprimé par jour';
+      // Generic line with dosage unit (e.g. "500 mg", "10 mg")
+      const dosageRx = /\b(\d+[\.,]?\d*|[SsOo]00?)\s*(?:mg|g|ml|mcg|µg|ui|cp)\b/i;
+      if (dosageRx.test(line)) {
+        let medTitle = line;
+        let posology = '';
+        let hasInlinePosology = false;
 
-        if (line.includes(':')) {
-          const parts = line.split(':');
-          medName = parts[0].trim();
-          posology = parts.slice(1).join(':').trim() || posology;
-        } else if (line.includes(' - ')) {
-          const parts = line.split(' - ');
-          medName = parts[0].trim();
-          posology = parts.slice(1).join(' ').trim() || posology;
-        } else if (i + 1 < rawLines.length) {
-          const nextL = rawLines[i + 1];
-          if (/(?:comprim[ée]|sachet|g[ée]lule|prise|matin|midi|soir|par jour|pendant|fois|jour|repas)/i.test(nextL)) {
-            posology = nextL.replace(/^[\d\.\-\s\*\•\)\/]+/, '').trim();
+        if (line.includes('—') || line.includes('-') || line.includes(':') || line.includes('=')) {
+          const parts = line.split(/[—\-:=]/);
+          medTitle = parts[0].trim();
+          if (parts.length > 1 && parts[1].trim().length > 3) {
+            posology = parts.slice(1).join(' ').trim();
+            hasInlinePosology = true;
           }
         }
-        addMed(medName, posology);
-      }
-    }
 
-    // Stage 2: Fallback to fullText search for known medicines
-    if (detectedMedications.length === 0) {
-      for (const d of DRUG_PATTERNS) {
-        if (d.rx.test(fullLower)) {
-          addMed(d.name, d.dose);
+        for (let j = i + 1; j < Math.min(i + 4, rawLines.length); j++) {
+          const nextL = rawLines[j];
+          if (/^(?:posologie\s*:?|prise\s*:?)/i.test(nextL.trim())) {
+            const extracted = nextL.replace(/^(?:posologie\s*:?|prise\s*:?)/i, '').trim();
+            posology = posology ? (posology + ' ' + extracted) : extracted;
+            break;
+          } else if (/^(?:et\s+soir|pendant|toutes\s+les|si\s+douleur|le\s+matin|au\s+coucher|par\s+jour|en\s+cas)/i.test(nextL.trim())) {
+            posology = posology ? (posology + ' ' + nextL.trim()) : nextL.trim();
+            break;
+          } else if (!hasInlinePosology && /^(?:\d+\s*(?:comprim[ée]|g[ée]lule|sachet)|1\s+)/i.test(nextL.trim())) {
+            posology = nextL.trim();
+            break;
+          }
         }
-      }
-    }
 
-    // Stage 3: If still empty, check lines with numbering (e.g., "1. ...", "2- ...")
-    if (detectedMedications.length === 0) {
-      for (const line of rawLines) {
-        if (/^[\d][\.\-\)\/]\s*[A-Za-zÀ-ÿ]/.test(line)) {
-          addMed(line, 'Selon avis médical');
+        if (!posology) {
+          posology = '1 comprimé par jour';
         }
+
+        addMed(medTitle, posology);
       }
     }
 
