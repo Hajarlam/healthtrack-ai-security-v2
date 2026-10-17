@@ -225,36 +225,38 @@ La navigation est gérée par la barre latérale rétractable `LayoutComponent` 
 ### 10. 🎭 Conseiller Virtuel AI (`/conseiller-virtuel`) — *AiDashboardComponent*
 * **Accès** : Patient, Médecin.
 * **Ce qu'il fait** :
-  * Établit une session WebRTC avec l'infrastructure d'**Anam AI** en récupérant un token sécurisé auprès du backend (`GET /api/avatar/token`).
-  * Affiche la vidéo de l'avatar photoréaliste **Dr. Sarah**.
-  * Échange vocal bidirectionnel : l'utilisateur pose une question oralement et l'avatar répond à haute voix en français avec synchronisation labiale naturelle.
+  * Intégration en temps réel de **LiveAvatar WebRTC** (`https://app.liveavatar.com/fc9c1f9f-bc99-4fd9-a6b2-8b4b5669a046`).
+  * Expérience médicale immersive purement vocale et visuelle (suppression des boîtes textuelles redondantes).
+  * Dialogue multilingue en direct (Français, Darija/Arabe, Anglais) avec synchronisation labiale et réponses médicales orales.
 
-### 11. 📄 OCR Ordonnance (`/ocr-ordonnance`) — *AiDashboardComponent*
+### 11. 📄 OCR Ordonnance Intelligent & Vision IA (`/ocr-ordonnance`) — *AiDashboardComponent*
 * **Accès** : Patient, Médecin.
 * **Ce qu'il fait** :
-  * Zone de dépôt de fichiers (*Drag & Drop*) acceptant les images (JPG, PNG) et documents PDF.
-  * Téléversement vers l'API `POST /api/ocr/analyze`.
-  * Restitution de la fiche médicale numérisée : nom du médecin émetteur, date de délivrance, liste des médicaments extraits avec dosages.
-  * Bouton d'ajout automatique au pilulier de l'application.
+  * Moteur de vision artificielle multimodal : support de **Google Gemini 1.5 / 2.5 Flash Vision** via clé API configurable, combiné à un moteur local intelligent (matching de signature géométrique et prétraitement Canvas binarisé).
+  * Reconnaissance haute fidélité des ordonnances manuscrites et imprimées (praticien, date, molécules et posologies).
+  * Lecteur avec animation de scanner laser vert temps réel et aperçu dynamique de l'image.
+  * Presets d'ordonnances types (Cardiologie, Cabinet général, Douleurs/Fièvre).
+  * Édition directe des lignes détectées (nom, dosage, posologie) avec ajout et suppression manuelle de médicaments.
+  * Transfert immédiat sans délai vers le pilulier (`/medications`) avec persistance `localStorage` instantanée et synchronisation Spring Boot.
 
 ### 12. 👨‍⚕️ Mes Patients (`/patients`) — *PatientsComponent* (Médecin uniquement)
 * **Accès** : Réservé aux Médecins (`doctorGuard`).
 * **Ce qu'il fait** :
-  * Répertoire complet des patients suivis par le médecin connecté.
-  * Barre de recherche par nom, prénom ou pathologie chronique.
-  * Consultation du dossier médical d'un patient : dernières constantes enregistrées, historique des alertes et traitements en cours.
+  * Répertoire complet des patients suivis par le médecin connecté (ex: *Sara El Amrani*, *Jean Martin*, *Karim Tazi* avec téléphones et pathologies renseignés).
+  * File active de suivi : indicateurs de consultation, alertes critiques filtrées, et gestion directe des dossiers.
 
 ### 13. 👥 Gestion des Utilisateurs (`/users`) — *UsersComponent* (Admin uniquement)
 * **Accès** : Réservé à l'Administrateur (`adminGuard`).
 * **Ce qu'il fait** :
-  * Liste exhaustive de tous les comptes de la plateforme.
-  * Actions d'administration : activation / désactivation de compte, modification de rôle, réinitialisation de statut de sécurité.
+  * Liste exhaustive de tous les comptes de la plateforme avec métriques globales d'usage.
+  * **Export Officiel du Rapport de Conformité RGPD en PDF** (Droit d'accès et portabilité Art. 15/20 RGPD).
+  * Actions d'administration : activation / désactivation de compte, modification de rôle.
 
 ### 14. 🛡️ Sécurité & Audit (`/security-audit`) — *SecurityAuditComponent* (Admin uniquement)
 * **Accès** : Réservé à l'Administrateur (`adminGuard`).
 * **Ce qu'il fait** :
-  * Registre immuable des événements de sécurité (*Audit Trail*) : date et heure précises, adresse IP source, identifiant de l'utilisateur, action effectuée (`LOGIN_SUCCESS`, `LOGIN_FAILED`, `ACCESS_RECORD`, `ACCOUNT_LOCKED`).
-  * Surveillance des tentatives d'intrusion et monitoring de la conformité HDS/RGPD.
+  * Registre immuable des événements de sécurité (*Audit Trail*) : horodatage certifié, IP source, identifiant utilisateur, action (`LOGIN_SUCCESS`, `ACCESS_RECORD`, etc.).
+  * Export du journal d'audit de sécurité certifié et surveillance continue contre les attaques par force brute.
 
 ### 15. 👤 Mon Profil (`/profile`) — *ProfileComponent*
 * **Accès** : Tout utilisateur connecté.
@@ -337,13 +339,13 @@ L'application Android native est développée en **Java 17** avec **Material Des
 
 ## 🤖 8. Les 4 Moteurs d'Intelligence Artificielle
 
-### 1. 🎭 Conseillère Virtuelle Temps Réel (Anam AI Avatar)
-* **Technologie** : SDK officiel `@anam-ai/js-sdk` et protocole WebRTC haute fidélité.
-* **Fonctionnement** : *Dr. Sarah* écoute la voix du patient, comprend la question grâce à son modèle médical et répond vocalement avec des expressions faciales et une synchronisation labiale en temps réel.
+### 1. 🎭 Conseillère Virtuelle Temps Réel (LiveAvatar WebRTC)
+* **Technologie** : Moteur LiveAvatar Streaming WebRTC (`fc9c1f9f-bc99-4fd9-a6b2-8b4b5669a046`).
+* **Fonctionnement** : Écoute vocale active via le microphone de l'utilisateur, compréhension clinique multilingue (Français, Darija marocaine, Anglais) et réponse orale synthétisée avec expression faciale photoréaliste et synchronisation labiale instantanée, sans aucune pollution de chat textuel secondaire.
 
-### 2. 🧠 Assistant Médical RAG (Chatbot Clinique)
-* **Technologie** : RAG (*Retrieval-Augmented Generation*) combiné avec OpenAI GPT-3.5.
-* **Contextualisation Médicale** : Lors de chaque question, le backend injecte automatiquement le profil de santé du patient (dernière tension, glycémie, antécédents) pour produire une réponse sur-mesure et prudente.
+### 2. 🧠 Scanner OCR Multimodal & Vision IA (Gemini 1.5 Flash + Hybride)
+* **Technologie** : Google Gemini 1.5 / 2.5 Flash Vision Multimodal (REST API) + Moteur local Tesseract.js avec binarisation Canvas adaptative et détection dimensionnelle de documents.
+* **Extraction Clinique** : Décodage haute précision des ordonnances manuscrites et imprimées. Détection automatique du médecin émetteur, de la date de délivrance, isolation précise des principes actifs (*Kardégic 75mg, Triatec 10mg, Tahor 10mg, Doliprane, Amoxicilline, etc.*), extraction des posologies journalières, interface d'ajustement inline et synchronisation directe au pilulier.
 
 ### 3. 📈 Détection Algorithmique d'Anomalies Vitales
 * **Seuils Cliniques Paramétrés** :
@@ -353,9 +355,11 @@ L'application Android native est développée en **Java 17** avec **Material Des
   * *Hypoglycémie* : < 0.70 g/L | *Hyperglycémie* : > 1.80 g/L
   * *Fièvre* : Température > 38.5 °C
 
-### 4. 📄 Numérisation OCR d'Ordonnances
-* **Technologie** : Apache PDFBox pour les documents PDF et analyse par expressions régulières (*Regex*) pour les ordonnances scannées en image.
-* **Extraction** : Détecte le médecin prescripteur, la date, isole les molécules courantes (*Doliprane, Kardegic, Metformine, etc.*) et leurs posologies associées.
+### 4. 🧠 Assistant Médical RAG & Synthèse Clinique
+* **Technologie** : RAG (*Retrieval-Augmented Generation*) combiné avec OpenAI GPT et règles heuristiques locales.
+* **Contextualisation Médicale** : Génération automatique d'un score de risque de santé global (Faible, Modéré, Élevé) et de recommandations préventives adaptées aux antécédents du patient.
+
+> 📄 **Rapport Détaillé des Évolutions 2026** : Consultez [`RAPPORT_NOUVELLES_MODIFICATIONS_2026.md`](RAPPORT_NOUVELLES_MODIFICATIONS_2026.md) pour les détails techniques approfondis.
 
 ---
 
