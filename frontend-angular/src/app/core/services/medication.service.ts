@@ -107,9 +107,12 @@ export class MedicationService {
 
     this.saveLocalMeds(localList);
 
-    const requests = addedList.map(item => this.http.post<Medication>(this.API, item).pipe(catchError(() => of(item))));
-    if (requests.length === 0) return of(addedList);
-    return forkJoin(requests).pipe(catchError(() => of(addedList)));
+    // Sync in background without blocking caller UI
+    addedList.forEach(item => {
+      this.http.post<Medication>(this.API, item).pipe(catchError(() => of(item))).subscribe();
+    });
+
+    return of(addedList);
   }
 
   deleteMedication(id: number): Observable<void> {

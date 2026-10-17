@@ -118,12 +118,22 @@ export class MedicationsComponent implements OnInit {
   }
 
   ngOnInit() {
+    const local = this.medService.getLocalMeds();
+    if (local && local.length > 0) {
+      this.medications.set(local);
+    }
     this.loadMedications();
   }
 
   loadMedications() {
     this.medService.getMedications().subscribe({
-      next: data => this.medications.set(data || []),
+      next: data => {
+        if (data && data.length > 0) {
+          this.medications.set(data);
+        } else {
+          this.medications.set(this.medService.getLocalMeds());
+        }
+      },
       error: () => this.medications.set(this.medService.getLocalMeds())
     });
   }
